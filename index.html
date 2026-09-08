@@ -1,5 +1,15 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>YUI MASTER</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YUI MASTER">
+<meta name="application-name" content="YUI MASTER">
+<meta name="theme-color" content="#070a14">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Anton&display=swap">
 <style>
   :root{
@@ -18,6 +28,7 @@
     --font-lt:"Anton","Zen Kaku Gothic New",system-ui,sans-serif;
   }
   *{box-sizing:border-box}
+  html,body{overscroll-behavior:none}
   body{background:var(--ink);color:var(--paper);font-family:var(--font-jp);}
   #app{position:fixed;inset:0;display:grid;place-items:center;background:
     radial-gradient(120% 90% at 50% 0%, #16203c 0%, #070a14 60%, #04060d 100%);
@@ -25,9 +36,14 @@
   #stage{position:relative;width:min(100%, calc(100dvh * 16 / 9));aspect-ratio:16/9;
     box-shadow:0 0 0 1px #22304f, 0 30px 80px rgba(0,0,0,.7);background:#05080f;overflow:hidden;}
   canvas{display:block;width:100%;height:100%;image-rendering:auto;touch-action:none;}
+  /* 縦持ちでは、画面上部にゲーム、下の余白をまるごと操作パネルにする */
+  @media (orientation:portrait){
+    #app{align-items:start;padding-top:env(safe-area-inset-top)}
+    #stage{width:100%;max-width:100%}
+  }
 
   /* ---------- overlay scaffolding ---------- */
-  .layer{position:absolute;inset:0;display:none;flex-direction:column;z-index:40;}
+  .layer{position:fixed;inset:0;display:none;flex-direction:column;z-index:40;}
   .layer.on{display:flex;}
   .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,15,.86),rgba(5,8,15,.96));backdrop-filter:blur(2px);}
   .sheet{position:relative;margin:auto;width:min(760px,92%);max-height:88%;overflow:auto;overscroll-behavior:contain;
@@ -115,46 +131,60 @@
   .bookitem{background:#0c1528;border:1px solid #22304f;padding:12px 14px;display:grid;gap:9px}
   .bookitem p{font-size:13px;color:#d5deef}
   .bookitem .row{justify-content:flex-end}
-  .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--yui);color:#08130a;
+  .toast{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--yui);color:#08130a;
     font-weight:700;font-size:13px;padding:9px 18px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
   .toast.on{opacity:1}
   .close-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
 
   /* ---------- touch controls ---------- */
-  #pad{position:absolute;inset:0;display:none;pointer-events:none;z-index:30}
+  /* ボタンは画面（ビューポート）に対して配置する。ゲーム枠の中に閉じ込めない */
+  :root{--btn:min(18vh,86px);--gap:min(2vh,11px);--stick:min(34vh,158px)}
+  @media (orientation:portrait){:root{--btn:min(22vw,104px);--gap:min(2.4vw,13px);--stick:min(42vw,196px)}}
+  #pad{position:fixed;inset:0;display:none;pointer-events:none;z-index:30}
   #pad.on{display:block}
-  .tbtn{position:absolute;pointer-events:auto;display:grid;place-items:center;
-    font-family:var(--font-dp);font-size:13px;color:#dbe5f8;background:rgba(16,26,48,.72);
-    border:1px solid rgba(90,120,175,.5);border-radius:50%;user-select:none;-webkit-user-select:none;touch-action:none}
-  .tbtn:active,.tbtn.hold{background:rgba(61,240,255,.3);border-color:var(--cy);color:#fff}
-  #stick{position:absolute;left:3%;bottom:6%;width:min(30%,168px);aspect-ratio:1;pointer-events:auto;
-    border-radius:50%;border:1px solid rgba(90,120,175,.35);background:rgba(16,26,48,.42);touch-action:none}
-  #knob{position:absolute;left:50%;top:50%;width:42%;height:42%;transform:translate(-50%,-50%);border-radius:50%;
-    background:rgba(61,240,255,.35);border:1px solid var(--cy);pointer-events:none}
-  .yuibtn{position:absolute;left:50%;top:11%;transform:translateX(-50%);pointer-events:auto;display:none;
-    font-family:var(--font-dp);font-size:13px;padding:9px 18px;background:var(--yui);color:#08130a;border:0;
-    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));animation:pulse 1s infinite}
+  .pad-zone{position:absolute;bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
+  .pad-left{left:max(10px,env(safe-area-inset-left))}
+  .pad-right{right:max(10px,env(safe-area-inset-right))}
+  .btns{display:grid;grid-template-columns:repeat(3,var(--btn));grid-template-rows:repeat(2,var(--btn));gap:var(--gap)}
+  .tbtn{pointer-events:auto;width:100%;height:100%;display:grid;place-items:center;
+    font-family:var(--font-dp);font-size:clamp(12px,calc(var(--btn)*0.3),26px);color:#dbe5f8;
+    background:rgba(16,26,48,.78);border:1.5px solid rgba(90,120,175,.55);border-radius:50%;
+    user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #t-guard{grid-area:1/2} #t-jump{grid-area:1/3}
+  #t-special{grid-area:2/1} #t-heavy{grid-area:2/2} #t-light{grid-area:2/3}
+  #t-light{background:rgba(61,240,255,.18);border-color:rgba(61,240,255,.55)}
+  #t-heavy{background:rgba(255,61,139,.18);border-color:rgba(255,61,139,.55)}
+  .tbtn:active,.tbtn.hold{background:rgba(61,240,255,.42);border-color:var(--cy);color:#fff}
+  #stick{position:relative;width:var(--stick);height:var(--stick);pointer-events:auto;border-radius:50%;
+    border:1.5px solid rgba(90,120,175,.4);background:rgba(16,26,48,.5);touch-action:none;
+    -webkit-tap-highlight-color:transparent}
+  #knob{position:absolute;left:50%;top:50%;width:44%;height:44%;transform:translate(-50%,-50%);border-radius:50%;
+    background:rgba(61,240,255,.4);border:1.5px solid var(--cy);pointer-events:none}
+  .yuibtn{position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translateX(-50%);
+    pointer-events:auto;display:none;z-index:35;font-family:var(--font-dp);font-size:15px;padding:13px 26px;
+    background:var(--yui);color:#08130a;border:0;
+    clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));animation:pulse 1s infinite}
   .yuibtn.on{display:block}
+  .pad-note{display:none}
   @keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
-  .rotate-hint{position:absolute;inset:0;display:none;place-items:center;background:rgba(5,8,15,.94);z-index:50;text-align:center;padding:24px}
-  .rotate-hint.on{display:grid}
+  /* 縦持ち：ゲームの下の余白ぜんぶが操作パネル */
+  @media (orientation:portrait){
+    #pad.on{display:grid;top:calc(env(safe-area-inset-top) + 56.25vw);bottom:0;left:0;right:0;
+      grid-template-columns:auto auto;grid-template-rows:auto 1fr auto;
+      justify-content:space-between;align-items:end;
+      padding:14px 14px max(14px,env(safe-area-inset-bottom))}
+    .yuibtn{position:static;grid-column:1/-1;grid-row:1;justify-self:center;transform:none;margin-bottom:4px}
+    .pad-zone{position:static;grid-row:2;bottom:auto}
+    .pad-left{grid-column:1;left:auto} .pad-right{grid-column:2;right:auto}
+    .pad-note{display:block;grid-column:1/-1;grid-row:3;text-align:center;
+      font-size:11px;color:#5f7093;margin-top:12px;letter-spacing:.04em}
+  }
   @media (prefers-reduced-motion:reduce){.yuibtn{animation:none}}
 </style>
 
 <div id="app">
   <div id="stage">
     <canvas id="cv"></canvas>
-
-    <!-- TOUCH -->
-    <div id="pad">
-      <div id="stick"><div id="knob"></div></div>
-      <button class="tbtn" id="t-light" style="right:16%;bottom:4%;width:13%;aspect-ratio:1">弱</button>
-      <button class="tbtn" id="t-heavy" style="right:2%;bottom:13%;width:13%;aspect-ratio:1">強</button>
-      <button class="tbtn" id="t-jump" style="right:30%;bottom:9%;width:12%;aspect-ratio:1">跳</button>
-      <button class="tbtn" id="t-guard" style="right:17%;bottom:31%;width:12%;aspect-ratio:1">守</button>
-      <button class="tbtn" id="t-special" style="right:3%;bottom:40%;width:11%;aspect-ratio:1">必</button>
-      <button class="yuibtn" id="t-yui">YUI CALL</button>
-    </div>
 
     <!-- TITLE -->
     <div class="layer on" id="title">
@@ -265,8 +295,23 @@
       </div>
     </div>
 
-    <div class="rotate-hint" id="rotate"><div><h2>横向きにすると戦いやすいです</h2><p class="muted" style="margin-top:8px">このままでも遊べます</p></div></div>
     <div class="toast" id="toast"></div>
+  </div>
+
+  <!-- TOUCH -->
+  <div id="pad">
+    <button class="yuibtn" id="t-yui">YUI CALL</button>
+    <div class="pad-zone pad-left"><div id="stick"><div id="knob"></div></div></div>
+    <div class="pad-zone pad-right">
+      <div class="btns">
+        <button class="tbtn" id="t-guard">守</button>
+        <button class="tbtn" id="t-jump">跳</button>
+        <button class="tbtn" id="t-special">必</button>
+        <button class="tbtn" id="t-heavy">強</button>
+        <button class="tbtn" id="t-light">弱</button>
+      </div>
+    </div>
+    <div class="pad-note">横向きにすると、画面が大きくなります</div>
   </div>
 </div>
 
@@ -280,12 +325,18 @@ const W = 960, H = 540, GROUND = 468, WALL_L = 46, WALL_R = W - 46;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let HUD=1;   // 画面が小さいほどHUDの文字を大きくする係数
 function fit(){
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   cv.width = W * dpr; cv.height = H * dpr;
   ctx.setTransform(dpr,0,0,dpr,0,0);
+  const w = cv.getBoundingClientRect().width || W;
+  HUD = Math.min(2.0, Math.max(1, 620/w));
 }
-fit(); window.addEventListener('resize', fit);
+fit();
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', ()=>setTimeout(fit,300));
+function fnt(weight,px,fam){ return weight+' '+Math.round(px*HUD)+'px '+fam; }
 const $ = s => document.querySelector(s);
 const el = (t,c,txt)=>{const e=document.createElement(t); if(c)e.className=c; if(txt!=null)e.textContent=txt; return e;};
 
@@ -354,7 +405,15 @@ function readInput(){
 const pressed = k => IN[k] && !PREV[k];
 
 // タッチ
-const isTouch = matchMedia('(hover:none)').matches || 'ontouchstart' in window;
+let isTouch = matchMedia('(hover:none)').matches || 'ontouchstart' in window || (navigator.maxTouchPoints||0)>0;
+// 読み込み時に判定を外していても、あとから拾い直す
+function refreshTouch(){
+  if(!isTouch && (matchMedia('(hover:none)').matches || (navigator.maxTouchPoints||0)>0)) isTouch=true;
+  return isTouch;
+}
+addEventListener('touchstart', ()=>{
+  if(!isTouch){ isTouch=true; if(scene==='battle') $('#pad').classList.add('on'); }
+}, {passive:true, once:true});
 function bindHold(id, prop){
   const b=document.getElementById(id);
   const on=e=>{ e.preventDefault(); touch[prop]=1; b.classList.add('hold'); audio(); };
@@ -378,12 +437,6 @@ bindHold('t-special','special'); bindHold('t-jump','up');
   st.addEventListener('pointerup',end); st.addEventListener('pointercancel',end);
 })();
 $('#t-yui').addEventListener('click',()=>tryCall());
-function checkOrientation(){
-  const r=$('#rotate'); const portrait=innerHeight>innerWidth;
-  r.classList.toggle('on', isTouch && portrait && scene==='battle');
-}
-addEventListener('resize',checkOrientation);
-$('#rotate').addEventListener('click',()=>$('#rotate').classList.remove('on'));
 
 /* ============================================================
    4. 技データ
@@ -1269,11 +1322,12 @@ function drawHUD(){
   bar(28,24,330,20,p.hp/p.maxHp,'#3df0ff',false);
   bar(28,48,220,7,p.guard/p.guardMax,'rgba(140,200,255,.65)',false);
   bar(28,59,220,9,p.meter/100, p.meter>=50?'#ffcf4a':'rgba(255,207,74,.4)',false);
-  ctx.fillStyle='#8194b8'; ctx.font='400 11px "Anton",sans-serif'; ctx.fillText('YOU',28,18);
-  if(p.meter>=50){ ctx.fillStyle='#ffcf4a'; ctx.font='400 10px "Anton",sans-serif'; ctx.fillText('SPECIAL READY  [U]',256,68); }
+  ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillText('YOU',28,18);
+  if(p.meter>=50){ ctx.fillStyle='#ffcf4a'; ctx.font=fnt('400',10,'"Anton",sans-serif');
+    ctx.fillText(isTouch?'SPECIAL READY':'SPECIAL READY  [U]',256,68); }
   // ボス
   ctx.textAlign='right';
-  ctx.fillStyle='#8194b8'; ctx.font='400 11px "Anton",sans-serif';
+  ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif');
   ctx.fillText(stage.boss.name, W-28, 18);
   ctx.textAlign='left';
   if(B.fx.revealHp || stage.id!=='w1'){
@@ -1281,38 +1335,40 @@ function drawHUD(){
   } else {
     ctx.fillStyle='rgba(8,12,22,.85)'; ctx.fillRect(W-358,24,330,20);
     ctx.strokeStyle='rgba(140,165,210,.3)'; ctx.strokeRect(W-357.5,24.5,329,19);
-    ctx.fillStyle='#54658c'; ctx.font='400 12px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+    ctx.fillStyle='#54658c'; ctx.font=fnt('400',12,'"Zen Kaku Gothic New",sans-serif'); ctx.textAlign='center';
     ctx.fillText('？？？', W-193, 39); ctx.textAlign='left';
   }
   // タイマー
   ctx.textAlign='center';
-  if(B.fx.infinite){ ctx.fillStyle='#ff8a3d'; ctx.font='400 30px "Zen Kaku Gothic New",sans-serif'; ctx.fillText('∞', W/2, 46); }
-  else { ctx.fillStyle= B.timer<600?'#ff3d8b':'#e8eefb'; ctx.font='400 30px "Anton",sans-serif'; ctx.fillText(String(Math.ceil(B.timer/60)), W/2, 46); }
+  if(B.fx.infinite){ ctx.fillStyle='#ff8a3d'; ctx.font=fnt('400',30,'"Zen Kaku Gothic New",sans-serif'); ctx.fillText('∞', W/2, 46); }
+  else { ctx.fillStyle= B.timer<600?'#ff3d8b':'#e8eefb'; ctx.font=fnt('400',30,'"Anton",sans-serif'); ctx.fillText(String(Math.ceil(B.timer/60)), W/2, 46); }
   // YUIゲージ
   const ready=B.yui>=100 && B.calls<2;
   const gw=300, gx=W/2-gw/2, gy=62;
   ctx.fillStyle='rgba(8,12,22,.8)'; ctx.fillRect(gx,gy,gw,10);
   ctx.fillStyle= ready?'#9fe870':'rgba(159,232,112,.55)';
   ctx.fillRect(gx+1,gy+1,(gw-2)*Math.min(1,B.yui/100),8);
-  ctx.font='400 10px "Anton",sans-serif';
+  ctx.font=fnt('400',10,'"Anton",sans-serif');
   ctx.fillStyle= ready?'#9fe870':'#5f7093';
-  ctx.fillText(ready? (isTouch?'YUI CALL READY — 画面上のボタン':'YUI CALL READY — [Y]') :'YUI CALL', W/2, gy+24);
+  ctx.fillText(ready? (isTouch?'YUI CALL READY — YUIボタン':'YUI CALL READY — [Y]') :'YUI CALL', W/2, gy+24);
   if(B.calls>=2){ ctx.fillStyle='#5f7093'; ctx.fillText('YUI CALL 使用済み', W/2, gy+24); }
   // WORLD 6：一発で完璧に、という思い込み
   if(stage.id==='w6'){
-    ctx.font='400 12px "Anton",sans-serif';
+    ctx.font=fnt('400',12,'"Anton",sans-serif');
     if(B.fx.revGain>0){ ctx.fillStyle='#9fe870'; ctx.fillText('REVISION — 当て直すほど強くなる', W/2, 112); }
     else if(B.whiffs>=1){ ctx.fillStyle='#8194b8'; ctx.fillText('ONE CHANCE ... のはずだった', W/2, 112); }
     else { ctx.fillStyle='#ff5c5c'; ctx.fillText('ONE CHANCE', W/2, 112); }
   }
   ctx.textAlign='left';
-  // 作戦パネル
+  // 作戦パネル（小さい画面では箱ごと拡大する）
   if(B.tactic){
-    ctx.fillStyle='rgba(12,21,40,.9)'; ctx.fillRect(28,H-92,300,64);
-    ctx.strokeStyle='rgba(159,232,112,.5)'; ctx.lineWidth=1; ctx.strokeRect(28.5,H-91.5,299,63);
-    ctx.fillStyle='#9fe870'; ctx.font='400 10px "Anton",sans-serif'; ctx.fillText('YUI TACTIC',38,H-74);
-    ctx.fillStyle='#cfd9ef'; ctx.font='400 12px "Zen Kaku Gothic New",sans-serif';
-    wrapText(B.tactic, 38, H-56, 280, 16);
+    const ts=Math.min(HUD,1.4), pw=Math.round(300*ts), ph=Math.round(64*ts), py=H-28-ph;
+    ctx.fillStyle='rgba(12,21,40,.9)'; ctx.fillRect(28,py,pw,ph);
+    ctx.strokeStyle='rgba(159,232,112,.5)'; ctx.lineWidth=1; ctx.strokeRect(28.5,py+0.5,pw-1,ph-1);
+    ctx.fillStyle='#9fe870'; ctx.font='400 '+Math.round(10*ts)+'px "Anton",sans-serif';
+    ctx.fillText('YUI TACTIC',38,py+Math.round(18*ts));
+    ctx.fillStyle='#cfd9ef'; ctx.font='400 '+Math.round(12*ts)+'px "Zen Kaku Gothic New",sans-serif';
+    wrapText(B.tactic, 38, py+Math.round(36*ts), pw-20, Math.round(16*ts));
   }
 }
 function wrapText(text,x,y,maxW,lh){
@@ -1325,17 +1381,18 @@ function wrapText(text,x,y,maxW,lh){
   ctx.fillText(line,x,yy);
 }
 function drawIntro(){
-  const t=B.t;
+  const t=B.t, s=Math.min(HUD,1.45);
+  const px=(n)=>Math.round(n*s)+'px ';
   ctx.save(); ctx.textAlign='center';
   if(t<80){
     ctx.globalAlpha=Math.min(1,t/12);
     ctx.fillStyle='rgba(5,8,15,.72)'; ctx.fillRect(0,150,W,190);
-    ctx.fillStyle='#8194b8'; ctx.font='400 13px "Anton",sans-serif'; ctx.fillText(B.stage.num, W/2, 190);
-    ctx.fillStyle='#fff'; ctx.font='400 30px "Dela Gothic One","Zen Kaku Gothic New",sans-serif';
+    ctx.fillStyle='#8194b8'; ctx.font='400 '+px(13)+'"Anton",sans-serif'; ctx.fillText(B.stage.num, W/2, 190);
+    ctx.fillStyle='#fff'; ctx.font='400 '+px(30)+'"Dela Gothic One","Zen Kaku Gothic New",sans-serif';
     ctx.fillText(B.stage.title, W/2, 232);
-    ctx.fillStyle='#ff3d8b'; ctx.font='400 15px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillStyle='#ff3d8b'; ctx.font='400 '+px(15)+'"Zen Kaku Gothic New",sans-serif';
     ctx.fillText(B.stage.boss.name+'「'+B.stage.boss.quote+'」', W/2, 272);
-    ctx.fillStyle='#9fe870'; ctx.font='400 13px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillStyle='#9fe870'; ctx.font='400 '+px(13)+'"Zen Kaku Gothic New",sans-serif';
     ctx.fillText(B.stage.trouble, W/2, 306);
   } else {
     ctx.globalAlpha=Math.max(0,1-(t-118)/30);
@@ -1363,12 +1420,11 @@ function showLayer(name){
   });
   scene = (name===null)?'battle':name;
   if(name===null){ scene='battle'; }
-  $('#pad').classList.toggle('on', isTouch && scene==='battle');
-  checkOrientation();
+  $('#pad').classList.toggle('on', refreshTouch() && scene==='battle');
 }
 function toBattleScene(){
   ['title','select','how','call','result','manual','book'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  scene='battle'; $('#pad').classList.toggle('on', isTouch); checkOrientation();
+  scene='battle'; $('#pad').classList.toggle('on', refreshTouch());
 }
 let lastMenu='title';
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1400); }
