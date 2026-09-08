@@ -139,7 +139,7 @@
   /* ---------- touch controls ---------- */
   /* ボタンは画面（ビューポート）に対して配置する。ゲーム枠の中に閉じ込めない */
   :root{--btn:min(18vh,86px);--gap:min(2vh,11px);--stick:min(34vh,158px)}
-  @media (orientation:portrait){:root{--btn:min(22vw,104px);--gap:min(2.4vw,13px);--stick:min(42vw,196px)}}
+  @media (orientation:portrait){:root{--btn:min(19vw,92px);--gap:min(2.4vw,12px);--stick:min(36vw,170px)}}
   #pad{position:fixed;inset:0;display:none;pointer-events:none;z-index:30}
   #pad.on{display:block}
   .pad-zone{position:absolute;bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none}
@@ -178,6 +178,11 @@
     .pad-left{grid-column:1;left:auto} .pad-right{grid-column:2;right:auto}
     .pad-note{display:block;grid-column:1/-1;grid-row:3;text-align:center;
       font-size:11px;color:#5f7093;margin-top:12px;letter-spacing:.04em}
+    /* 縦持ちは画面幅が足りないので2列。弱を右下（親指の位置）に置く */
+    .btns{grid-template-columns:repeat(2,var(--btn));grid-template-rows:repeat(3,var(--btn))}
+    #t-jump{grid-area:1/1} #t-guard{grid-area:1/2}
+    #t-heavy{grid-area:2/1} #t-light{grid-area:2/2}
+    #t-special{grid-area:3/1}
   }
   @media (prefers-reduced-motion:reduce){.yuibtn{animation:none}}
 </style>
