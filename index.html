@@ -1,0 +1,1695 @@
+<meta charset="utf-8">
+<title>YUI MASTER</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Anton&display=swap">
+<style>
+  :root{
+    --ink:#070a14;
+    --ink-2:#0d1426;
+    --panel:#101a30;
+    --line:#243252;
+    --dim:#8194b8;
+    --paper:#e8eefb;
+    --cy:#3df0ff;
+    --mg:#ff3d8b;
+    --yui:#9fe870;
+    --gold:#ffcf4a;
+    --font-jp:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+    --font-dp:"Dela Gothic One","Zen Kaku Gothic New",system-ui,sans-serif;
+    --font-lt:"Anton","Zen Kaku Gothic New",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ink);color:var(--paper);font-family:var(--font-jp);}
+  #app{position:fixed;inset:0;display:grid;place-items:center;background:
+    radial-gradient(120% 90% at 50% 0%, #16203c 0%, #070a14 60%, #04060d 100%);
+    overflow:hidden;}
+  #stage{position:relative;width:min(100%, calc(100dvh * 16 / 9));aspect-ratio:16/9;
+    box-shadow:0 0 0 1px #22304f, 0 30px 80px rgba(0,0,0,.7);background:#05080f;overflow:hidden;}
+  canvas{display:block;width:100%;height:100%;image-rendering:auto;touch-action:none;}
+
+  /* ---------- overlay scaffolding ---------- */
+  .layer{position:absolute;inset:0;display:none;flex-direction:column;z-index:40;}
+  .layer.on{display:flex;}
+  .scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,15,.86),rgba(5,8,15,.96));backdrop-filter:blur(2px);}
+  .sheet{position:relative;margin:auto;width:min(760px,92%);max-height:88%;overflow:auto;overscroll-behavior:contain;
+    background:var(--panel);border:1px solid var(--line);padding:22px 24px 24px;
+    clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));}
+  .sheet::-webkit-scrollbar{width:8px}
+  .sheet::-webkit-scrollbar-thumb{background:#2c3c60}
+
+  .eyebrow{font-family:var(--font-lt);letter-spacing:.18em;font-size:12px;color:var(--cy);text-transform:uppercase;}
+  h1,h2,h3{font-family:var(--font-dp);font-weight:400;margin:0;text-wrap:balance;line-height:1.25;}
+  h1{font-size:clamp(28px,5vw,46px);letter-spacing:.02em}
+  h2{font-size:clamp(18px,2.6vw,24px)}
+  h3{font-size:15px}
+  p{margin:0;line-height:1.75;font-size:14px;color:#cfd9ef}
+  .muted{color:var(--dim);font-size:12.5px;line-height:1.7}
+
+  .btn{font-family:var(--font-jp);font-weight:700;font-size:14px;color:var(--ink);background:var(--cy);
+    border:0;padding:12px 20px;cursor:pointer;letter-spacing:.04em;
+    clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));}
+  .btn:hover{filter:brightness(1.12)}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  .btn.ghost{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--line);}
+  .btn.ghost:hover{background:#16223c}
+  .btn.yui{background:var(--yui)}
+  .btn.sm{padding:8px 14px;font-size:12.5px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+  /* ---------- title ---------- */
+  #title .sheet{width:min(880px,92%);text-align:left;background:transparent;border:0;clip-path:none;padding:0}
+  .logo{display:flex;flex-direction:column;gap:2px}
+  .logo .mark{font-family:var(--font-lt);font-size:clamp(46px,9vw,104px);line-height:.86;letter-spacing:.01em;
+    color:#fff;text-shadow:0 0 22px rgba(61,240,255,.45), 4px 4px 0 var(--mg);transform:skewX(-7deg);}
+  .logo .sub{font-family:var(--font-dp);font-size:clamp(12px,1.7vw,17px);color:var(--cy);letter-spacing:.14em;margin-top:10px}
+  .logo .tag{color:var(--dim);font-size:13px;margin-top:12px;max-width:44ch;line-height:1.8}
+  .creed{font-family:var(--font-dp);font-size:13px;color:var(--yui);letter-spacing:.1em;margin-top:6px}
+
+  /* ---------- world select ---------- */
+  .worlds{display:grid;gap:10px;margin-top:16px}
+  .world{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;
+    padding:12px 14px;background:#0c1528;border-left:3px solid var(--cy);cursor:pointer;text-align:left;
+    border-top:1px solid #1b2743;border-right:1px solid #1b2743;border-bottom:1px solid #1b2743;color:inherit;font:inherit;width:100%}
+  .world:hover{background:#122040}
+  .world .n{font-family:var(--font-lt);font-size:26px;color:var(--cy);line-height:1}
+  .world .t{font-family:var(--font-dp);font-size:15px}
+  .world .b{color:var(--dim);font-size:12px;margin-top:3px}
+  .world .st{font-family:var(--font-lt);font-size:12px;letter-spacing:.1em;color:var(--yui)}
+  .world.locked{border-left-color:#2c3a5c;cursor:default;opacity:.5}
+  .world.locked .n,.world.locked .st{color:#54658c}
+  .roadmap{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+  .roadmap ul{margin:8px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 14px}
+  .roadmap li{color:#6f82a8;font-size:12px;line-height:1.6}
+  .roadmap li b{color:#8ea3cc;font-weight:400;font-family:var(--font-lt);font-size:11px;letter-spacing:.08em;margin-right:6px}
+
+  /* ---------- yui call ---------- */
+  #call .sheet{width:min(820px,94%);background:rgba(11,18,34,.97);border-color:#2a3c63}
+  .yui-head{display:flex;gap:14px;align-items:flex-start}
+  .yui-face{width:74px;height:74px;flex:none}
+  .yui-name{font-family:var(--font-dp);font-size:13px;color:var(--yui);letter-spacing:.08em}
+  .bubble{position:relative;background:#16223c;border:1px solid #2c3c60;padding:12px 14px;margin-top:6px;font-size:14px;line-height:1.7}
+  .bubble::before{content:"";position:absolute;left:-7px;top:14px;width:12px;height:12px;background:#16223c;
+    border-left:1px solid #2c3c60;border-bottom:1px solid #2c3c60;transform:rotate(45deg)}
+  .cmds{display:grid;gap:9px;margin-top:16px}
+  .cmd{position:relative;text-align:left;background:#0c1528;border:1px solid #24314f;padding:13px 15px;cursor:pointer;
+    color:var(--paper);font:inherit;font-size:14px;line-height:1.65;transition:transform .08s,border-color .12s}
+  .cmd:hover{border-color:var(--cy);transform:translateX(3px)}
+  .cmd:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .cmd .q{color:var(--dim);font-family:var(--font-lt);font-size:11px;letter-spacing:.14em;display:block;margin-bottom:4px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .chip{font-size:10.5px;letter-spacing:.08em;font-family:var(--font-lt);padding:3px 8px;
+    background:rgba(61,240,255,.1);color:var(--cy);border:1px solid rgba(61,240,255,.3)}
+  .combo-tag{font-family:var(--font-lt);color:var(--gold);font-size:12px;letter-spacing:.1em;margin-top:10px;display:block}
+  .effect{margin-top:14px;padding:12px 14px;background:rgba(159,232,112,.08);border-left:3px solid var(--yui);font-size:13.5px;line-height:1.7}
+  .effect b{color:var(--yui);font-weight:700}
+
+  /* ---------- result / manual / book ---------- */
+  .lesson{font-family:var(--font-dp);font-size:clamp(15px,2.2vw,19px);line-height:1.7;color:#fff;margin:14px 0 4px}
+  .manual-card{background:#0c1528;border:1px solid #22304f;padding:14px 16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+  .manual-card .no{font-family:var(--font-lt);font-size:22px;color:var(--yui);line-height:1}
+  .list{display:grid;gap:8px;margin-top:14px}
+  .skillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .skillpill{font-family:var(--font-lt);font-size:12px;letter-spacing:.12em;padding:6px 12px;background:rgba(61,240,255,.12);
+    color:var(--cy);border:1px solid rgba(61,240,255,.35)}
+  .cat{font-family:var(--font-lt);font-size:11px;letter-spacing:.16em;color:var(--dim);margin:18px 0 6px;border-bottom:1px solid var(--line);padding-bottom:5px}
+  .cmdbook{display:grid;gap:8px}
+  .bookitem{background:#0c1528;border:1px solid #22304f;padding:12px 14px;display:grid;gap:9px}
+  .bookitem p{font-size:13px;color:#d5deef}
+  .bookitem .row{justify-content:flex-end}
+  .toast{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:var(--yui);color:#08130a;
+    font-weight:700;font-size:13px;padding:9px 18px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
+  .toast.on{opacity:1}
+  .close-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
+
+  /* ---------- touch controls ---------- */
+  #pad{position:absolute;inset:0;display:none;pointer-events:none;z-index:30}
+  #pad.on{display:block}
+  .tbtn{position:absolute;pointer-events:auto;display:grid;place-items:center;
+    font-family:var(--font-dp);font-size:13px;color:#dbe5f8;background:rgba(16,26,48,.72);
+    border:1px solid rgba(90,120,175,.5);border-radius:50%;user-select:none;-webkit-user-select:none;touch-action:none}
+  .tbtn:active,.tbtn.hold{background:rgba(61,240,255,.3);border-color:var(--cy);color:#fff}
+  #stick{position:absolute;left:3%;bottom:6%;width:min(30%,168px);aspect-ratio:1;pointer-events:auto;
+    border-radius:50%;border:1px solid rgba(90,120,175,.35);background:rgba(16,26,48,.42);touch-action:none}
+  #knob{position:absolute;left:50%;top:50%;width:42%;height:42%;transform:translate(-50%,-50%);border-radius:50%;
+    background:rgba(61,240,255,.35);border:1px solid var(--cy);pointer-events:none}
+  .yuibtn{position:absolute;left:50%;top:11%;transform:translateX(-50%);pointer-events:auto;display:none;
+    font-family:var(--font-dp);font-size:13px;padding:9px 18px;background:var(--yui);color:#08130a;border:0;
+    clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));animation:pulse 1s infinite}
+  .yuibtn.on{display:block}
+  @keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+  .rotate-hint{position:absolute;inset:0;display:none;place-items:center;background:rgba(5,8,15,.94);z-index:50;text-align:center;padding:24px}
+  .rotate-hint.on{display:grid}
+  @media (prefers-reduced-motion:reduce){.yuibtn{animation:none}}
+</style>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+
+    <!-- TOUCH -->
+    <div id="pad">
+      <div id="stick"><div id="knob"></div></div>
+      <button class="tbtn" id="t-light" style="right:16%;bottom:4%;width:13%;aspect-ratio:1">弱</button>
+      <button class="tbtn" id="t-heavy" style="right:2%;bottom:13%;width:13%;aspect-ratio:1">強</button>
+      <button class="tbtn" id="t-jump" style="right:30%;bottom:9%;width:12%;aspect-ratio:1">跳</button>
+      <button class="tbtn" id="t-guard" style="right:17%;bottom:31%;width:12%;aspect-ratio:1">守</button>
+      <button class="tbtn" id="t-special" style="right:3%;bottom:40%;width:11%;aspect-ratio:1">必</button>
+      <button class="yuibtn" id="t-yui">YUI CALL</button>
+    </div>
+
+    <!-- TITLE -->
+    <div class="layer on" id="title">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="logo">
+          <div class="mark">YUI MASTER</div>
+          <div class="sub">― AI秘書攻略バトル ―</div>
+          <div class="tag">棒人間で殴り合う格闘ゲーム。ピンチになると、AI秘書のゆいちゃんに相談できる。どう頼んだかで、返ってくる作戦が変わる。</div>
+          <div class="creed">あそぶ。頼む。やってみる。</div>
+        </div>
+        <div class="row" style="margin-top:26px">
+          <button class="btn" id="b-start">はじめる</button>
+          <button class="btn ghost" id="b-how">あそびかた</button>
+          <button class="btn ghost" id="b-manual0">ゆいちゃん取扱説明書</button>
+          <button class="btn ghost" id="b-book0">MY COMMAND BOOK</button>
+        </div>
+        <p class="muted" style="margin-top:14px">NPO法人夢ノ森伴走者CUE ／ Version 0.2 ／ WORLD 1-7</p>
+      </div>
+    </div>
+
+    <!-- SELECT -->
+    <div class="layer" id="select">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="eyebrow">World Select</div>
+        <h2 style="margin-top:6px">どこから戦う？</h2>
+        <div class="worlds" id="worldlist"></div>
+        <div class="roadmap">
+          <div class="eyebrow">この先にあるWORLD（開発中）</div>
+          <ul id="roadmaplist"></ul>
+        </div>
+        <div class="close-row">
+          <button class="btn ghost sm" data-back="title">タイトルへ</button>
+          <div class="row">
+            <button class="btn ghost sm" id="b-manual1">取扱説明書</button>
+            <button class="btn ghost sm" id="b-book1">COMMAND BOOK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW TO -->
+    <div class="layer" id="how">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="eyebrow">How to play</div>
+        <h2 style="margin-top:6px">操作</h2>
+        <div class="list" id="howlist"></div>
+        <p class="muted" style="margin-top:14px">説明はここまで。あとは戦えば分かります。</p>
+        <div class="close-row"><button class="btn" data-back="title">とじる</button></div>
+      </div>
+    </div>
+
+    <!-- YUI CALL -->
+    <div class="layer" id="call">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="yui-head">
+          <svg class="yui-face" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(159,232,112,.18)" stroke-width="1"/>
+            <path d="M31 62a29 29 0 0 1 58 0" fill="none" stroke="#9fe870" stroke-width="3" stroke-linecap="round"/>
+            <path d="M31 62v18M89 62v18" stroke="#9fe870" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="60" cy="64" r="24" fill="none" stroke="#9fe870" stroke-width="2.2"/>
+            <path d="M50 62q4-5 8 0M62 62q4-5 8 0" fill="none" stroke="#9fe870" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M55 73q5 4 10 0" fill="none" stroke="#9fe870" stroke-width="2.2" stroke-linecap="round"/>
+            <rect x="82" y="46" width="9" height="9" fill="none" stroke="#c6f24a" stroke-width="2"/>
+            <path d="M40 92h40" stroke="#9fe870" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
+          </svg>
+          <div style="flex:1">
+            <div class="yui-name">AI秘書 ゆい</div>
+            <div class="bubble" id="call-line"></div>
+          </div>
+        </div>
+        <div class="cmds" id="call-cmds"></div>
+        <div id="call-result"></div>
+        <div class="close-row" id="call-actions"></div>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="layer" id="result">
+      <div class="scrim"></div>
+      <div class="sheet" id="result-sheet"></div>
+    </div>
+
+    <!-- MANUAL -->
+    <div class="layer" id="manual">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="eyebrow">Yui Manual</div>
+        <h2 style="margin-top:6px">ゆいちゃん取扱説明書</h2>
+        <p class="muted" style="margin-top:8px">見つけたページだけが増えていきます。</p>
+        <div class="list" id="manual-list"></div>
+        <div class="close-row"><button class="btn" data-back="auto">もどる</button></div>
+      </div>
+    </div>
+
+    <!-- COMMAND BOOK -->
+    <div class="layer" id="book">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="eyebrow">My Command Book</div>
+        <h2 style="margin-top:6px">CUEで使ってみる</h2>
+        <p class="muted" style="margin-top:8px">そのままコピーして、ゆいちゃんに貼れます。全部埋めなくても大丈夫です。</p>
+        <div class="cmdbook" id="book-list"></div>
+        <div class="close-row"><button class="btn" data-back="auto">もどる</button></div>
+      </div>
+    </div>
+
+    <div class="rotate-hint" id="rotate"><div><h2>横向きにすると戦いやすいです</h2><p class="muted" style="margin-top:8px">このままでも遊べます</p></div></div>
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+(function(){
+/* ============================================================
+   0. 基本セットアップ
+   ============================================================ */
+const W = 960, H = 540, GROUND = 468, WALL_L = 46, WALL_R = W - 46;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fit(){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+fit(); window.addEventListener('resize', fit);
+const $ = s => document.querySelector(s);
+const el = (t,c,txt)=>{const e=document.createElement(t); if(c)e.className=c; if(txt!=null)e.textContent=txt; return e;};
+
+/* ============================================================
+   1. セーブ
+   ============================================================ */
+const SAVE_KEY='yuimaster.save.v1';
+const save = loadSave();
+function loadSave(){
+  const base={version:1,cleared:[],manual:[1],skills:[],stats:{plays:0,wins:0,calls:0,revisions:0}};
+  try{ const raw=localStorage.getItem(SAVE_KEY); if(!raw) return base;
+    const d=JSON.parse(raw); return Object.assign(base,d,{stats:Object.assign(base.stats,d.stats||{})});
+  }catch(e){ return base; }
+}
+function persist(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }catch(e){} }
+
+/* ============================================================
+   2. サウンド（内蔵シンセ・外部ファイルなし）
+   ============================================================ */
+let AC=null;
+function audio(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC; }
+function sfx(kind){
+  const ac=audio(); if(!ac) return; const t=ac.currentTime;
+  const g=ac.createGain(); g.connect(ac.destination);
+  if(kind==='hit'||kind==='heavy'||kind==='guard'){
+    const len=kind==='heavy'?0.18:0.09;
+    const buf=ac.createBuffer(1, ac.sampleRate*len, ac.sampleRate); const d=buf.getChannelData(0);
+    for(let i=0;i<d.length;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2.2); }
+    const s=ac.createBufferSource(); s.buffer=buf;
+    const f=ac.createBiquadFilter(); f.type='lowpass'; f.frequency.value= kind==='guard'?900:(kind==='heavy'?1400:2600);
+    s.connect(f); f.connect(g); g.gain.value= kind==='heavy'?0.5:0.32; s.start(t);
+  } else {
+    const o=ac.createOscillator(); o.connect(g);
+    const map={ui:[440,0.06,'square'],ok:[660,0.12,'triangle'],ko:[110,0.5,'sawtooth'],sp:[180,0.35,'sawtooth'],pick:[880,0.1,'triangle']};
+    const m=map[kind]||map.ui; o.type=m[2]; o.frequency.setValueAtTime(m[0],t);
+    if(kind==='sp') o.frequency.exponentialRampToValueAtTime(900,t+m[1]);
+    if(kind==='ko') o.frequency.exponentialRampToValueAtTime(45,t+m[1]);
+    g.gain.setValueAtTime(0.16,t); g.gain.exponentialRampToValueAtTime(0.001,t+m[1]);
+    o.start(t); o.stop(t+m[1]+0.02);
+  }
+}
+
+/* ============================================================
+   3. 入力
+   ============================================================ */
+const KEY={};
+const touch={left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0};
+const GAMEKEYS=new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','Space','KeyJ','KeyK','KeyL','KeyU','KeyY','ShiftLeft','ShiftRight']);
+addEventListener('keydown',e=>{ if(GAMEKEYS.has(e.code)) e.preventDefault(); KEY[e.code]=true; if(e.code==='KeyY') tryCall(); if(e.code==='Escape') { if(scene==='battle') showLayer('select'); } });
+addEventListener('keyup',e=>{ KEY[e.code]=false; });
+addEventListener('blur',()=>{ for(const k in KEY) KEY[k]=false; });
+
+const IN={left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0};
+const PREV={};
+function readInput(){
+  Object.assign(PREV, IN);
+  IN.left = (KEY.ArrowLeft||KEY.KeyA||touch.left)?1:0;
+  IN.right = (KEY.ArrowRight||KEY.KeyD||touch.right)?1:0;
+  IN.up = (KEY.ArrowUp||KEY.KeyW||KEY.Space||touch.up)?1:0;
+  IN.light = (KEY.KeyJ||touch.light)?1:0;
+  IN.heavy = (KEY.KeyK||touch.heavy)?1:0;
+  IN.guard = (KEY.KeyL||touch.guard)?1:0;
+  IN.special = (KEY.KeyU||touch.special)?1:0;
+  IN.dodge = (KEY.ShiftLeft||KEY.ShiftRight)?1:0;
+}
+const pressed = k => IN[k] && !PREV[k];
+
+// タッチ
+const isTouch = matchMedia('(hover:none)').matches || 'ontouchstart' in window;
+function bindHold(id, prop){
+  const b=document.getElementById(id);
+  const on=e=>{ e.preventDefault(); touch[prop]=1; b.classList.add('hold'); audio(); };
+  const off=e=>{ e.preventDefault(); touch[prop]=0; b.classList.remove('hold'); };
+  b.addEventListener('pointerdown',on); b.addEventListener('pointerup',off);
+  b.addEventListener('pointercancel',off); b.addEventListener('pointerleave',off);
+}
+bindHold('t-light','light'); bindHold('t-heavy','heavy'); bindHold('t-guard','guard');
+bindHold('t-special','special'); bindHold('t-jump','up');
+(function stickSetup(){
+  const st=$('#stick'), kn=$('#knob'); let id=null;
+  const move=e=>{
+    const r=st.getBoundingClientRect(); const dx=e.clientX-(r.left+r.width/2); const dy=e.clientY-(r.top+r.height/2);
+    const max=r.width/2; const cl=Math.max(-max,Math.min(max,dx)), cy2=Math.max(-max,Math.min(max,dy));
+    kn.style.transform=`translate(calc(-50% + ${cl}px), calc(-50% + ${cy2}px))`;
+    touch.left = dx<-14?1:0; touch.right = dx>14?1:0; touch.up = dy<-r.height*0.3?1:0;
+  };
+  st.addEventListener('pointerdown',e=>{ e.preventDefault(); id=e.pointerId; st.setPointerCapture(id); audio(); move(e); });
+  st.addEventListener('pointermove',e=>{ if(id===e.pointerId) move(e); });
+  const end=e=>{ if(id!==null){ id=null; touch.left=touch.right=touch.up=0; kn.style.transform='translate(-50%,-50%)'; } };
+  st.addEventListener('pointerup',end); st.addEventListener('pointercancel',end);
+})();
+$('#t-yui').addEventListener('click',()=>tryCall());
+function checkOrientation(){
+  const r=$('#rotate'); const portrait=innerHeight>innerWidth;
+  r.classList.toggle('on', isTouch && portrait && scene==='battle');
+}
+addEventListener('resize',checkOrientation);
+$('#rotate').addEventListener('click',()=>$('#rotate').classList.remove('on'));
+
+/* ============================================================
+   4. 技データ
+   ============================================================ */
+const MOVES={
+  light  :{startup:4, active:3, recovery:8,  dmg:5,  hitstun:14, kbx:3.4, kby:-1.2, hx:16, hy:-76, hw:48, hh:24, stop:5,  guardDmg:9,  meter:6, sfx:'hit'},
+  heavy  :{startup:10,active:5, recovery:19, dmg:12, hitstun:24, kbx:8.4, kby:-4.6, hx:14, hy:-82, hw:64, hh:36, stop:9,  guardDmg:26, meter:10,sfx:'heavy'},
+  air    :{startup:6, active:7, recovery:6,  dmg:9,  hitstun:20, kbx:5.0, kby:-2.0, hx:8,  hy:-58, hw:54, hh:38, stop:7,  guardDmg:16, meter:8, sfx:'hit'},
+  special:{startup:13,active:9, recovery:24, dmg:22, hitstun:34, kbx:13,  kby:-7.5, hx:10, hy:-80, hw:92, hh:48, stop:14, guardDmg:60, meter:0, sfx:'heavy'}
+};
+const SPEED=3.7, JUMP=-12.4, GRAV=0.62;
+
+/* ============================================================
+   5. ファイター
+   ============================================================ */
+function makeFighter(o){
+  return Object.assign({
+    x:0,y:GROUND,vx:0,vy:0,face:1,maxHp:100,hp:100,meter:0,guardMax:100,guard:100,
+    state:'idle',t:0,onGround:true,hitstun:0,blockstun:0,invuln:0,attack:null,hitDone:false,
+    combo:0,comboTimer:0,flash:0,color:'#3df0ff',isPlayer:false,dead:false,
+    buffs:{atk:1,spd:1},buffTimer:0,platform:false,aiTimer:0,aiPlan:'',hesitate:0,blink:0,name:''
+  },o);
+}
+function hurtbox(f){
+  const crouch = (f.state==='guard')?8:0;
+  return {x:f.x-17,y:f.y-96+crouch,w:34,h:96-crouch};
+}
+function hitbox(f){
+  const m=f.attack; if(!m) return null;
+  const x = f.face>0 ? f.x+m.hx : f.x-m.hx-m.hw;
+  return {x, y:f.y+m.hy, w:m.hw, h:m.hh};
+}
+function overlap(a,b){ return a&&b&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y; }
+function setState(f,s){ if(f.state!==s){ f.state=s; f.t=0; } }
+function startAttack(f,name){
+  const m=MOVES[name]; f.attack=Object.assign({},m,{name}); f.hitDone=false; setState(f,'attack'); f.t=0;
+}
+function total(m){ return m.startup+m.active+m.recovery; }
+
+/* ============================================================
+   6. 演出バッファ
+   ============================================================ */
+let parts=[], pops=[], rings=[], shake={x:0,y:0,m:0}, hitstop=0, flashScreen=0, slowmo=0;
+function spark(x,y,n,color,pow){
+  if(REDUCED) n=Math.min(n,4);
+  for(let i=0;i<n;i++){ const a=Math.random()*Math.PI*2, s=(0.5+Math.random())*pow;
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-1,life:18+Math.random()*14,max:32,c:color,r:1.5+Math.random()*2.5}); }
+}
+function pop(x,y,text,color,scale){ pops.push({x,y,text,c:color||'#fff',life:44,s:scale||1,vy:-1.4}); }
+function ring(x,y,c,max){ rings.push({x,y,r:6,max:max||90,life:26,c}); }
+function doShake(m){ if(!REDUCED) shake.m=Math.max(shake.m,m); }
+
+/* ============================================================
+   7. ステージ定義（AI学習の中身はここに集約）
+   ============================================================ */
+const STAGES=[
+{
+  id:'w1', num:'WORLD 1', title:'ゆいちゃんに話しかけてみよう', skill:'PURPOSE', skillJp:'目的を伝える',
+  boss:{name:'フワットシジー', quote:'いい感じに、やっといて〜', hp:150, color:'#ff3d8b',
+        ai:{aggr:0.55,guard:0.30,jump:0.20,range:96,gap:26,hesitate:0.28}},
+  trouble:'相手のHPバーが出ない。効いているのか分からない。',
+  manual:{no:'02', h:'目的を伝える', b:'何をしたいのかを言うと、作戦が具体的になります。'},
+  lesson:'ゆいちゃんは、何をしたいのかを教えてもらうと、作戦を考えやすくなります。',
+  call:{
+    line:'あの……けっこう苦戦してますね。作戦、一緒に考えます？',
+    options:[
+      {tier:1,chips:[],text:'なんとかして',
+       reply:'まかせてください！……と言いたいところなんですが、"なんとか"の中身、もう少しだけ教えてもらえますか？',
+       fx:'とりあえず気合いを入れてもらった。<b>攻撃力 +5%</b>'},
+      {tier:2,chips:['目的'],text:'あの棒人間を倒したい',
+       reply:'倒すのが目的ですね。それなら、当たっているかどうかが見えたほうがいいです。',
+       fx:'<b>相手のHPバーが表示された。</b>どこまで削れたか分かる。'},
+      {tier:3,chips:['目的','状況'],text:'あの棒人間を倒したい。弱攻撃と強攻撃が使えます。どこを狙えばいい？',
+       reply:'了解です。胴体はガードが厚いけど、足元が空いています。強攻撃のあとに隙ができますよ。',
+       fx:'<b>HPバー</b>と<b>弱点マーカー</b>が出た。足元へのヒットが 1.8倍。'}
+    ],
+    revise:{text:'倒したいのは目の前の相手。弱攻撃と強攻撃が使えます',
+            reply:'ありがとうございます、それなら分かります。足元が空いています。そこを狙ってください。',
+            fx:'<b>HPバー</b>と<b>弱点マーカー</b>が出た。あとから足しても、ちゃんと届く。'}
+  }
+},
+{
+  id:'w2', num:'WORLD 2', title:'背景を伝えよう', skill:'CONTEXT', skillJp:'状況を伝える',
+  boss:{name:'ジョウホウタリナイ', quote:'……', hp:175, color:'#b06bff',
+        ai:{aggr:0.68,guard:0.22,jump:0.30,range:104,gap:22,hesitate:0.05,blink:true}},
+  trouble:'あたりが暗い。相手の位置も、次の動きも読めない。',
+  manual:{no:'03', h:'背景を伝える', b:'なぜ必要なのかが分かると、外れた答えが減ります。'},
+  lesson:'複雑なお願いほど、背景を少し教えてあげると強いです。',
+  call:{
+    line:'暗いですね……。いまの状況、教えてもらえますか？',
+    options:[
+      {tier:1,chips:[],text:'見えない',
+       reply:'見えない、というのは……相手ですか、足場ですか？ どちらか分かると、灯りの向きを変えられます。',
+       fx:'すこしだけ視界が広がった。<b>霧が薄まる</b>'},
+      {tier:2,chips:['状況'],text:'相手が暗くて見えない。急に近づいてくる',
+       reply:'瞬間移動していますね。移動の直前に、足元が光ります。',
+       fx:'<b>視界が回復。</b>相手のシルエットがはっきりする。'},
+      {tier:3,chips:['目的','状況'],text:'相手が暗くて見えない。急に近づいて強い攻撃をしてくる。近づかれる前に対処したい',
+       reply:'なるほど。移動の前と、攻撃の前に予兆が出ます。そこを合図にしてください。',
+       fx:'<b>霧が晴れた。</b>相手の攻撃前に<b>予兆マーカー</b>が出る。'}
+    ],
+    revise:{text:'相手が暗くて見えない。急に近づいて強い攻撃をしてくる',
+            reply:'それなら分かります。攻撃の前に予兆が出るので、そこを合図に。',
+            fx:'<b>霧が晴れた。</b>予兆マーカーも出る。'}
+  }
+},
+{
+  id:'w3', num:'WORLD 3', title:'誰に届けるかを伝えよう', skill:'TARGET', skillJp:'対象を伝える',
+  boss:{name:'ダレムケダー', quote:'ドレガ ホンモノ ダ？', hp:145, color:'#ffcf4a',
+        ai:{aggr:0.62,guard:0.26,jump:0.24,range:100,gap:24,hesitate:0.10,decoy:true}},
+  trouble:'相手が3体に見える。殴っても手応えがない。',
+  manual:{no:'04', h:'誰向けかを伝える', b:'文章や資料では、これが一番効きます。'},
+  lesson:'誰に向けるかを決めると、届く言葉が変わります。',
+  call:{
+    line:'3体……いえ、本物は1体です。誰に向けているか決まると、見分けられます。',
+    options:[
+      {tier:1,chips:[],text:'みんなに届けたい',
+       reply:'みんな、ですか。……全員に向けると、だいたい誰にも刺さらないんです。どなたに一番届けたいですか？',
+       fx:'分身が少しだけ薄くなった。<b>偽物のダメージ -40%</b>'},
+      {tier:2,chips:['対象'],text:'中学生に届けたい',
+       reply:'中学生ですね。それなら、真ん中の子が本物です。',
+       fx:'<b>本物が時々光る。</b>ただし、まだ見失いやすい。'},
+      {tier:3,chips:['対象','状況'],text:'初参加の中学生に届けたい。CUEのことも社会問題も知らない子',
+       reply:'よく分かりました。他の2体は、あなたの話を聞いていません。本物はこの子だけです。',
+       fx:'<b>本物が常時発光。</b>分身は無害になった。'}
+    ],
+    revise:{text:'届けたいのは、初参加の中学生。CUEのことは何も知らない子',
+            reply:'それなら分かります。本物はこの子です。他は聞いていません。',
+            fx:'<b>本物が常時発光。</b>分身は無害になった。'}
+  }
+},
+{
+  id:'w4', num:'WORLD 4', title:'条件をつけよう', skill:'CONDITION', skillJp:'条件を伝える',
+  boss:{name:'ジョウケンナシ', quote:'マダマダ、イケルヨネ？', hp:200, color:'#ff8a3d',
+        ai:{aggr:0.50,guard:0.34,jump:0.16,range:98,gap:26,hesitate:0}},
+  trouble:'いつ終わるのか分からない。削っても、すぐ元に戻る。',
+  manual:{no:'06', h:'条件を伝える', b:'予算・期限・文字数・人数。現実的な案になります。'},
+  lesson:'予算・期限・分量を伝えると、終わりが決まって、現実的な案が返ってきます。',
+  call:{
+    line:'これ、終わりが決まっていないですね。どこまでやれば終わりですか？',
+    options:[
+      {tier:1,chips:[],text:'早く終わらせたい',
+       reply:'ですよね……。早く、というのは何分くらいですか？ 予算でも分量でも大丈夫です。',
+       fx:'相手の回復が少し鈍った。<b>再生 -50%</b>'},
+      {tier:2,chips:['条件'],text:'60秒で終わらせたい',
+       reply:'60秒ですね。時間が決まると、こちらも組み立てられます。',
+       fx:'<b>相手の再生が止まった。</b>削った分が残るようになった。'},
+      {tier:3,chips:['目的','条件'],text:'60秒で決着をつけたい。使えるのは弱・強・必殺の3つだけ',
+       reply:'分かりました。60秒で届く範囲に絞ります。ここから先は、削った分がそのまま残ります。',
+       fx:'<b>制限時間60秒が設定された。</b>再生停止。相手の残り体力が<b>半分に確定</b>。'}
+    ],
+    revise:{text:'60秒で決着をつけたい。使えるのは弱・強・必殺だけ',
+            reply:'時間と手札が分かりました。60秒で届く範囲に絞りましょう。',
+            fx:'<b>制限時間60秒が設定された。</b>再生停止。残り体力が<b>半分に確定</b>。'}
+  }
+},
+{
+  id:'w5', num:'WORLD 5', title:'材料を渡そう', skill:'MATERIAL', skillJp:'材料を渡す',
+  boss:{name:'シリョウナシ', quote:'テブラ デ ナニガ デキル？', hp:130, color:'#6be3c9',
+        ai:{aggr:0.72,guard:0.20,jump:0.30,range:100,gap:20,hesitate:0}},
+  trouble:'攻撃がすり抜ける。手応えがまったくない。',
+  manual:{no:'05', h:'材料を渡す', b:'議事録・メモ・過去資料を見せると精度が上がります。'},
+  lesson:'議事録やメモを渡すと、ゆいちゃんの精度は一気に上がります。',
+  call:{
+    line:'手ぶらだと、さすがに掴めません。何か材料はありますか？',
+    options:[
+      {tier:1,chips:[],text:'いい感じの資料ある？',
+       reply:'わたしの手元には無いんです。……そちらのメモや議事録、写真でも大丈夫ですよ。',
+       fx:'言葉だけで押している。<b>威力が少しだけ戻った</b>'},
+      {tier:2,chips:['材料'],text:'去年の記録がある',
+       reply:'去年の記録、助かります。見せてもらえますか？',
+       fx:'<b>攻撃に実体が戻ってきた。</b>まだ半分。'},
+      {tier:3,chips:['材料','状況'],text:'去年の同じ相手の戦い方をメモしてある。渡すから、それを見て考えて',
+       reply:'ありがとうございます。……なるほど、この相手、右に回り込む癖がありますね。',
+       fx:'<b>攻撃が完全に実体化。</b>材料ぶんの<b>威力+15%</b>。'}
+    ],
+    revise:{text:'去年の同じ相手のメモがある。渡すから、それを見て考えて',
+            reply:'ありがとうございます。……この相手、右に回り込む癖がありますね。',
+            fx:'<b>攻撃が完全に実体化。</b>あとから渡しても、ちゃんと効く。'}
+  }
+},
+{
+  id:'w6', num:'WORLD 6', title:'一回で完成させようとしない', skill:'REVISION', skillJp:'直して頼み直す',
+  boss:{name:'イッパツデカンペキ', quote:'イチドデ、カンペキニ。', hp:190, color:'#ff5c5c',
+        ai:{aggr:0.66,guard:0.28,jump:0.20,range:104,gap:24,hesitate:0}},
+  trouble:'相手が怯まない。一発で決めないと、と焦る。',
+  manual:{no:'08', h:'まず作らせてから直してOK', b:'一発で完璧を狙わない方が、結果的に早いです。'},
+  lesson:'まず作ってもらって、あとから直す。そのほうが結局早いです。',
+  call:{
+    line:'一発で決めなくて大丈夫ですよ。……まず出して、あとから直しましょう？',
+    options:[
+      {tier:1,chips:[],text:'一撃で倒せる技を教えて',
+       reply:'そういう技、あればいいんですけど……。当てて、見て、直す。そのほうが早いです。',
+       fx:'<b>REVISION</b> がわずかに効き始めた。（2発目から +10%ずつ）'},
+      {tier:2,chips:['目的'],text:'まず一回当ててみる。そこから直したい',
+       reply:'いいですね、それでいきましょう。当てるたびに、次が良くなります。',
+       fx:'<b>REVISION</b>（2発目から +25%ずつ）'},
+      {tier:3,chips:['目的','条件'],text:'まず当ててみて、効きを見ながら削り切りたい。派手さは要らない',
+       reply:'了解です。一回で完璧にしないぶん、当てるたびに強くなります。',
+       fx:'<b>REVISION 全開。</b>連続で当てるほど威力が上がる（最大2.6倍）。'}
+    ],
+    revise:{text:'まず当ててみて、効きを見ながら削り切りたい',
+            reply:'それでいきましょう。直しながらのほうが、結局早いです。',
+            fx:'<b>REVISION 全開。</b>連続で当てるほど威力が上がる。'}
+  }
+},
+{
+  id:'w7', num:'WORLD 7', title:'AIに質問させよう', skill:'QUESTION', skillJp:'質問してもらう',
+  boss:{name:'シツモンサセナイ', quote:'キカレテナイカラ、イワナイ。', hp:165, color:'#7f8cff',
+        ai:{aggr:0.60,guard:0.30,jump:0.34,range:100,gap:22,hesitate:0}},
+  trouble:'見えない何かでダメージを受ける。原因が分からない。',
+  manual:{no:'09', h:'分からなければ質問してもらう', b:'「足りない情報があれば聞いて」と添えるだけです。'},
+  lesson:'分からないことは、ゆいちゃんから質問してもらえばOKです。',
+  call:{
+    line:'状況が分かりません。……逆に、わたしから聞いてもいいですか？',
+    options:[
+      {tier:1,chips:[],text:'なんか痛い',
+       reply:'痛い、ですか。どこで、どんなときに痛いか分かれば、たどれるんですが……。',
+       fx:'ゆいが考えている。<b>被ダメージ -20%</b>'},
+      {tier:2,chips:['状況'],text:'床にいるとダメージを受ける',
+       reply:'床ですね。でも全部ではなさそうです。どのあたりか、覚えていますか？',
+       fx:'<b>危険な床が、うっすら見えるようになった。</b>'},
+      {tier:3,chips:['質問'],text:'足りない情報があれば、先に質問して',
+       reply:'では、ひとつだけ確認させてください。',
+       ask:{q:'ダメージを受けたのは、<b>止まっているとき</b>ですか？ それとも<b>動いた直後</b>ですか？',
+            answers:[
+              {text:'止まっているとき', reply:'ありがとうございます。踏み続けると反応する床ですね。位置が特定できました。'},
+              {text:'動いた直後', reply:'ありがとうございます。踏んだ瞬間に反応する床ですね。位置が特定できました。'},
+              {text:'……よく覚えていない', reply:'大丈夫です。それなら両方の可能性で見ます。……ありました、ここです。'}
+            ]},
+       fx:'<b>見えなかった床が、全部見えた。</b>避けて戦える。'}
+    ],
+    revise:{text:'床にいると痛い。全部ではない。分からないところは質問して',
+            reply:'ありがとうございます。それなら特定できます。……ここと、ここです。',
+            fx:'<b>見えなかった床が、全部見えた。</b>'}
+  }
+}
+];
+const ROADMAP=[
+ ['W8','調査させよう'],['W9','比較・分析させよう'],['W10','アイデアを増やそう'],['W11','企画をつくろう'],
+ ['W12','文章をつくろう'],['W13','資料をつくろう'],['W14','会議を助けてもらおう'],['W15','プロジェクトを整理しよう'],
+ ['W16','ゆいちゃんと一緒に考えよう'],['W17','AIに任せる・人が決める'],['FINAL','AIと一緒にCUEを動かせ！']
+];
+const MANUAL_PAGES={
+ 1:{no:'01',h:'まず普通に話しかければOK',b:'難しい書き方は要りません。「これ、どうしよう」から始められます。'},
+ 2:{no:'02',h:'目的を伝える',b:'何をしたいのかを言うと、作戦が具体的になります。'},
+ 3:{no:'03',h:'背景を伝える',b:'なぜ必要なのかが分かると、外れた答えが減ります。'},
+ 4:{no:'04',h:'誰向けかを伝える',b:'文章や資料では、これが一番効きます。'},
+ 5:{no:'05',h:'材料を渡す',b:'議事録・メモ・過去資料を見せると精度が上がります。'},
+ 6:{no:'06',h:'条件を伝える',b:'予算・期限・文字数・人数。現実的な案になります。'},
+ 8:{no:'08',h:'まず作らせてから直してOK',b:'一発で完璧を狙わない方が、結果的に早いです。'},
+ 9:{no:'09',h:'分からなければ質問してもらう',b:'「足りない情報があれば聞いて」と添えるだけです。'},
+ 13:{no:'13',h:'短い相談は短いままでいい',b:'全部の要素を毎回書く必要はありません。重い仕事のときだけ材料を足します。'}
+};
+const BOOK=[
+ {cat:'イベント・里山',items:[
+  {t:'募集文をつくる',p:'次の里山イベントの募集文を考えて。対象は初参加の中学生。CUEや社会問題を知らなくても「楽しそう」と思える文章にしたい。足りない情報があれば先に質問して。'},
+  {t:'企画を20案出す',p:'里山で中学生が遊びたくなる企画を20個。予算3万円以内、道具は現地の竹と丸太、雨天時は室内に切り替えられるもの。'},
+  {t:'当日の進行表',p:'イベント当日のタイムスケジュールを表で。9:00集合16:00解散、参加40名、スタッフ8名、昼食1時間、安全説明を冒頭に。'}]},
+ {cat:'SNS・広報',items:[
+  {t:'投稿文を3案',p:'この活動写真の説明から、Instagram投稿文を3案。ハッシュタグは5個まで、絵文字なし、CUEらしい落ち着いた語り口で。'},
+  {t:'長い報告を分割',p:'この長い活動報告を、SNS用に3つの短い投稿に分けて。それぞれ単独で読める形で。'}]},
+ {cat:'会議',items:[
+  {t:'議事メモを整理',p:'この議事メモから、決まったこと／決まらなかったこと／次アクション（担当・期限つき）を抽出して。'},
+  {t:'次回の議題',p:'次回ミーティングの議題案を作って。60分、参加5名、決めたいのは秋のイベント日程と役割分担。'}]},
+ {cat:'助成金・調査',items:[
+  {t:'助成金を探す',p:'姫路市と兵庫県で、里山保全と子どもの居場所づくりに使えそうな助成金を調べて。締切が近い順、金額と対象経費もつけて。出典URLと確認日を必ず添えて。'},
+  {t:'要項を読み解く',p:'この助成金の募集要項を読んで、CUEが該当するか／しないかを条件ごとに表にして。'},
+  {t:'3つを比較',p:'3つの助成金を比較して。金額・対象経費・報告義務・手間の4軸の表で。'}]},
+ {cat:'企画書・資料',items:[
+  {t:'白紙から相談',p:'企画書の骨組みを一緒に作りたい。まだ内容がふわっとしている。何から決めればいいか質問しながら進めて。'},
+  {t:'1枚企画書に',p:'この企画を、初めて聞く人にも伝わる1枚企画書にして。目的／背景／対象／内容／予算／効果の6項目で。'},
+  {t:'読み手を変える',p:'この企画書、中学生の保護者が読む前提で言い換えて。専門用語は全部やさしく。'}]},
+ {cat:'条件をつける・材料を渡す',items:[
+  {t:'条件を切る',p:'この企画を現実的な形にしたい。予算3万円以内、準備できるのは2週間、当日スタッフは4名。この条件で実行できる案に絞って。'},
+  {t:'材料を渡して考えてもらう',p:'去年の同じイベントの記録と当日メモを貼ります。これを見て、今年変えたほうがいい点を5つ挙げて。理由も一言ずつ。'},
+  {t:'質問してもらう',p:'これから相談したいことがあるけれど、うまく説明できる自信がない。足りない情報があれば、先に質問して。それから答えて。'}]},
+ {cat:'引き継ぎ・相談',items:[
+  {t:'引き継ぎ整理',p:'このプロジェクトを引き継ぎたい。目的／現状／課題／担当／期限／次アクションの6項目に整理して。'},
+  {t:'まだ考えがない',p:'何から考えたらいいか分からない。秋にやりたいことがぼんやりある状態。質問しながら整理して。'},
+  {t:'弱点を聞く',p:'この案、自分では良いと思っているけど弱点を教えて。厳しめでいい。'},
+  {t:'人が決める部分',p:'この判断、AIに任せていい部分と、人が決めるべき部分に分けて。'}]}
+];
+
+/* ============================================================
+   8. バトル状態
+   ============================================================ */
+let scene='title';
+let B=null;   // battle state
+function newBattle(stage){
+  const p=makeFighter({x:250,y:GROUND,face:1,color:'#3df0ff',isPlayer:true,name:'YOU',maxHp:100,hp:100});
+  const b=makeFighter({x:700,y:GROUND,face:-1,color:stage.boss.color,maxHp:stage.boss.hp,hp:stage.boss.hp,name:stage.boss.name});
+  b.ai=stage.boss.ai;
+  B={ stage, p, b, yui:0, phase:'intro', t:0, timer:99*60, items:[], itemTimer:420,
+      calls:0, tier:0, tactic:'', revised:false, lastTier:0, whiffs:0, hazTick:0,
+      fx:{revealHp:false, weak:false, fog:0, telegraph:false, revealReal:false, decoyDmg:1, atk:1,
+          solid:1, regen:0, infinite:false, armor:false, revGain:0, taken:1,
+          hazards:[], hazardVisible:false, hazardHint:false},
+      history:[], decoys:[], result:null };
+  if(stage.id==='w2') B.fx.fog=1;
+  if(stage.id==='w3'){ B.decoys=[{off:-150,delay:14},{off:150,delay:26}]; }
+  if(stage.id==='w4'){ B.fx.regen=0.13; B.fx.infinite=true; }
+  if(stage.id==='w5'){ B.fx.solid=0.28; }
+  if(stage.id==='w6'){ B.fx.armor=true; }
+  if(stage.id==='w7'){ B.fx.hazards=[{x:150,w:130,on:false},{x:640,w:150,on:false}]; }
+  parts=[];pops=[];rings=[];hitstop=0;shake.m=0;slowmo=0;flashScreen=0;
+  save.stats.plays++; persist();
+}
+
+/* ============================================================
+   9. 戦闘ロジック
+   ============================================================ */
+function updateFighter(f, opp){
+  if(f.dead){ f.vy+=GRAV; f.y=Math.min(GROUND,f.y+f.vy); if(f.y>=GROUND){f.y=GROUND;f.vy=0;f.vx*=0.8;} f.x+=f.vx; return; }
+  f.t++;
+  if(f.flash>0)f.flash--;
+  if(f.invuln>0)f.invuln--;
+  if(f.comboTimer>0){f.comboTimer--; if(f.comboTimer===0)f.combo=0;}
+  if(f.buffTimer>0){ f.buffTimer--; if(f.buffTimer===0){ f.buffs.atk=1; f.buffs.spd=1; } }
+  if(f.blink>0)f.blink--;
+
+  // 状態別
+  if(f.state==='hurt'){ f.hitstun--; if(f.hitstun<=0 && f.onGround) setState(f,'idle'); }
+  else if(f.state==='crush'){ f.hitstun--; if(f.hitstun<=0){ f.guard=f.guardMax; setState(f,'idle'); } }
+  else if(f.state==='block'){ f.blockstun--; if(f.blockstun<=0) setState(f, IN.guard&&f.isPlayer?'guard':'idle'); }
+  else if(f.state==='dodge'){ if(f.t>=18) setState(f,'idle'); }
+  else if(f.state==='attack'){
+    const m=f.attack;
+    if(f.t>=total(m)){
+      if(!f.hitDone && f.isPlayer && B) B.whiffs++;
+      f.attack=null; setState(f,'idle');
+    }
+  }
+
+  // ガード回復
+  if(f.state!=='block' && f.state!=='crush' && f.guard<f.guardMax) f.guard=Math.min(f.guardMax,f.guard+0.16);
+
+  // 物理
+  f.vy+=GRAV;
+  f.x+=f.vx; f.y+=f.vy;
+  // 足場
+  const plat={x:388,y:336,w:184,h:14};
+  f.platform=false;
+  if(f.vy>0 && f.y-f.vy<=plat.y+2 && f.y>=plat.y && f.y<=plat.y+26 && f.x>plat.x-8 && f.x<plat.x+plat.w+8){
+    f.y=plat.y; f.vy=0; f.platform=true;
+  }
+  if(f.y>=GROUND){ if(!f.onGround){ spark(f.x,GROUND,5,'#48608f',1.6); } f.y=GROUND; f.vy=0; }
+  f.onGround=(f.y>=GROUND-0.01)||f.platform;
+  if(f.onGround && f.state==='hurt' && f.hitstun<=0) setState(f,'idle');
+  // 壁
+  if(f.x<WALL_L){ f.x=WALL_L; if(f.vx<-7&&f.state==='hurt'){ wallSlam(f); } f.vx=Math.abs(f.vx)*0.35; }
+  if(f.x>WALL_R){ f.x=WALL_R; if(f.vx>7&&f.state==='hurt'){ wallSlam(f); } f.vx=-Math.abs(f.vx)*0.35; }
+  // 摩擦
+  if(f.onGround){ f.vx*= (f.state==='hurt'?0.86:0.72); } else { f.vx*=0.985; }
+  if(Math.abs(f.vx)<0.05)f.vx=0;
+  // 向き
+  if(['idle','walk','guard'].includes(f.state) && opp) f.face = opp.x<f.x?-1:1;
+}
+function wallSlam(f){
+  f.hp=Math.max(0,f.hp-4); f.hitstun=Math.max(f.hitstun,20); f.vy=-6;
+  doShake(9); sfx('heavy'); spark(f.x,f.y-60,14,'#ffffff',4); pop(f.x,f.y-110,'WALL','#fff',0.9);
+}
+
+function playerControl(p, opp){
+  if(p.dead) return;
+  const busy = ['attack','hurt','crush','block','dodge'].includes(p.state);
+  if(!busy){
+    if(pressed('special') && p.meter>=50){ p.meter-=50; startAttack(p,'special'); p.invuln=6; sfx('sp'); ring(p.x,p.y-60,'#3df0ff',150); doShake(6); return; }
+    if(pressed('light')){ startAttack(p, p.onGround?'light':'air'); sfx('ui'); return; }
+    if(pressed('heavy')){ startAttack(p, p.onGround?'heavy':'air'); return; }
+    if(pressed('dodge') && p.onGround){ setState(p,'dodge'); p.invuln=10; p.vx=(IN.left?-1:IN.right?1:-p.face)*9.5; sfx('ui'); return; }
+    if(IN.guard && p.onGround){ setState(p,'guard'); p.vx=0; }
+    else {
+      if(p.state==='guard') setState(p,'idle');
+      const sp=SPEED*p.buffs.spd;
+      if(IN.left&&!IN.right){ p.vx=-sp; if(p.onGround)setState(p,'walk'); }
+      else if(IN.right&&!IN.left){ p.vx=sp; if(p.onGround)setState(p,'walk'); }
+      else if(p.onGround && p.state==='walk') setState(p,'idle');
+      if(pressed('up') && p.onGround){ p.vy=JUMP; p.onGround=false; setState(p,'jump'); sfx('ui'); }
+    }
+  }
+  if(!p.onGround && !busy) setState(p,'jump');
+}
+
+function aiControl(f, opp){
+  if(f.dead||opp.dead) return;
+  const a=f.ai; const d=opp.x-f.x, ad=Math.abs(d);
+  if(f.hesitate>0){ f.hesitate--; f.vx*=0.8; return; }
+  const busy=['attack','hurt','crush','block','dodge'].includes(f.state);
+  if(busy) return;
+  f.face = d<0?-1:1;
+  f.aiTimer--;
+  if(f.aiTimer>0){
+    if(f.aiPlan==='approach'){ f.vx=(d<0?-1:1)*SPEED*0.86; setState(f,'walk'); }
+    else if(f.aiPlan==='retreat'){ f.vx=(d<0?1:-1)*SPEED*0.8; setState(f,'walk'); }
+    else if(f.aiPlan==='guard'){ setState(f,'guard'); f.vx=0; }
+    else { f.vx*=0.8; if(f.onGround&&f.state!=='guard')setState(f,'idle'); }
+    return;
+  }
+  f.aiTimer=a.gap+((Math.random()*14)|0);
+  const r=Math.random();
+  if(a.hesitate && r<a.hesitate){ f.hesitate=24+((Math.random()*26)|0); f.aiPlan='idle'; return; }
+  if(a.blink && ad>230 && Math.random()<0.35){
+    spark(f.x,f.y-50,10,'#b06bff',3); f.x = opp.x + (Math.random()<0.5?-110:110);
+    f.x=Math.max(WALL_L,Math.min(WALL_R,f.x)); f.blink=12; spark(f.x,f.y-50,10,'#b06bff',3); f.aiPlan='approach'; return;
+  }
+  if(ad<=a.range){
+    if(r<a.guard){ f.aiPlan='guard'; }
+    else if(r<a.guard+0.45){ startAttack(f,'light'); f.aiPlan='idle'; }
+    else if(r<a.guard+0.72){ startAttack(f,'heavy'); f.aiPlan='idle'; }
+    else { f.aiPlan='retreat'; }
+  } else if(ad<230){
+    if(r<a.jump && f.onGround){ f.vy=JUMP; f.vx=(d<0?-1:1)*4.2; setState(f,'jump'); f.aiPlan='idle'; }
+    else if(r<a.aggr+0.3){ f.aiPlan='approach'; }
+    else { f.aiPlan='idle'; }
+  } else {
+    f.aiPlan = r<a.aggr?'approach':'idle';
+  }
+}
+
+function resolveHit(att, def, m, isDecoyHit){
+  const counter = def.state==='attack' && def.attack && def.t<def.attack.startup+def.attack.active;
+  const facingRight = att.x<def.x;
+  const blocking = (def.state==='guard'||def.state==='block') && def.onGround && ((facingRight&&def.face<0)||(!facingRight&&def.face>0));
+  att.hitDone=true;
+  hitstop=Math.max(hitstop,m.stop);
+  if(att.isPlayer) att.meter=Math.min(100,att.meter+m.meter); else att.meter=Math.min(100,att.meter+m.meter*0.6);
+
+  if(blocking){
+    const chip=Math.max(1,Math.round(m.dmg*0.14));
+    def.hp=Math.max(0,def.hp-chip);
+    def.guard-=m.guardDmg; def.blockstun=Math.max(def.blockstun, 8+((m.dmg/3)|0)); setState(def,'block');
+    def.vx=(att.face)*m.kbx*0.45;
+    spark(def.x+def.face*-18, def.y-70, 8, '#8fd8ff', 2.4);
+    sfx('guard'); doShake(3);
+    if(def.isPlayer) B.yui+=1.5;
+    if(def.guard<=0){
+      def.guard=0; setState(def,'crush'); def.hitstun=64; def.vx=att.face*4;
+      pop(def.x,def.y-120,'GUARD CRUSH','#ffcf4a',1.15); ring(def.x,def.y-60,'#ffcf4a',110); doShake(10); sfx('ko');
+    }
+    return;
+  }
+  if(def.invuln>0) return;
+
+  // ダメージ計算
+  let dmg=m.dmg*att.buffs.atk;
+  if(att.isPlayer) dmg*=B.fx.atk*B.fx.solid;
+  if(!att.isPlayer) dmg*=B.fx.taken;
+  if(counter) dmg*=1.4;
+  // 弱点（WORLD1）
+  const hb=hitbox(att);
+  const lowHit = hb && (hb.y+hb.h) > def.y-46;
+  if(att.isPlayer && B.fx.weak && lowHit) dmg*=1.8;
+  if(att.isPlayer && B.stage.id==='w1' && !B.fx.revealHp) dmg*=0.62; // 目的が定まっていない
+  if(!att.isPlayer && isDecoyHit) dmg*=B.fx.decoyDmg;
+  // コンボ補正（W6のREVISIONでは逆に、当て直すほど強くなる）
+  let scale=Math.max(0.5, Math.pow(0.9, att.combo));
+  if(att.isPlayer && B.fx.revGain>0) scale=Math.min(2.6, 1+att.combo*B.fx.revGain);
+  dmg=Math.max(1, Math.round(dmg*scale));
+
+  def.hp=Math.max(0,def.hp-dmg);
+  const armored = !def.isPlayer && B.fx.armor && m.name!=='special';
+  if(armored){
+    def.flash=6; def.vx+=att.face*1.1;
+    if(att.combo===0) pop(def.x, def.y-142, 'ARMOR', '#8194b8', 0.78);
+  } else {
+    def.hitstun=m.hitstun+(counter?8:0); setState(def,'hurt');
+    def.vx=att.face*m.kbx*(counter?1.25:1); def.vy=m.kby; def.flash=6;
+  }
+  def.meter=Math.min(100,def.meter+m.meter*0.5);
+  att.combo++; att.comboTimer=48;
+
+  const hx=(att.x+def.x)/2, hy=def.y-70;
+  spark(hx,hy, counter?20:12, counter?'#ffcf4a':'#ffffff', counter?4.5:3);
+  ring(hx,hy, counter?'#ffcf4a':att.color, m.name==='special'?170:70);
+  pop(def.x, def.y-118, String(dmg), counter?'#ffcf4a':'#fff', m.name==='heavy'||m.name==='special'?1.2:0.85);
+  if(counter) pop(def.x, def.y-146,'COUNTER','#ffcf4a',1.0);
+  if(att.isPlayer && B.fx.revGain>0 && att.combo>=2) pop(att.x, att.y-150, 'REVISION x'+att.combo,'#9fe870',0.95);
+  else if(att.combo>=2) pop(att.x, att.y-150, att.combo+' HIT','#3df0ff',0.9);
+  doShake(m.name==='special'?14:(m.name==='heavy'?8:4));
+  sfx(m.sfx);
+  if(m.name==='special') flashScreen=8;
+  if(def.isPlayer) B.yui+=dmg*1.2; else B.yui+=dmg*0.3;
+}
+
+function checkHits(){
+  const {p,b}=B;
+  // プレイヤー → 本体 / 分身
+  if(p.attack && p.state==='attack' && !p.hitDone && p.t>=p.attack.startup && p.t<p.attack.startup+p.attack.active){
+    const hb=hitbox(p);
+    if(overlap(hb,hurtbox(b))) resolveHit(p,b,p.attack,false);
+    else if(B.decoys.length && !B.fx.revealReal){
+      for(const d of B.decoys){
+        const snap=snapshotAt(d.delay); if(!snap) continue;
+        const gx=snap.x+d.off;
+        if(overlap(hb,{x:gx-17,y:snap.y-96,w:34,h:96})){
+          p.hitDone=true; hitstop=Math.max(hitstop,4);
+          spark(gx,snap.y-70,8,'#5d6b8d',2); pop(gx,snap.y-120,'ちがう','#8194b8',0.85); sfx('guard');
+          break;
+        }
+      }
+    }
+  }
+  // 本体 → プレイヤー
+  if(b.attack && b.state==='attack' && !b.hitDone && b.t>=b.attack.startup && b.t<b.attack.startup+b.attack.active){
+    if(overlap(hitbox(b),hurtbox(p))) resolveHit(b,p,b.attack,false);
+  }
+  // 分身 → プレイヤー
+  if(B.decoys.length && !B.fx.revealReal && b.attack){
+    for(const d of B.decoys){
+      const snap=snapshotAt(d.delay); if(!snap||!snap.atk) continue;
+      if(d.hitDone===snap.stamp) continue;
+      const m=MOVES[snap.atk];
+      if(snap.t>=m.startup && snap.t<m.startup+m.active){
+        const gx=snap.x+d.off;
+        const box={x: snap.face>0?gx+m.hx:gx-m.hx-m.hw, y:snap.y+m.hy, w:m.hw, h:m.hh};
+        if(overlap(box,hurtbox(p)) && p.invuln<=0 && !p.dead){
+          d.hitDone=snap.stamp;
+          const fake=Object.assign({},b,{x:gx,face:snap.face,isPlayer:false,buffs:{atk:1,spd:1}});
+          resolveHit(fake,p,Object.assign({},m,{dmg:Math.max(1,Math.round(m.dmg*0.6))}),true);
+        }
+      }
+    }
+  }
+}
+function snapshotAt(delay){
+  const h=B.history; if(h.length<=delay) return null;
+  return h[h.length-1-delay];
+}
+
+/* ============================================================
+   10. アイテム
+   ============================================================ */
+const ITEMS=[{k:'heal',c:'#9fe870',ch:'回'},{k:'atk',c:'#ff6b6b',ch:'力'},{k:'spd',c:'#6bb8ff',ch:'速'}];
+function updateItems(){
+  B.itemTimer--;
+  if(B.itemTimer<=0){ B.itemTimer=560+((Math.random()*260)|0);
+    const it=ITEMS[(Math.random()*ITEMS.length)|0];
+    B.items.push({x:140+Math.random()*(W-280),y:-30,vy:0,life:720,...it});
+  }
+  for(let i=B.items.length-1;i>=0;i--){
+    const it=B.items[i]; it.vy=Math.min(5,it.vy+0.3); it.y+=it.vy; it.life--;
+    if(it.y>GROUND-14){ it.y=GROUND-14; it.vy=0; }
+    for(const f of [B.p,B.b]){
+      if(!f.dead && Math.abs(f.x-it.x)<34 && Math.abs((f.y-48)-it.y)<58){
+        if(it.k==='heal'){ f.hp=Math.min(f.maxHp,f.hp+16); pop(f.x,f.y-130,'+16','#9fe870',1); }
+        if(it.k==='atk'){ f.buffs.atk=1.4; f.buffTimer=600; pop(f.x,f.y-130,'力','#ff6b6b',1); }
+        if(it.k==='spd'){ f.buffs.spd=1.45; f.buffTimer=600; pop(f.x,f.y-130,'速','#6bb8ff',1); }
+        ring(it.x,it.y,it.c,60); sfx('pick'); B.items.splice(i,1); break;
+      }
+    }
+    if(it.life<=0) B.items.splice(i,1);
+  }
+}
+
+/* ---- 見えない床（WORLD 7） ---- */
+function updateHazards(){
+  if(!B.fx.hazards.length) return;
+  const p=B.p; if(p.dead) return;
+  B.hazTick++;
+  for(const h of B.fx.hazards){
+    const inside = p.onGround && !p.platform && p.x>h.x && p.x<h.x+h.w;
+    h.on=inside;
+    if(inside && B.hazTick%24===0){
+      const d=3; p.hp=Math.max(0,p.hp-d); p.flash=5; B.yui+=d*1.2;
+      spark(p.x,GROUND,10,'#ff3d8b',2.6); pop(p.x,p.y-118,String(d),'#ff3d8b',0.8);
+      doShake(4); sfx('guard');
+    }
+  }
+}
+function drawHazards(){
+  if(!B.fx.hazards.length) return;
+  for(const h of B.fx.hazards){
+    ctx.save();
+    if(B.fx.hazardVisible){
+      ctx.fillStyle='rgba(255,61,139,.14)'; ctx.fillRect(h.x,GROUND-44,h.w,44);
+      ctx.setLineDash([6,5]); ctx.strokeStyle='rgba(255,61,139,.65)'; ctx.lineWidth=2;
+      ctx.strokeRect(h.x,GROUND-44,h.w,44); ctx.setLineDash([]);
+      ctx.fillStyle='#ff3d8b'; ctx.fillRect(h.x,GROUND-3,h.w,3);
+      ctx.fillStyle='#ff8fb8'; ctx.font='700 10px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+      ctx.fillText('危険な床', h.x+h.w/2, GROUND-50); ctx.textAlign='left';
+    } else if(B.fx.hazardHint || h.on){
+      const pulse = h.on?0.55:(0.08+0.16*Math.abs(Math.sin(performance.now()/420)));
+      ctx.globalAlpha=pulse; ctx.fillStyle='#ff3d8b'; ctx.fillRect(h.x,GROUND-3,h.w,3);
+    }
+    ctx.restore();
+  }
+}
+
+/* ============================================================
+   11. メインループ
+   ============================================================ */
+let last=performance.now(), acc=0;
+function loop(now){
+  requestAnimationFrame(loop);
+  let dt=now-last; last=now; if(dt>100)dt=100; acc+=dt;
+  const step=1000/60;
+  let guard=0;
+  while(acc>=step && guard<5){ acc-=step; tick(); guard++; }
+  render();
+}
+function tick(){
+  readInput();
+  // 演出更新（常に動く）
+  for(let i=parts.length-1;i>=0;i--){ const q=parts[i]; q.life--; q.x+=q.vx; q.y+=q.vy; q.vy+=0.14; q.vx*=0.97; if(q.life<=0)parts.splice(i,1); }
+  for(let i=pops.length-1;i>=0;i--){ const q=pops[i]; q.life--; q.y+=q.vy; q.vy*=0.92; if(q.life<=0)pops.splice(i,1); }
+  for(let i=rings.length-1;i>=0;i--){ const q=rings[i]; q.life--; q.r+=(q.max-q.r)*0.22; if(q.life<=0)rings.splice(i,1); }
+  if(shake.m>0){ shake.m*=0.86; if(shake.m<0.3)shake.m=0; shake.x=(Math.random()-0.5)*shake.m*2; shake.y=(Math.random()-0.5)*shake.m*2; }
+  if(flashScreen>0)flashScreen--;
+
+  if(scene!=='battle'||!B) return;
+  if(B.phase==='paused') return;
+
+  if(hitstop>0){ hitstop--; return; }
+
+  if(B.phase==='intro'){
+    B.t++;
+    if(B.t>150) B.phase='fight';
+    return;
+  }
+  if(B.phase==='over'){ B.t++;
+    updateFighter(B.p,B.b); updateFighter(B.b,B.p);
+    if(B.t>110) endBattle();
+    return;
+  }
+
+  // 戦闘中
+  if(slowmo>0){ slowmo--; if(slowmo%2===0) return; }
+  if(B.fx.infinite) B.timer=99*60; else B.timer--;
+  if(B.fx.regen>0 && B.b.hp>0 && !B.b.dead) B.b.hp=Math.min(B.b.maxHp, B.b.hp+B.fx.regen);
+  updateHazards();
+  B.yui=Math.min(100, B.yui + 2/60);
+  if(B.timer<=0){ finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return; }
+
+  playerControl(B.p,B.b);
+  aiControl(B.b,B.p);
+  updateFighter(B.p,B.b);
+  updateFighter(B.b,B.p);
+  checkHits();
+  updateItems();
+
+  // 履歴（分身用）
+  B.history.push({x:B.b.x,y:B.b.y,face:B.b.face,state:B.b.state,t:B.b.t,
+                  atk:B.b.attack?B.b.attack.name:null, stamp:B.b.attack?(B.b.x|0)+'_'+B.b.t:null});
+  if(B.history.length>70) B.history.shift();
+
+  // 押し合い
+  const dd=B.b.x-B.p.x;
+  if(Math.abs(dd)<30 && Math.abs(B.p.y-B.b.y)<70){ const push=(30-Math.abs(dd))*0.12*(dd<0?-1:1); B.p.x-=push; B.b.x+=push; }
+
+  // YUIボタン
+  const ready=B.yui>=100 && B.calls<2;
+  $('#t-yui').classList.toggle('on', ready && isTouch);
+
+  // KO
+  if(B.b.hp<=0 && !B.b.dead) finish(true);
+  else if(B.p.hp<=0 && !B.p.dead) finish(false);
+}
+function finish(win){
+  const loser = win?B.b:B.p;
+  loser.dead=true; loser.vx=(win?1:-1)*7; loser.vy=-9;
+  B.phase='over'; B.t=0; B.result=win;
+  doShake(16); flashScreen=10; sfx('ko'); slowmo=0;
+  pop(W/2, 180, win?'K.O.':'YOU LOSE', win?'#3df0ff':'#ff3d8b', 2.2);
+  $('#t-yui').classList.remove('on');
+}
+
+/* ============================================================
+   12. 描画
+   ============================================================ */
+function render(){
+  ctx.save();
+  ctx.clearRect(0,0,W,H);
+  ctx.translate(shake.x,shake.y);
+  drawBackground();
+  if(B){
+    drawPlatform();
+    drawHazards();
+    B.items.forEach(drawItem);
+    if(B.decoys.length && B.stage.id==='w3') drawDecoys();
+    drawFighter(B.b, true);
+    drawFighter(B.p, false);
+    drawEffects();
+    if(B.stage.id==='w2' && B.fx.fog>0) drawFog();
+    drawHUD();
+    if(B.phase==='intro') drawIntro();
+  } else {
+    drawAttract();
+    drawEffects();
+  }
+  ctx.restore();
+  if(flashScreen>0){ ctx.fillStyle='rgba(255,255,255,'+(flashScreen/26)+')'; ctx.fillRect(0,0,W,H); }
+}
+
+function drawBackground(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#101b34'); g.addColorStop(0.55,'#0a1122'); g.addColorStop(1,'#06090f');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // 遠景ビル
+  ctx.fillStyle='#0d1730';
+  for(let i=0;i<16;i++){ const bw=40+((i*37)%50), bh=70+((i*53)%150); ctx.fillRect(i*62-20, GROUND-bh-60, bw, bh); }
+  // ネオンライン
+  ctx.strokeStyle='rgba(61,240,255,.13)'; ctx.lineWidth=1;
+  for(let i=0;i<7;i++){ ctx.beginPath(); ctx.moveTo(0,120+i*46); ctx.lineTo(W,120+i*46); ctx.stroke(); }
+  // 床
+  ctx.fillStyle='#080c16'; ctx.fillRect(0,GROUND,W,H-GROUND);
+  ctx.strokeStyle='rgba(61,240,255,.42)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,GROUND); ctx.lineTo(W,GROUND); ctx.stroke();
+  ctx.strokeStyle='rgba(61,240,255,.09)';
+  for(let i=0;i<26;i++){ const x=i*38; ctx.beginPath(); ctx.moveTo(x,GROUND); ctx.lineTo(x*1.7-300,H); ctx.stroke(); }
+  // 壁
+  ctx.strokeStyle='rgba(255,61,139,.18)'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(WALL_L-16,GROUND); ctx.lineTo(WALL_L-16,GROUND-200);
+  ctx.moveTo(WALL_R+16,GROUND); ctx.lineTo(WALL_R+16,GROUND-200); ctx.stroke();
+}
+function drawPlatform(){
+  ctx.fillStyle='#16233f'; ctx.fillRect(388,336,184,14);
+  ctx.strokeStyle='rgba(61,240,255,.5)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(388,336); ctx.lineTo(572,336); ctx.stroke();
+}
+function drawItem(it){
+  ctx.save(); ctx.translate(it.x,it.y);
+  ctx.rotate(Math.sin(performance.now()/300)*0.25);
+  ctx.strokeStyle=it.c; ctx.lineWidth=2; ctx.shadowColor=it.c; ctx.shadowBlur=12;
+  ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(13,0); ctx.lineTo(0,14); ctx.lineTo(-13,0); ctx.closePath(); ctx.stroke();
+  ctx.shadowBlur=0; ctx.fillStyle=it.c; ctx.font='700 13px "Zen Kaku Gothic New",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(it.ch,0,1);
+  ctx.restore();
+}
+
+/* --- 棒人間 --- */
+function poseFor(f){
+  const P={lean:0,crouch:0,armA:[2.6,0.5],armB:[0.6,0.4],legA:[1.75,0.1],legB:[1.35,0.1],headT:0};
+  const bob=Math.sin(f.t*0.12)*0.06;
+  switch(f.state){
+    case 'idle': P.armA=[2.4+bob,0.6]; P.armB=[0.75-bob,0.5]; P.legA=[1.72,0.06]; P.legB=[1.42,0.06]; break;
+    case 'walk': { const s=Math.sin(f.t*0.34);
+      P.legA=[1.57+s*0.5,0.18]; P.legB=[1.57-s*0.5,0.18]; P.armA=[2.3-s*0.5,0.5]; P.armB=[0.85+s*0.5,0.4]; P.lean=0.06; break; }
+    case 'jump': P.legA=[1.9,0.9]; P.legB=[1.3,0.6]; P.armA=[2.9,0.4]; P.armB=[0.3,0.4]; P.lean=0.1; break;
+    case 'guard': P.crouch=8; P.armA=[1.15,1.5]; P.armB=[1.5,1.6]; P.legA=[1.8,0.25]; P.legB=[1.35,0.25]; P.lean=-0.12; break;
+    case 'dodge': P.lean=0.5; P.armA=[2.6,1.2]; P.armB=[1.0,1.2]; P.legA=[1.6,0.5]; P.legB=[1.5,0.5]; break;
+    case 'hurt': P.lean=-0.35; P.armA=[3.4,0.2]; P.armB=[-0.3,0.2]; P.legA=[1.9,0.2]; P.legB=[1.2,0.2]; P.headT=-0.3; break;
+    case 'crush': P.lean=-0.5; P.armA=[3.6,0.1]; P.armB=[-0.5,0.1]; P.legA=[2.0,0.3]; P.legB=[1.1,0.3]; P.headT=-0.4; break;
+    case 'block': P.crouch=6; P.armA=[1.1,1.7]; P.armB=[1.45,1.7]; P.legA=[1.8,0.2]; P.legB=[1.35,0.2]; P.lean=-0.2; break;
+    case 'attack': {
+      const m=f.attack, k=m.name; const ph=f.t;
+      const wind=Math.min(1,ph/Math.max(1,m.startup));
+      const act = ph>=m.startup ? Math.min(1,(ph-m.startup)/Math.max(1,m.active)) : 0;
+      const rec = ph>=m.startup+m.active ? Math.min(1,(ph-m.startup-m.active)/m.recovery) : 0;
+      const ext = act>0 ? 1-rec*0.75 : 0;
+      if(k==='light'){ P.armB=[0.4-wind*0.5+ext*0.5, 1.5-ext*1.45]; P.armA=[2.5,0.7]; P.lean=0.1+ext*0.12;
+        P.legA=[1.72,0.1]; P.legB=[1.42,0.1]; }
+      else if(k==='heavy'){ P.armB=[1.4-wind*1.8+ext*1.6, 1.9-ext*1.85]; P.armA=[2.9,0.5]; P.lean=-0.18+ext*0.5;
+        P.legA=[1.85,0.2]; P.legB=[1.25,0.28]; }
+      else if(k==='air'){ P.armB=[0.2+ext*0.4,0.5]; P.armA=[2.7,0.5]; P.legA=[1.2+ext*0.7,0.2]; P.legB=[1.5,0.7]; P.lean=0.3; }
+      else { P.armB=[0.55,0.1]; P.armA=[0.75,0.15]; P.lean=0.42; P.legA=[1.9,0.3]; P.legB=[1.15,0.5]; }
+      break; }
+    default: break;
+  }
+  return P;
+}
+function limb(x,y,a1,l1,a2,l2){
+  const jx=x+Math.cos(a1)*l1, jy=y+Math.sin(a1)*l1;
+  const ex=jx+Math.cos(a1+a2)*l2, ey=jy+Math.sin(a1+a2)*l2;
+  ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(jx,jy); ctx.lineTo(ex,ey); ctx.stroke();
+  return [ex,ey];
+}
+function drawStick(f,x,y,color,alpha,scale){
+  const P=poseFor(f);
+  const dir=f.face;
+  ctx.save();
+  ctx.globalAlpha=alpha==null?1:alpha;
+  ctx.translate(x,y);
+  ctx.scale(dir*(scale||1),(scale||1));
+  if(f.dead){ ctx.rotate(-1.35); ctx.translate(0,-20); }
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle= f.flash>0 ? '#ffffff' : color;
+  ctx.lineWidth=5;
+  ctx.shadowColor=color; ctx.shadowBlur= REDUCED?0:14;
+  const hipY=-46+P.crouch, neckY=-84+P.crouch;
+  const lean=P.lean;
+  const nx=Math.sin(lean)*22, ny=neckY;
+  // 胴
+  ctx.beginPath(); ctx.moveTo(0,hipY); ctx.lineTo(nx,ny); ctx.stroke();
+  // 奥の腕・脚（暗め）
+  ctx.globalAlpha=(alpha==null?1:alpha)*0.55;
+  limb(nx,ny+4,P.armA[0],21,P.armA[1],20);
+  limb(0,hipY,P.legA[0],25,P.legA[1],24);
+  ctx.globalAlpha=alpha==null?1:alpha;
+  // 手前
+  limb(0,hipY,P.legB[0],25,P.legB[1],24);
+  const hand=limb(nx,ny+4,P.armB[0],21,P.armB[1],20);
+  // 頭
+  ctx.beginPath(); ctx.arc(nx+Math.sin(lean+P.headT)*12, ny-14, 11, 0, Math.PI*2); ctx.stroke();
+  // 攻撃の軌跡
+  if(f.state==='attack' && f.attack && f.t>=f.attack.startup && f.t<f.attack.startup+f.attack.active){
+    ctx.globalAlpha=0.55; ctx.lineWidth= f.attack.name==='special'?7:3.5;
+    ctx.strokeStyle= f.attack.name==='special' ? '#ffffff' : color;
+    ctx.beginPath(); ctx.arc(nx,ny+4, 34, -0.9, 0.9); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawFighter(f, isBoss){
+  let alpha=1;
+  if(B.stage.id==='w2'&&isBoss&&B.fx.fog>0) alpha=0.25+0.75*(1-B.fx.fog);
+  if(isBoss && B.fx.solid<1) alpha=Math.min(alpha, 0.28+0.62*B.fx.solid);
+  // 影
+  ctx.save(); ctx.globalAlpha=0.34; ctx.fillStyle='#000';
+  ctx.beginPath(); ctx.ellipse(f.x, f.platform?350:GROUND+2, 22, 5, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
+  // 無敵中のゴースト
+  if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,f.color,0.28); drawStick(f,f.x-f.vx*1.1,f.y,f.color,0.45); }
+  drawStick(f,f.x,f.y,f.color,alpha);
+  // 本物マーカー
+  if(isBoss && B.fx.revealReal){
+    const t=performance.now()/300;
+    ctx.save(); ctx.strokeStyle='#9fe870'; ctx.lineWidth=2; ctx.shadowColor='#9fe870'; ctx.shadowBlur=14;
+    ctx.beginPath(); ctx.arc(f.x, f.y-50, 46+Math.sin(t)*3, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(f.x-9,f.y-134); ctx.lineTo(f.x+9,f.y-134); ctx.lineTo(f.x,f.y-120); ctx.closePath(); ctx.fillStyle='#9fe870'; ctx.fill();
+    ctx.restore();
+  }
+  // 弱点マーカー
+  if(isBoss && B.fx.weak){
+    ctx.save(); ctx.strokeStyle='#ffcf4a'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.strokeRect(f.x-24, f.y-44, 48, 40);
+    ctx.setLineDash([]); ctx.fillStyle='#ffcf4a'; ctx.font='700 10px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center'; ctx.fillText('弱点', f.x, f.y-50); ctx.restore();
+  }
+  // 予兆マーカー
+  if(isBoss && B.fx.telegraph && f.state==='attack' && f.attack && f.t<f.attack.startup){
+    ctx.save(); ctx.fillStyle='#ff3d8b'; ctx.shadowColor='#ff3d8b'; ctx.shadowBlur=12;
+    const w=40*(f.t/f.attack.startup);
+    ctx.fillRect(f.x-20, f.y-142, w, 5);
+    ctx.strokeStyle='rgba(255,61,139,.55)'; ctx.lineWidth=1; ctx.strokeRect(f.x-20,f.y-142,40,5);
+    ctx.restore();
+  }
+}
+function drawDecoys(){
+  for(const d of B.decoys){
+    const snap=snapshotAt(d.delay); if(!snap) continue;
+    const ghost={state:snap.state,t:snap.t,face:snap.face,attack:snap.atk?MOVES[snap.atk]:null,flash:0,dead:false,platform:false};
+    if(ghost.attack) ghost.attack=Object.assign({},ghost.attack,{name:snap.atk});
+    const a=B.fx.revealReal?0.16:0.72;
+    ctx.save(); ctx.globalAlpha=1;
+    drawStick(ghost, snap.x+d.off, snap.y, B.fx.revealReal?'#4a5876':'#9aa8c6', a);
+    ctx.restore();
+  }
+}
+function drawFog(){
+  const f=B.fx.fog;
+  const g=ctx.createRadialGradient(B.p.x,B.p.y-50,40, B.p.x,B.p.y-50, 200+ (1-f)*400);
+  g.addColorStop(0,'rgba(3,5,10,0)'); g.addColorStop(1,'rgba(3,5,10,'+(0.93*f)+')');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(3,5,10,'+(0.35*f)+')'; ctx.fillRect(0,0,W,H);
+}
+function drawEffects(){
+  for(const q of parts){ ctx.globalAlpha=Math.max(0,q.life/q.max); ctx.fillStyle=q.c;
+    ctx.fillRect(q.x-q.r/2,q.y-q.r/2,q.r,q.r); }
+  ctx.globalAlpha=1;
+  for(const q of rings){ ctx.globalAlpha=Math.max(0,q.life/26)*0.8; ctx.strokeStyle=q.c; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.arc(q.x,q.y,q.r,0,Math.PI*2); ctx.stroke(); }
+  ctx.globalAlpha=1;
+  ctx.textAlign='center';
+  for(const q of pops){ const a=Math.min(1,q.life/22);
+    ctx.globalAlpha=a; ctx.save(); ctx.translate(q.x,q.y); ctx.transform(1,0,-0.18,1,0,0);
+    ctx.font='400 '+(26*q.s)+'px "Anton","Zen Kaku Gothic New",sans-serif';
+    ctx.lineWidth=4; ctx.strokeStyle='rgba(0,0,0,.7)'; ctx.strokeText(q.text,0,0);
+    ctx.fillStyle=q.c; ctx.fillText(q.text,0,0); ctx.restore(); }
+  ctx.globalAlpha=1; ctx.textAlign='left';
+}
+
+/* --- HUD --- */
+function bar(x,y,w,h,ratio,color,flip){
+  ctx.fillStyle='rgba(8,12,22,.85)'; ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='rgba(140,165,210,.45)'; ctx.lineWidth=1; ctx.strokeRect(x+0.5,y+0.5,w-1,h-1);
+  const ww=Math.max(0,Math.min(1,ratio))*(w-4);
+  ctx.fillStyle=color;
+  ctx.fillRect(flip? x+w-2-ww : x+2, y+2, ww, h-4);
+}
+function drawHUD(){
+  const {p,b,stage}=B;
+  ctx.textBaseline='alphabetic';
+  // プレイヤー
+  bar(28,24,330,20,p.hp/p.maxHp,'#3df0ff',false);
+  bar(28,48,220,7,p.guard/p.guardMax,'rgba(140,200,255,.65)',false);
+  bar(28,59,220,9,p.meter/100, p.meter>=50?'#ffcf4a':'rgba(255,207,74,.4)',false);
+  ctx.fillStyle='#8194b8'; ctx.font='400 11px "Anton",sans-serif'; ctx.fillText('YOU',28,18);
+  if(p.meter>=50){ ctx.fillStyle='#ffcf4a'; ctx.font='400 10px "Anton",sans-serif'; ctx.fillText('SPECIAL READY  [U]',256,68); }
+  // ボス
+  ctx.textAlign='right';
+  ctx.fillStyle='#8194b8'; ctx.font='400 11px "Anton",sans-serif';
+  ctx.fillText(stage.boss.name, W-28, 18);
+  ctx.textAlign='left';
+  if(B.fx.revealHp || stage.id!=='w1'){
+    bar(W-358,24,330,20,b.hp/b.maxHp,b.color,true);
+  } else {
+    ctx.fillStyle='rgba(8,12,22,.85)'; ctx.fillRect(W-358,24,330,20);
+    ctx.strokeStyle='rgba(140,165,210,.3)'; ctx.strokeRect(W-357.5,24.5,329,19);
+    ctx.fillStyle='#54658c'; ctx.font='400 12px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+    ctx.fillText('？？？', W-193, 39); ctx.textAlign='left';
+  }
+  // タイマー
+  ctx.textAlign='center';
+  if(B.fx.infinite){ ctx.fillStyle='#ff8a3d'; ctx.font='400 30px "Zen Kaku Gothic New",sans-serif'; ctx.fillText('∞', W/2, 46); }
+  else { ctx.fillStyle= B.timer<600?'#ff3d8b':'#e8eefb'; ctx.font='400 30px "Anton",sans-serif'; ctx.fillText(String(Math.ceil(B.timer/60)), W/2, 46); }
+  // YUIゲージ
+  const ready=B.yui>=100 && B.calls<2;
+  const gw=300, gx=W/2-gw/2, gy=62;
+  ctx.fillStyle='rgba(8,12,22,.8)'; ctx.fillRect(gx,gy,gw,10);
+  ctx.fillStyle= ready?'#9fe870':'rgba(159,232,112,.55)';
+  ctx.fillRect(gx+1,gy+1,(gw-2)*Math.min(1,B.yui/100),8);
+  ctx.font='400 10px "Anton",sans-serif';
+  ctx.fillStyle= ready?'#9fe870':'#5f7093';
+  ctx.fillText(ready? (isTouch?'YUI CALL READY — 画面上のボタン':'YUI CALL READY — [Y]') :'YUI CALL', W/2, gy+24);
+  if(B.calls>=2){ ctx.fillStyle='#5f7093'; ctx.fillText('YUI CALL 使用済み', W/2, gy+24); }
+  // WORLD 6：一発で完璧に、という思い込み
+  if(stage.id==='w6'){
+    ctx.font='400 12px "Anton",sans-serif';
+    if(B.fx.revGain>0){ ctx.fillStyle='#9fe870'; ctx.fillText('REVISION — 当て直すほど強くなる', W/2, 112); }
+    else if(B.whiffs>=1){ ctx.fillStyle='#8194b8'; ctx.fillText('ONE CHANCE ... のはずだった', W/2, 112); }
+    else { ctx.fillStyle='#ff5c5c'; ctx.fillText('ONE CHANCE', W/2, 112); }
+  }
+  ctx.textAlign='left';
+  // 作戦パネル
+  if(B.tactic){
+    ctx.fillStyle='rgba(12,21,40,.9)'; ctx.fillRect(28,H-92,300,64);
+    ctx.strokeStyle='rgba(159,232,112,.5)'; ctx.lineWidth=1; ctx.strokeRect(28.5,H-91.5,299,63);
+    ctx.fillStyle='#9fe870'; ctx.font='400 10px "Anton",sans-serif'; ctx.fillText('YUI TACTIC',38,H-74);
+    ctx.fillStyle='#cfd9ef'; ctx.font='400 12px "Zen Kaku Gothic New",sans-serif';
+    wrapText(B.tactic, 38, H-56, 280, 16);
+  }
+}
+function wrapText(text,x,y,maxW,lh){
+  let line=''; let yy=y;
+  for(const ch of text){
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxW){ ctx.fillText(line,x,yy); line=ch; yy+=lh; }
+    else line=test;
+  }
+  ctx.fillText(line,x,yy);
+}
+function drawIntro(){
+  const t=B.t;
+  ctx.save(); ctx.textAlign='center';
+  if(t<80){
+    ctx.globalAlpha=Math.min(1,t/12);
+    ctx.fillStyle='rgba(5,8,15,.72)'; ctx.fillRect(0,150,W,190);
+    ctx.fillStyle='#8194b8'; ctx.font='400 13px "Anton",sans-serif'; ctx.fillText(B.stage.num, W/2, 190);
+    ctx.fillStyle='#fff'; ctx.font='400 30px "Dela Gothic One","Zen Kaku Gothic New",sans-serif';
+    ctx.fillText(B.stage.title, W/2, 232);
+    ctx.fillStyle='#ff3d8b'; ctx.font='400 15px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillText(B.stage.boss.name+'「'+B.stage.boss.quote+'」', W/2, 272);
+    ctx.fillStyle='#9fe870'; ctx.font='400 13px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillText(B.stage.trouble, W/2, 306);
+  } else {
+    ctx.globalAlpha=Math.max(0,1-(t-118)/30);
+    ctx.fillStyle='#fff'; ctx.font='400 66px "Anton",sans-serif';
+    ctx.transform(1,0,-0.16,1,0,0);
+    ctx.fillText(t<118?'READY':'FIGHT!', W/2+40, 250);
+  }
+  ctx.restore(); ctx.textAlign='left';
+}
+function drawAttract(){
+  // タイトル背景で棒人間が戦っている
+  const t=performance.now()/1000;
+  const a=makeFighter({x:360+Math.sin(t*0.8)*40,y:GROUND,face:1,color:'#3df0ff'});
+  const c=makeFighter({x:600-Math.sin(t*0.8)*40,y:GROUND,face:-1,color:'#ff3d8b'});
+  a.t=(t*60)|0; c.t=(t*60)|0; a.state='walk'; c.state='walk';
+  drawStick(a,a.x,a.y,a.color,0.5); drawStick(c,c.x,c.y,c.color,0.5);
+}
+
+/* ============================================================
+   13. 画面遷移 / UI
+   ============================================================ */
+function showLayer(name){
+  ['title','select','how','call','result','manual','book'].forEach(id=>{
+    document.getElementById(id).classList.toggle('on', id===name);
+  });
+  scene = (name===null)?'battle':name;
+  if(name===null){ scene='battle'; }
+  $('#pad').classList.toggle('on', isTouch && scene==='battle');
+  checkOrientation();
+}
+function toBattleScene(){
+  ['title','select','how','call','result','manual','book'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  scene='battle'; $('#pad').classList.toggle('on', isTouch); checkOrientation();
+}
+let lastMenu='title';
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),1400); }
+
+// タイトル
+$('#b-start').onclick=()=>{ audio(); sfx('ui'); buildWorlds(); showLayer('select'); };
+$('#b-how').onclick=()=>{ sfx('ui'); buildHow(); showLayer('how'); };
+$('#b-manual0').onclick=()=>{ lastMenu='title'; buildManual(); showLayer('manual'); };
+$('#b-book0').onclick=()=>{ lastMenu='title'; buildBook(); showLayer('book'); };
+$('#b-manual1').onclick=()=>{ lastMenu='select'; buildManual(); showLayer('manual'); };
+$('#b-book1').onclick=()=>{ lastMenu='select'; buildBook(); showLayer('book'); };
+document.addEventListener('click',e=>{
+  const back=e.target.getAttribute && e.target.getAttribute('data-back');
+  if(back){ sfx('ui'); showLayer(back==='auto'?lastMenu:back); if(back==='title'){} }
+});
+
+function buildHow(){
+  const list=$('#howlist'); list.textContent='';
+  const rows=[['移動','← → ／ A D','左スティック'],['ジャンプ','↑ ／ W ／ Space','跳'],
+    ['弱攻撃','J','弱'],['強攻撃','K','強'],['ガード','L（長押し）','守'],
+    ['回避（無敵）','Shift','—'],['必殺技','U（ゲージ50%）','必'],['ゆいに相談','Y（ゲージMAX）','YUI CALL']];
+  rows.forEach(r=>{
+    const d=el('div','manual-card');
+    const a=el('div'); a.appendChild(el('h3',null,r[0]));
+    const p=el('p','muted', 'キーボード：'+r[1]+' ／ タッチ：'+r[2]); a.appendChild(p);
+    d.appendChild(el('div','no','—')); d.appendChild(a); list.appendChild(d);
+  });
+  const note=el('div','manual-card');
+  note.appendChild(el('div','no','!'));
+  const nb=el('div'); nb.appendChild(el('h3',null,'強攻撃3発でガードを崩せる'));
+  nb.appendChild(el('p','muted','相手の攻撃に合わせて当てると COUNTER で1.4倍。壁に叩きつけると追加ダメージ。'));
+  note.appendChild(nb); list.appendChild(note);
+}
+function buildWorlds(){
+  const list=$('#worldlist'); list.textContent='';
+  STAGES.forEach((s,i)=>{
+    const unlocked = i===0 || save.cleared.includes(STAGES[i-1].id);
+    const b=el('button','world'+(unlocked?'':' locked'));
+    b.appendChild(el('div','n', String(i+1)));
+    const mid=el('div');
+    mid.appendChild(el('div','t', s.title));
+    mid.appendChild(el('div','b', s.boss.name+'　／　'+s.trouble));
+    b.appendChild(mid);
+    b.appendChild(el('div','st', save.cleared.includes(s.id)?'CLEAR':(unlocked?'PLAY':'LOCKED')));
+    if(unlocked) b.onclick=()=>startStage(s);
+    list.appendChild(b);
+  });
+  const rl=$('#roadmaplist'); rl.textContent='';
+  ROADMAP.forEach(r=>{ const li=el('li'); const bb=el('b',null,r[0]); li.appendChild(bb); li.appendChild(document.createTextNode(r[1])); rl.appendChild(li); });
+}
+function startStage(s){ sfx('ok'); newBattle(s); toBattleScene(); }
+
+/* --- YUI CALL --- */
+function tryCall(){
+  if(scene!=='battle'||!B) return;
+  if(B.phase!=='fight') return;
+  if(B.yui<100 || B.calls>=2) return;
+  openCall(false);
+}
+function openCall(forced){
+  B.phase='paused'; B.yui=0; B.calls++; save.stats.calls++; persist();
+  sfx('ok'); $('#t-yui').classList.remove('on');
+  const c=B.stage.call;
+  $('#call-line').textContent = forced ? 'さっきの相手、手強いですね。……作戦、一緒に考えます？' : c.line;
+  $('#call-result').textContent=''; $('#call-actions').textContent='';
+  const box=$('#call-cmds'); box.textContent='';
+  c.options.forEach((o,i)=>{
+    const b=el('button','cmd');
+    b.appendChild(el('span','q','COMMAND '+String.fromCharCode(65+i)));
+    b.appendChild(document.createTextNode('「'+o.text+'」'));
+    if(o.chips.length){ const cs=el('div','chips'); o.chips.forEach(ch=>cs.appendChild(el('span','chip',ch))); b.appendChild(cs); }
+    b.onclick=()=>chooseCommand(o);
+    box.appendChild(b);
+  });
+  showLayer('call');
+}
+function chooseCommand(o){
+  sfx('ok');
+  $('#call-cmds').textContent='';
+  if(o.ask){ askBack(o); return; }
+  $('#call-line').textContent=o.reply;
+  applyTier(o.tier);
+  const res=$('#call-result'); res.textContent='';
+  const fx=el('div','effect'); fx.innerHTML=sanitize(o.fx); res.appendChild(fx);
+  if(o.chips.length>=2){ res.appendChild(el('span','combo-tag', o.chips.length+' COMBO!')); }
+  const act=$('#call-actions'); act.textContent='';
+  if(o.tier===1 && !B.revised){
+    const hint=el('p','muted','情報は、あとから足しても大丈夫です。');
+    act.appendChild(hint);
+    const r=el('button','btn yui','情報を足して、もう一度たのむ');
+    r.onclick=()=>doRevision();
+    act.appendChild(r);
+  } else {
+    act.appendChild(el('p','muted', B.calls<2 ? 'ゲージが溜まれば、もう一度相談できます。' : ''));
+  }
+  const go=el('button','btn','戦いに戻る'); go.onclick=closeCall; act.appendChild(go);
+}
+/* ゆいの方から質問してもらう（WORLD 7） */
+function askBack(o){
+  $('#call-line').textContent=o.reply;
+  const res=$('#call-result'); res.textContent='';
+  const q=el('div','effect'); q.innerHTML=sanitize(o.ask.q); res.appendChild(q);
+  $('#call-actions').textContent='';
+  const box=$('#call-cmds');
+  o.ask.answers.forEach(a=>{
+    const b=el('button','cmd');
+    b.appendChild(el('span','q','あなたの答え'));
+    b.appendChild(document.createTextNode('「'+a.text+'」'));
+    b.onclick=()=>{
+      sfx('ok'); box.textContent='';
+      $('#call-line').textContent=a.reply;
+      const r=$('#call-result'); r.textContent='';
+      const fx=el('div','effect'); fx.innerHTML=sanitize(o.fx); r.appendChild(fx);
+      r.appendChild(el('span','combo-tag','QUESTION!'));
+      applyTier(3); unlockManual(9);
+      const act=$('#call-actions'); act.textContent='';
+      act.appendChild(el('p','muted','分からないことは、先に聞いてもらえばいい。'));
+      const go=el('button','btn','戦いに戻る'); go.onclick=closeCall; act.appendChild(go);
+    };
+    box.appendChild(b);
+  });
+}
+function doRevision(){
+  sfx('ok'); B.revised=true; save.stats.revisions++; persist();
+  const rv=B.stage.call.revise;
+  $('#call-line').textContent=rv.reply;
+  const res=$('#call-result'); res.textContent='';
+  const q=el('div','cmd'); q.style.cursor='default';
+  q.appendChild(el('span','q','あなたの追加COMMAND'));
+  q.appendChild(document.createTextNode('「'+rv.text+'」'));
+  res.appendChild(q);
+  const fx=el('div','effect'); fx.innerHTML=sanitize(rv.fx); res.appendChild(fx);
+  res.appendChild(el('span','combo-tag','REVISION COMBO!'));
+  applyTier(3);
+  unlockManual(8);
+  const act=$('#call-actions'); act.textContent='';
+  act.appendChild(el('p','muted','一発で完璧に書かなくていい。あとから足せば届きます。'));
+  const go=el('button','btn','戦いに戻る'); go.onclick=closeCall; act.appendChild(go);
+}
+function applyTier(tier){
+  B.tier=Math.max(B.tier,tier);
+  const id=B.stage.id, f=B.fx;
+  if(tier>=1){ f.atk=Math.max(f.atk,1.05); }
+  if(id==='w1'){
+    if(tier>=2){ f.revealHp=true; f.atk=1; }
+    if(tier>=3){ f.weak=true; B.tactic='胴体はガードが厚い。足元を狙う。強攻撃のあとが隙。'; }
+    else if(tier>=2) B.tactic='相手の残りが見える。削れているか確認しながら攻める。';
+    else B.tactic='とにかく攻める。効いているかは分からない。';
+  }
+  if(id==='w2'){
+    if(tier===1) f.fog=Math.min(f.fog,0.72);
+    if(tier===2) f.fog=Math.min(f.fog,0.30);
+    if(tier>=3){ f.fog=0; f.telegraph=true; B.tactic='攻撃前に予兆が出る。見えたらガードか回避。'; }
+    else if(tier===2) B.tactic='相手の位置が見える。間合いを取る。';
+    else B.tactic='まだ暗い。近づきすぎない。';
+  }
+  if(id==='w3'){
+    if(tier===1) f.decoyDmg=0.6;
+    if(tier===2){ f.decoyDmg=0.5; B.tactic='本物が時々光る。光った瞬間に踏み込む。'; }
+    if(tier>=3){ f.revealReal=true; f.decoyDmg=0; B.tactic='本物だけを狙う。分身はもう当たらない。'; }
+    else if(tier===1) B.tactic='分身のダメージが減った。手数で探る。';
+  }
+  if(id==='w4'){
+    if(tier===1){ f.regen=0.065; B.tactic='相手の回復が鈍った。まだ終わりは見えない。'; }
+    if(tier===2){ f.regen=0; B.tactic='回復が止まった。削った分は残る。'; }
+    if(tier>=3){ f.regen=0; f.infinite=false; B.timer=60*60;
+      B.b.hp=Math.min(B.b.hp, Math.round(B.b.maxHp*0.5));
+      B.tactic='60秒で決着。削った分は残る。ここから押し切る。'; }
+  }
+  if(id==='w5'){
+    if(tier===1){ f.solid=0.45; B.tactic='言葉だけで押している。手応えは薄い。'; }
+    if(tier===2){ f.solid=0.72; B.tactic='材料が半分届いた。当たるようになった。'; }
+    if(tier>=3){ f.solid=1.15; B.tactic='相手は右に回り込む癖がある。実体化した攻撃で追う。'; }
+  }
+  if(id==='w6'){
+    if(tier===1){ f.revGain=0.10; B.tactic='2発目から少しずつ強くなる。止めない。'; }
+    if(tier===2){ f.revGain=0.25; B.tactic='当てるたびに強くなる。直し続ける。'; }
+    if(tier>=3){ f.revGain=0.40; B.tactic='連続で当てるほど威力が上がる（最大2.6倍）。'; }
+  }
+  if(id==='w7'){
+    if(tier===1){ f.taken=0.8; B.tactic='原因は分からない。まずは耐える。'; }
+    if(tier===2){ f.taken=0.9; f.hazardHint=true; B.tactic='危険な床がうっすら光る。光を見たら離れる。'; }
+    if(tier>=3){ f.taken=1; f.hazardVisible=true; B.tactic='危険な床が全部見えている。避けて戦う。'; }
+  }
+}
+function sanitize(html){
+  // 許可タグは <b> のみ
+  const tmp=document.createElement('div'); tmp.textContent=html;
+  return tmp.innerHTML.replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
+}
+function closeCall(){
+  // 条件を切らないまま相談を使い切ったときも、試合が終わるようにする
+  if(B.fx.infinite && B.calls>=2){ B.fx.infinite=false; B.timer=60*60; }
+  toBattleScene(); B.phase='fight';
+  pop(B.p.x, B.p.y-150, 'TACTIC SET', '#9fe870', 1.0); ring(B.p.x,B.p.y-60,'#9fe870',140); sfx('ok');
+}
+
+/* --- 結果 --- */
+function endBattle(){
+  const win=B.result;
+  const s=B.stage;
+  const sheet=$('#result-sheet'); sheet.textContent='';
+  if(win){
+    save.stats.wins++;
+    if(!save.cleared.includes(s.id)) save.cleared.push(s.id);
+    if(!save.skills.includes(s.skill)) save.skills.push(s.skill);
+    unlockManual(Number(s.manual.no));
+    if(B.tier>0 && B.tier<3) unlockManual(13);
+    persist();
+    sheet.appendChild(el('div','eyebrow','Win'));
+    const h=el('h1'); h.textContent='K.O.'; h.style.color='#3df0ff'; sheet.appendChild(h);
+    const skill=el('div','skillrow');
+    const sp=el('div','skillpill', s.skill+' — '+s.skillJp); skill.appendChild(sp); sheet.appendChild(skill);
+    sheet.appendChild(el('div','lesson', s.lesson));
+    const mc=el('div','manual-card'); mc.style.marginTop='16px';
+    mc.appendChild(el('div','no', s.manual.no));
+    const mb=el('div'); mb.appendChild(el('h3',null,'取扱説明書に追加：'+s.manual.h));
+    mb.appendChild(el('p','muted', s.manual.b)); mc.appendChild(mb); sheet.appendChild(mc);
+    if(B.revised){
+      const rc=el('div','manual-card'); rc.style.marginTop='8px';
+      rc.appendChild(el('div','no','08'));
+      const rb=el('div'); rb.appendChild(el('h3',null,'取扱説明書に追加：まず作らせてから直してOK'));
+      rb.appendChild(el('p','muted','一発で完璧を狙わない方が、結果的に早いです。')); rc.appendChild(rb); sheet.appendChild(rc);
+    }
+    if(B.tier>0 && B.tier<3){
+      const sc=el('div','manual-card'); sc.style.marginTop='8px';
+      sc.appendChild(el('div','no','13'));
+      const sb=el('div'); sb.appendChild(el('h3',null,'取扱説明書に追加：短い相談は短いままでいい'));
+      sb.appendChild(el('p','muted','全部の要素を毎回書く必要はありません。いまのお願いでも勝てました。'));
+      sc.appendChild(sb); sheet.appendChild(sc);
+    }
+    const row=el('div','close-row');
+    const idx=STAGES.indexOf(s);
+    if(idx<STAGES.length-1){
+      const nx=el('button','btn','次のWORLDへ'); nx.onclick=()=>{ startStage(STAGES[idx+1]); }; row.appendChild(nx);
+    } else {
+      const nx=el('button','btn yui','CUEで使ってみる'); nx.onclick=()=>{ lastMenu='select'; buildBook(); showLayer('book'); }; row.appendChild(nx);
+    }
+    const r2=el('div','row');
+    const again=el('button','btn ghost sm','もう一度戦う'); again.onclick=()=>startStage(s); r2.appendChild(again);
+    const sel=el('button','btn ghost sm','WORLD選択'); sel.onclick=()=>{ buildWorlds(); showLayer('select'); }; r2.appendChild(sel);
+    row.appendChild(r2); sheet.appendChild(row);
+    if(idx===STAGES.length-1){
+      const done=el('div','effect'); done.style.marginTop='16px';
+      done.innerHTML='<b>Version 0.1 はここまで。</b> 見つけた頼み方は、そのままCUEの仕事で使えます。';
+      sheet.appendChild(done);
+    }
+    sfx('ok');
+  } else {
+    sheet.appendChild(el('div','eyebrow','Lose'));
+    const h=el('h1'); h.textContent='YOU LOSE'; h.style.color='#ff3d8b'; sheet.appendChild(h);
+    sheet.appendChild(el('p','muted', B.tier>0 ? 'あと少し。作戦はもう手元にあります。' : 'ゆいちゃんに相談してからだと、だいぶ変わります。'));
+    const row=el('div','close-row');
+    const again=el('button','btn','もう一度戦う'); again.onclick=()=>{
+      const st=B.stage; startStage(st);
+      if(B.tier===0){ setTimeout(()=>{ if(scene==='battle'&&B.phase!=='paused'){ B.phase='fight'; B.yui=100; openCall(true); } }, 120); }
+    };
+    row.appendChild(again);
+    const sel=el('button','btn ghost sm','WORLD選択'); sel.onclick=()=>{ buildWorlds(); showLayer('select'); };
+    row.appendChild(sel); sheet.appendChild(row);
+  }
+  showLayer('result');
+}
+function unlockManual(n){ if(MANUAL_PAGES[n] && !save.manual.includes(n)){ save.manual.push(n); persist(); } }
+
+function buildManual(){
+  const list=$('#manual-list'); list.textContent='';
+  const keys=Object.keys(MANUAL_PAGES).map(Number).sort((a,b)=>a-b);
+  keys.forEach(n=>{
+    const got=save.manual.includes(n); const m=MANUAL_PAGES[n];
+    const d=el('div','manual-card'); if(!got) d.style.opacity='.4';
+    d.appendChild(el('div','no', got?m.no:'--'));
+    const b=el('div');
+    b.appendChild(el('h3',null, got?m.h:'まだ見つけていないページ'));
+    b.appendChild(el('p','muted', got?m.b:'戦って見つけると、ここに増えます。'));
+    d.appendChild(b); list.appendChild(d);
+  });
+  if(save.skills.length){
+    const sr=el('div','skillrow');
+    save.skills.forEach(s=>sr.appendChild(el('div','skillpill', s)));
+    const t=el('div','cat','見つけた技'); list.appendChild(t); list.appendChild(sr);
+  }
+}
+function buildBook(){
+  const list=$('#book-list'); list.textContent='';
+  BOOK.forEach(group=>{
+    list.appendChild(el('div','cat', group.cat));
+    group.items.forEach(it=>{
+      const d=el('div','bookitem');
+      d.appendChild(el('h3',null,it.t));
+      d.appendChild(el('p',null,it.p));
+      const row=el('div','row');
+      const b=el('button','btn sm','コピー');
+      b.onclick=()=>copyText(it.p);
+      row.appendChild(b); d.appendChild(row); list.appendChild(d);
+    });
+  });
+  const tmpl=el('div','bookitem'); tmpl.style.marginTop='16px';
+  tmpl.appendChild(el('h3',null,'困ったときの型（全部埋めなくていい）'));
+  const tp='目的：\n背景：\n対象：\n材料：\n条件：\nほしい形：\n※足りない情報があれば、先に質問してください。';
+  const pre=el('p',null,tp); pre.style.whiteSpace='pre-wrap'; tmpl.appendChild(pre);
+  const row=el('div','row'); const b=el('button','btn sm','コピー'); b.onclick=()=>copyText(tp); row.appendChild(b);
+  tmpl.appendChild(row); list.appendChild(tmpl);
+}
+function copyText(t){
+  const done=()=>toast('コピーしました');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done).catch(()=>fallback());
+  } else fallback();
+  function fallback(){
+    const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ toast('長押しで選択してコピーしてください'); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ============================================================
+   14. 起動
+   ============================================================ */
+buildWorlds(); buildHow(); buildManual(); buildBook();
+requestAnimationFrame(loop);
+})();
+</script>
