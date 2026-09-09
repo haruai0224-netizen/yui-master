@@ -131,6 +131,14 @@
   .bookitem{background:#0c1528;border:1px solid #22304f;padding:12px 14px;display:grid;gap:9px}
   .bookitem p{font-size:13px;color:#d5deef}
   .bookitem .row{justify-content:flex-end}
+  .vsinput{width:100%;margin-top:16px;padding:13px 14px;font:inherit;font-size:16px;letter-spacing:.12em;
+    background:#0c1528;color:var(--paper);border:1px solid var(--line);outline:none}
+  .vsinput:focus{border-color:var(--cy)}
+  .vsstatus{margin-top:14px;padding:12px 14px;font-size:13.5px;line-height:1.7;min-height:44px;
+    background:rgba(61,240,255,.07);border-left:3px solid var(--cy);color:#cfd9ef}
+  .vsstatus.warn{background:rgba(255,61,139,.08);border-left-color:var(--mg)}
+  .vsstatus.ok{background:rgba(159,232,112,.09);border-left-color:var(--yui)}
+  .vsnote{margin-top:14px;display:grid;gap:4px}
   .toast{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--yui);color:#08130a;
     font-weight:700;font-size:13px;padding:9px 18px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
   .toast.on{opacity:1}
@@ -204,6 +212,7 @@
         </div>
         <div class="row" style="margin-top:26px">
           <button class="btn" id="b-start">はじめる</button>
+          <button class="btn ghost" id="b-vs">通信対戦</button>
           <button class="btn ghost" id="b-how">あそびかた</button>
           <button class="btn ghost" id="b-manual0">ゆいちゃん取扱説明書</button>
           <button class="btn ghost" id="b-book0">MY COMMAND BOOK</button>
@@ -230,6 +239,29 @@
             <button class="btn ghost sm" id="b-book1">COMMAND BOOK</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- VERSUS -->
+    <div class="layer" id="vs">
+      <div class="scrim"></div>
+      <div class="sheet">
+        <div class="eyebrow">Versus</div>
+        <h2 style="margin-top:6px">通信対戦</h2>
+        <p class="muted" style="margin-top:8px">同じ「あいことば」を入れた2人がつながります。片方が<b>部屋をつくる</b>、もう片方が<b>部屋に入る</b>を押してください。</p>
+        <input id="vs-code" class="vsinput" maxlength="12" placeholder="あいことば（英数字 4〜12文字）" autocomplete="off" spellcheck="false" inputmode="latin">
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="vs-host">部屋をつくる</button>
+          <button class="btn ghost" id="vs-join">部屋に入る</button>
+        </div>
+        <div id="vs-status" class="vsstatus"></div>
+        <div class="vsnote">
+          <p class="muted">・あいことばは推測されにくいものにしてください。同じ言葉を使っている人がいると、その人につながります</p>
+          <p class="muted">・端末どうしを直接つなぎます。ゲームの位置や体力だけを送っていて、個人情報は送っていません</p>
+          <p class="muted">・部屋をつくった側の画面が正になります。入った側はわずかに遅れて見えます</p>
+          <p class="muted">・対戦ステージには、ジャンプで乗れる台・こわれる床・動く足場・バネ台があります</p>
+        </div>
+        <div class="close-row"><button class="btn ghost sm" id="vs-back">タイトルへ</button></div>
       </div>
     </div>
 
@@ -460,6 +492,42 @@ const SPEED=3.7, JUMP=-12.4, GRAV=0.62;
 /* ============================================================
    5. ファイター
    ============================================================ */
+/* ---- 足場（1人用は1枚、対戦ステージはギミック付き） ---- */
+const DEFAULT_PLATS=[{x:388,y:336,w:184,type:'solid'}];
+function vsPlats(){
+  return [
+    {x:110,y:378,w:150,type:'solid'},
+    {x:700,y:378,w:150,type:'solid'},
+    {x:240,y:300,w:120,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
+    {x:600,y:300,w:120,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
+    {x:420,y:238,w:120,type:'move',x0:420,range:130,ph:0,dx:0},
+    {x:330,y:440,w:80,type:'bounce'},
+    {x:550,y:440,w:80,type:'bounce'}
+  ];
+}
+function platsOf(){ return (B && B.plats) ? B.plats : DEFAULT_PLATS; }
+function updatePlats(){
+  for(const pl of platsOf()){
+    if(pl.type==='move'){
+      pl.ph+=0.013; const nx=pl.x0+Math.sin(pl.ph)*pl.range;
+      pl.dx=nx-pl.x; pl.x=nx;
+    }
+    if(pl.type==='crumble'){
+      const stood=pl.stand>0; pl.stand=0;
+      if(pl.on!==false){
+        if(stood){
+          pl.fuse++;
+          if(pl.fuse>42){ pl.on=false; pl.fuse=0; pl.respawn=240;
+            spark(pl.x+pl.w/2,pl.y,16,'#8194b8',2.8); sfx('guard'); doShake(4); }
+        } else pl.fuse=Math.max(0,pl.fuse-1);
+      } else {
+        pl.respawn--;
+        if(pl.respawn<=0){ pl.on=true; pl.fuse=0; ring(pl.x+pl.w/2,pl.y,'#3df0ff',90); }
+      }
+    }
+  }
+}
+
 function makeFighter(o){
   return Object.assign({
     x:0,y:GROUND,vx:0,vy:0,face:1,maxHp:100,hp:100,meter:0,guardMax:100,guard:100,
@@ -1092,10 +1160,20 @@ function updateFighter(f, opp){
   f.vy+=GRAV;
   f.x+=f.vx; f.y+=f.vy;
   // 足場
-  const plat={x:388,y:336,w:184,h:14};
   f.platform=false;
-  if(f.vy>0 && f.y-f.vy<=plat.y+2 && f.y>=plat.y && f.y<=plat.y+26 && f.x>plat.x-8 && f.x<plat.x+plat.w+8){
-    f.y=plat.y; f.vy=0; f.platform=true;
+  for(const pl of platsOf()){
+    if(pl.on===false) continue;
+    if(f.vy>0 && f.y-f.vy<=pl.y+2 && f.y>=pl.y && f.y<=pl.y+26 && f.x>pl.x-8 && f.x<pl.x+pl.w+8){
+      if(pl.type==='bounce'){
+        f.y=pl.y-1; f.vy=-17; f.platform=false;
+        ring(f.x,pl.y,'#9fe870',95); spark(f.x,pl.y,8,'#9fe870',2.6); sfx('ui');
+      } else {
+        f.y=pl.y; f.vy=0; f.platform=true; f.platY=pl.y+14;
+        if(pl.dx) f.x+=pl.dx;
+        if(pl.type==='crumble') pl.stand=1;
+      }
+      break;
+    }
   }
   if(f.y>=GROUND){ if(!f.onGround){ spark(f.x,GROUND,5,'#48608f',1.6); } f.y=GROUND; f.vy=0; }
   f.onGround=(f.y>=GROUND-0.01)||f.platform;
@@ -1114,26 +1192,28 @@ function wallSlam(f){
   doShake(9); sfx('heavy'); spark(f.x,f.y-60,14,'#ffffff',4); pop(f.x,f.y-110,'WALL','#fff',0.9);
 }
 
-function playerControl(p, opp){
+function applyControl(p, opp, cur, prv){
   if(p.dead) return;
+  const hit=k=>cur[k]&&!prv[k];
   const busy = ['attack','hurt','crush','block','dodge'].includes(p.state);
   if(!busy){
-    if(pressed('special') && p.meter>=50){ p.meter-=50; startAttack(p,'special'); p.invuln=6; sfx('sp'); ring(p.x,p.y-60,'#3df0ff',150); doShake(6); return; }
-    if(pressed('light')){ startAttack(p, p.onGround?'light':'air'); sfx('ui'); return; }
-    if(pressed('heavy')){ startAttack(p, p.onGround?'heavy':'air'); return; }
-    if(pressed('dodge') && p.onGround){ setState(p,'dodge'); p.invuln=10; p.vx=(IN.left?-1:IN.right?1:-p.face)*9.5; sfx('ui'); return; }
-    if(IN.guard && p.onGround){ setState(p,'guard'); p.vx=0; }
+    if(hit('special') && p.meter>=50){ p.meter-=50; startAttack(p,'special'); p.invuln=6; sfx('sp'); ring(p.x,p.y-60,'#3df0ff',150); doShake(6); return; }
+    if(hit('light')){ startAttack(p, p.onGround?'light':'air'); sfx('ui'); return; }
+    if(hit('heavy')){ startAttack(p, p.onGround?'heavy':'air'); return; }
+    if(hit('dodge') && p.onGround){ setState(p,'dodge'); p.invuln=10; p.vx=(cur.left?-1:cur.right?1:-p.face)*9.5; sfx('ui'); return; }
+    if(cur.guard && p.onGround){ setState(p,'guard'); p.vx=0; }
     else {
       if(p.state==='guard') setState(p,'idle');
       const sp=SPEED*p.buffs.spd;
-      if(IN.left&&!IN.right){ p.vx=-sp; if(p.onGround)setState(p,'walk'); }
-      else if(IN.right&&!IN.left){ p.vx=sp; if(p.onGround)setState(p,'walk'); }
+      if(cur.left&&!cur.right){ p.vx=-sp; if(p.onGround)setState(p,'walk'); }
+      else if(cur.right&&!cur.left){ p.vx=sp; if(p.onGround)setState(p,'walk'); }
       else if(p.onGround && p.state==='walk') setState(p,'idle');
-      if(pressed('up') && p.onGround){ p.vy=JUMP; p.onGround=false; setState(p,'jump'); sfx('ui'); }
+      if(hit('up') && p.onGround){ p.vy=JUMP; p.onGround=false; setState(p,'jump'); sfx('ui'); }
     }
   }
   if(!p.onGround && !busy) setState(p,'jump');
 }
+function playerControl(p, opp){ applyControl(p, opp, IN, PREV); }
 
 function aiControl(f, opp){
   if(f.dead||opp.dead) return;
@@ -1560,21 +1640,24 @@ function tick(){
   }
   if(B.phase==='over'){ B.t++;
     updateFighter(B.p,B.b); updateFighter(B.b,B.p);
+    if(B.vs && NET.role==='host') sendSnapshot();
     if(B.t>110) endBattle();
     return;
   }
 
   // 戦闘中
   if(slowmo>0){ slowmo--; if(slowmo%2===0) return; }
+  // 通信対戦の参加側は、自分の入力を送って、ホストから届いた状態を映すだけ
+  if(B.vs && NET.role==='guest'){ netGuestStep(); return; }
   if(B.fx.infinite) B.timer=99*60; else B.timer--;
   if(B.fx.regen>0 && B.b.hp>0 && !B.b.dead) B.b.hp=Math.min(B.b.maxHp, B.b.hp+B.fx.regen);
-  updateHazards();
+  updateHazards(); updatePlats();
   updateStance(); updateWalls(); updateBullets(); updateDrainSupport(); updateFinalPhase();
-  B.yui=Math.min(100, B.yui + 2/60);
+  if(!B.vs) B.yui=Math.min(100, B.yui + 2/60);
   if(B.timer<=0){ finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return; }
 
   playerControl(B.p,B.b);
-  aiControl(B.b,B.p);
+  if(B.vs) netHostStep(); else aiControl(B.b,B.p);
   updateFighter(B.p,B.b);
   updateFighter(B.b,B.p);
   updateAlly();
@@ -1591,8 +1674,10 @@ function tick(){
   const dd=B.b.x-B.p.x;
   if(Math.abs(dd)<30 && Math.abs(B.p.y-B.b.y)<70){ const push=(30-Math.abs(dd))*0.12*(dd<0?-1:1); B.p.x-=push; B.b.x+=push; }
 
+  if(B.vs) sendSnapshot();
+
   // YUIボタン／HUMAN FINISHボタン
-  const ready=B.yui>=100 && B.calls<maxCalls();
+  const ready=!B.vs && B.yui>=100 && B.calls<maxCalls();
   $('#t-yui').classList.toggle('on', ready && isTouch && !B.finishReady);
   $('#t-finish').classList.toggle('on', !!B.finishReady);
 
@@ -1627,6 +1712,12 @@ function render(){
     drawFighter(B.b, true);
     drawFighter(B.p, false);
     if(B.stage.id==='w17') drawWeakMarkers();
+    if(B.vs){ // 自分が動かしているほうに目印
+      const me = NET.role==='host'?B.p:B.b;
+      ctx.save(); ctx.fillStyle='#9fe870';
+      ctx.beginPath(); ctx.moveTo(me.x-8,me.y-136); ctx.lineTo(me.x+8,me.y-136); ctx.lineTo(me.x,me.y-124);
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
     drawBullets();
     drawEffects();
     drawWalls();
@@ -1665,9 +1756,44 @@ function drawBackground(){
 }
 function drawPlatform(){
   const off = B ? B.fx.platGhost : 0;   // W8：古い地図はズレて描かれる（当たり判定は本当の位置）
-  ctx.fillStyle= off?'#241f16':'#16233f'; ctx.fillRect(388+off,336,184,14);
-  ctx.strokeStyle= off?'rgba(192,138,74,.6)':'rgba(61,240,255,.5)'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(388+off,336); ctx.lineTo(572+off,336); ctx.stroke();
+  for(const pl of platsOf()){
+    const x=pl.x+off, y=pl.y, w=pl.w;
+    ctx.save();
+    if(pl.type==='bounce'){
+      ctx.fillStyle='rgba(159,232,112,.16)'; ctx.fillRect(x,y,w,12);
+      ctx.strokeStyle='#9fe870'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y); ctx.stroke();
+      ctx.lineWidth=2;
+      for(let i=0;i<3;i++){ const cx=x+w/2+(i-1)*20;
+        ctx.beginPath(); ctx.moveTo(cx-7,y-6); ctx.lineTo(cx,y-14); ctx.lineTo(cx+7,y-6); ctx.stroke(); }
+    } else if(pl.type==='crumble'){
+      if(pl.on===false){
+        ctx.setLineDash([4,6]); ctx.strokeStyle='rgba(129,148,184,.4)'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y); ctx.stroke(); ctx.setLineDash([]);
+      } else {
+        const shakeN=(pl.fuse||0)>0 ? Math.sin(pl.fuse*0.9)*((pl.fuse||0)/14) : 0;
+        ctx.translate(shakeN,0);
+        ctx.fillStyle='#2a2338'; ctx.fillRect(x,y,w,12);
+        ctx.strokeStyle= (pl.fuse||0)>0 ? '#ff7a45' : 'rgba(180,160,220,.7)'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y); ctx.stroke();
+        ctx.strokeStyle='rgba(255,122,69,'+Math.min(0.9,(pl.fuse||0)/24)+')'; ctx.lineWidth=1.5;
+        for(let i=1;i<4;i++){ const cx=x+w*i/4;
+          ctx.beginPath(); ctx.moveTo(cx,y+1); ctx.lineTo(cx-4,y+11); ctx.stroke(); }
+      }
+    } else if(pl.type==='move'){
+      ctx.fillStyle='#16233f'; ctx.fillRect(x,y,w,12);
+      ctx.strokeStyle='#3df0ff'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y); ctx.stroke();
+      ctx.fillStyle='rgba(61,240,255,.75)';
+      ctx.beginPath(); ctx.moveTo(x-6,y+6); ctx.lineTo(x+2,y+1); ctx.lineTo(x+2,y+11); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x+w+6,y+6); ctx.lineTo(x+w-2,y+1); ctx.lineTo(x+w-2,y+11); ctx.fill();
+    } else {
+      ctx.fillStyle= off?'#241f16':'#16233f'; ctx.fillRect(x,y,w,14);
+      ctx.strokeStyle= off?'rgba(192,138,74,.6)':'rgba(61,240,255,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+w,y); ctx.stroke();
+    }
+    ctx.restore();
+  }
   if(off){
     ctx.fillStyle='rgba(192,138,74,.85)'; ctx.font='700 11px "Zen Kaku Gothic New",sans-serif';
     ctx.textAlign='center'; ctx.fillText('去年の地図', 480+off, 328); ctx.textAlign='left';
@@ -1825,7 +1951,7 @@ function drawFighter(f, isBoss){
   if(B.fx.blank>0.4) col=darken(col);                            // W11 白紙の上では濃く描く
   // 影
   ctx.save(); ctx.globalAlpha=0.34; ctx.fillStyle='#000';
-  ctx.beginPath(); ctx.ellipse(f.x, f.platform?350:GROUND+2, 22, 5, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
+  ctx.beginPath(); ctx.ellipse(f.x, f.platform?(f.platY||350):GROUND+2, 22, 5, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
   // 無敵中のゴースト
   if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,col,0.28); drawStick(f,f.x-f.vx*1.1,f.y,col,0.45); }
   drawStick(f,f.x,f.y,col,alpha);
@@ -1902,13 +2028,14 @@ function drawHUD(){
   bar(28,24,330,20,p.hp/p.maxHp,'#3df0ff',false);
   bar(28,48,220,7,p.guard/p.guardMax,'rgba(140,200,255,.65)',false);
   bar(28,59,220,9,p.meter/100, p.meter>=50?'#ffcf4a':'rgba(255,207,74,.4)',false);
-  ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillText('YOU',28,18);
+  ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif');
+  ctx.fillText(B.vs?(NET.role==='host'?'あなた':'あいて'):'YOU',28,18);
   if(p.meter>=50){ ctx.fillStyle='#ffcf4a'; ctx.font=fnt('400',10,'"Anton",sans-serif');
     ctx.fillText(isTouch?'SPECIAL READY':'SPECIAL READY  [U]',256,68); }
   // ボス
   ctx.textAlign='right';
   ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif');
-  ctx.fillText(stage.boss.name, W-28, 18);
+  ctx.fillText(B.vs?(NET.role==='host'?'あいて':'あなた'):stage.boss.name, W-28, 18);
   ctx.textAlign='left';
   if(B.fx.revealHp || stage.id!=='w1'){
     bar(W-358,24,330,20,b.hp/b.maxHp,b.color,true);
@@ -2011,10 +2138,154 @@ function drawAttract(){
 }
 
 /* ============================================================
+   12.5 通信対戦（WebRTCで端末どうしを直接つなぐ）
+   ============================================================ */
+const NET={peer:null,conn:null,role:null,code:'',connected:false,pending:0,lastMask:-1,
+  cur:{left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0},
+  prv:{left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0}};
+const VS_STAGE={ id:'vs', num:'VERSUS', title:'通信対戦', skill:'', skillJp:'',
+  boss:{name:'あいて', quote:'イザ ジンジョウニ', hp:100, color:'#ff3d8b',
+        ai:{aggr:0,guard:0,jump:0,range:100,gap:60,hesitate:0}},
+  trouble:'台とギミックのあるステージ。先に相手を削りきったほうが勝ち。',
+  manual:null, lesson:'', call:null };
+const NSTATES=['idle','walk','jump','guard','dodge','attack','hurt','block','crush'];
+const NMOVES=['light','heavy','air','special'];
+
+function loadPeerJS(){
+  return new Promise((res,rej)=>{
+    if(window.Peer) return res();
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload=()=>res(); s.onerror=()=>rej(new Error('script'));
+    document.head.appendChild(s);
+  });
+}
+function netStatus(msg,tone){
+  const e=$('#vs-status'); if(!e) return;
+  e.textContent=msg||''; e.className='vsstatus'+(tone?' '+tone:'');
+}
+function roomId(code){ return 'yuimaster-v1-'+code; }
+function inputMask(o){ return (o.left?1:0)|(o.right?2:0)|(o.up?4:0)|(o.light?8:0)|(o.heavy?16:0)|(o.guard?32:0)|(o.special?64:0)|(o.dodge?128:0); }
+function maskTo(m,o){ o.left=m&1?1:0; o.right=m&2?1:0; o.up=m&4?1:0; o.light=m&8?1:0;
+  o.heavy=m&16?1:0; o.guard=m&32?1:0; o.special=m&64?1:0; o.dodge=m&128?1:0; return o; }
+function encF(f){
+  return [Math.round(f.x), Math.round(f.y), f.face, Math.max(0,NSTATES.indexOf(f.state)), f.t|0,
+          Math.round(f.hp*10), Math.round(f.meter), Math.round(f.guard),
+          f.attack?NMOVES.indexOf(f.attack.name):-1, f.dead?1:0];
+}
+function decF(f,a){
+  f.x=a[0]; f.y=a[1]; f.face=a[2]; f.state=NSTATES[a[3]]||'idle'; f.t=a[4];
+  f.hp=a[5]/10; f.meter=a[6]; f.guard=a[7];
+  f.attack = a[8]>=0 ? Object.assign({},MOVES[NMOVES[a[8]]],{name:NMOVES[a[8]]}) : null;
+  f.dead=!!a[9];
+  const on=platsOf().find(pl=>pl.on!==false && Math.abs(f.y-pl.y)<1.5 && f.x>pl.x-8 && f.x<pl.x+pl.w+8);
+  f.platform=!!on; if(on) f.platY=on.y+14;
+  f.onGround = f.y>=GROUND-0.01 || f.platform;
+}
+function sendSnapshot(){
+  const c=NET.conn; if(!c||!c.open) return;
+  try{
+    c.send({s:[ B.timer|0, encF(B.p), encF(B.b),
+      B.plats.map(p=>[Math.round(p.x), p.on===false?0:1, p.fuse|0]),
+      B.items.map(it=>[it.x|0,it.y|0,it.k]),
+      B.phase==='intro'?0:(B.phase==='over'?2:1), B.t|0,
+      B.result===null?-1:(B.result?1:0) ]});
+  }catch(e){}
+}
+function applySnapshot(s){
+  if(!B||!B.vs) return;
+  B.timer=s[0];
+  const before=[B.p.hp,B.b.hp];
+  decF(B.p,s[1]); decF(B.b,s[2]);
+  s[3].forEach((a,i)=>{ const pl=B.plats[i]; if(!pl) return; pl.x=a[0]; pl.on=!!a[1]; pl.fuse=a[2]; });
+  B.items=s[4].map(a=>{ const d=ITEMS.find(z=>z.k===a[2])||ITEMS[0];
+    return {x:a[0],y:a[1],vy:0,life:99,k:d.k,c:d.c,ch:d.ch}; });
+  const ph=s[5]; B.phase = ph===0?'intro':(ph===2?'over':'fight');
+  B.t=s[6]; B.result = s[7]<0?null:!!s[7];
+  // 当たった演出は、体力の減りから起こす
+  [[B.p,before[0]],[B.b,before[1]]].forEach(pair=>{
+    const f=pair[0], d=pair[1]-f.hp;
+    if(d>0.4){ f.flash=6; spark(f.x,f.y-70,10,'#ffffff',3); pop(f.x,f.y-118,String(Math.round(d)),'#fff',0.9);
+      doShake(4); sfx('hit'); }
+  });
+}
+function onNetData(d){
+  if(!d) return;
+  if(d.e==='go'||d.e==='rs'){ startVsBattle(); return; }
+  if(d.i!==undefined){ NET.pending=d.i|0; return; }
+  if(d.s){ applySnapshot(d.s); return; }
+}
+function onNetLost(){
+  if(!NET.connected) return;
+  NET.connected=false; NET.conn=null;
+  netStatus('相手との接続が切れました。もう一度つなぎ直してください','warn');
+  if(scene==='battle'){ showLayer('vs'); B=null; }
+}
+function bindConn(c){
+  NET.conn=c;
+  c.on('open',()=>{
+    NET.connected=true; netStatus('つながりました。はじめます','ok'); sfx('ok');
+    if(NET.role==='host') setTimeout(()=>{ try{c.send({e:'go'});}catch(e){} startVsBattle(); },500);
+  });
+  c.on('data',onNetData);
+  c.on('close',onNetLost);
+  c.on('error',onNetLost);
+}
+function netCleanup(){
+  try{ if(NET.conn) NET.conn.close(); }catch(e){}
+  try{ if(NET.peer) NET.peer.destroy(); }catch(e){}
+  NET.conn=null; NET.peer=null; NET.connected=false; NET.role=null; NET.pending=0; NET.lastMask=-1;
+}
+async function vsStart(role){
+  const raw=$('#vs-code').value.trim();
+  const code=raw.toLowerCase().replace(/[^a-z0-9]/g,'');
+  if(code.length<4){ netStatus('あいことばを、英数字4文字以上で入れてください','warn'); return; }
+  netCleanup(); audio();
+  netStatus('通信の準備をしています…');
+  try{ await loadPeerJS(); }
+  catch(e){ netStatus('通信の準備に失敗しました。ネットにつながっているか確認してください','warn'); return; }
+  NET.role=role; NET.code=code;
+  const id=roomId(code);
+  try{ NET.peer = role==='host' ? new Peer(id+'-h') : new Peer(); }
+  catch(e){ netStatus('通信を開始できませんでした','warn'); return; }
+  NET.peer.on('error',err=>{
+    const t=String((err&&err.type)||err);
+    if(t==='unavailable-id') netStatus('そのあいことばは、いま誰かが使っています。別の言葉にするか「部屋に入る」を押してください','warn');
+    else if(t==='peer-unavailable') netStatus('その部屋が見つかりません。相手が先に「部屋をつくる」を押したか確認してください','warn');
+    else if(t==='browser-incompatible') netStatus('このブラウザは通信対戦に対応していません','warn');
+    else netStatus('つながりませんでした（'+t+'）。もう一度ためしてください','warn');
+  });
+  if(role==='host'){
+    NET.peer.on('open',()=>netStatus('あいことば「'+raw+'」で待っています。相手に伝えて、「部屋に入る」を押してもらってください'));
+    NET.peer.on('connection',c=>{ if(NET.conn){ try{c.close();}catch(e){} return; } bindConn(c); });
+  } else {
+    NET.peer.on('open',()=>{ netStatus('部屋をさがしています…'); bindConn(NET.peer.connect(id+'-h')); });
+  }
+}
+function startVsBattle(){
+  newBattle(VS_STAGE);
+  B.vs=true; B.plats=vsPlats(); B.yui=0; B.itemTimer=300; B.overT=0;
+  B.p.x=190; B.b.x=770;
+  NET.pending=0; NET.lastMask=-1;
+  maskTo(0,NET.cur); maskTo(0,NET.prv);
+  toBattleScene();
+}
+function netHostStep(){
+  Object.assign(NET.prv,NET.cur);
+  maskTo(NET.pending,NET.cur);
+  applyControl(B.b,B.p,NET.cur,NET.prv);
+}
+function netGuestStep(){
+  const m=inputMask(IN);
+  if(NET.conn&&NET.conn.open){ try{ NET.conn.send({i:m}); }catch(e){} }
+  NET.lastMask=m;
+}
+
+/* ============================================================
    13. 画面遷移 / UI
    ============================================================ */
 function showLayer(name){
-  ['title','select','how','call','result','manual','book'].forEach(id=>{
+  ['title','select','how','call','result','manual','book','vs'].forEach(id=>{
     document.getElementById(id).classList.toggle('on', id===name);
   });
   scene = (name===null)?'battle':name;
@@ -2022,7 +2293,7 @@ function showLayer(name){
   $('#pad').classList.toggle('on', refreshTouch() && scene==='battle');
 }
 function toBattleScene(){
-  ['title','select','how','call','result','manual','book'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  ['title','select','how','call','result','manual','book','vs'].forEach(id=>document.getElementById(id).classList.remove('on'));
   scene='battle'; $('#pad').classList.toggle('on', refreshTouch());
 }
 let lastMenu='title';
@@ -2031,6 +2302,10 @@ function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on
 // タイトル
 $('#b-start').onclick=()=>{ audio(); sfx('ui'); buildWorlds(); showLayer('select'); };
 $('#b-how').onclick=()=>{ sfx('ui'); buildHow(); showLayer('how'); };
+$('#b-vs').onclick=()=>{ audio(); sfx('ui'); netStatus(''); showLayer('vs'); };
+$('#vs-host').onclick=()=>vsStart('host');
+$('#vs-join').onclick=()=>vsStart('guest');
+$('#vs-back').onclick=()=>{ sfx('ui'); netCleanup(); netStatus(''); showLayer('title'); };
 $('#b-manual0').onclick=()=>{ lastMenu='title'; buildManual(); showLayer('manual'); };
 $('#b-book0').onclick=()=>{ lastMenu='title'; buildBook(); showLayer('book'); };
 $('#b-manual1').onclick=()=>{ lastMenu='select'; buildManual(); showLayer('manual'); };
@@ -2078,7 +2353,7 @@ function startStage(s){ sfx('ok'); newBattle(s); toBattleScene(); }
 
 /* --- YUI CALL --- */
 function tryCall(){
-  if(scene!=='battle'||!B) return;
+  if(scene!=='battle'||!B||B.vs) return;
   if(B.phase!=='fight') return;
   if(B.yui<100 || B.calls>=maxCalls()) return;
   openCall(false);
@@ -2284,6 +2559,26 @@ function endBattle(){
   const win=B.result;
   const s=B.stage;
   const sheet=$('#result-sheet'); sheet.textContent='';
+  if(B.vs){
+    const iWon = NET.role==='host' ? !!win : !win;
+    sheet.appendChild(el('div','eyebrow','Versus'));
+    const h=el('h1'); h.textContent=iWon?'WIN':'LOSE'; h.style.color=iWon?'#3df0ff':'#ff3d8b';
+    sheet.appendChild(h);
+    sheet.appendChild(el('p','muted', iWon?'勝ちました。':'負けました。もう一度どうぞ。'));
+    const row=el('div','close-row');
+    if(NET.role==='host'){
+      const again=el('button','btn','もう一度');
+      again.onclick=()=>{ if(NET.conn&&NET.conn.open){ try{NET.conn.send({e:'rs'});}catch(e){} } startVsBattle(); };
+      row.appendChild(again);
+    } else {
+      row.appendChild(el('p','muted','相手が「もう一度」を押すと、また始まります。'));
+    }
+    const quit=el('button','btn ghost sm','やめる');
+    quit.onclick=()=>{ netCleanup(); netStatus(''); showLayer('title'); };
+    row.appendChild(quit); sheet.appendChild(row);
+    showLayer('result'); sfx('ko');
+    return;
+  }
   if(win){
     save.stats.wins++;
     if(!save.cleared.includes(s.id)) save.cleared.push(s.id);
