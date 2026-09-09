@@ -165,6 +165,7 @@
     background:var(--yui);color:#08130a;border:0;
     clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));animation:pulse 1s infinite}
   .yuibtn.on{display:block}
+  .finishbtn{background:var(--cy);letter-spacing:.08em}
   .pad-note{display:none}
   @keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
   /* 縦持ち：ゲームの下の余白ぜんぶが操作パネル */
@@ -219,7 +220,7 @@
         <h2 style="margin-top:6px">どこから戦う？</h2>
         <div class="worlds" id="worldlist"></div>
         <div class="roadmap">
-          <div class="eyebrow">この先にあるWORLD（開発中）</div>
+          <div class="eyebrow">この先の予定</div>
           <ul id="roadmaplist"></ul>
         </div>
         <div class="close-row">
@@ -306,6 +307,7 @@
   <!-- TOUCH -->
   <div id="pad">
     <button class="yuibtn" id="t-yui">YUI CALL</button>
+    <button class="yuibtn finishbtn" id="t-finish">FINISH</button>
     <div class="pad-zone pad-left"><div id="stick"><div id="knob"></div></div></div>
     <div class="pad-zone pad-right">
       <div class="btns">
@@ -390,7 +392,7 @@ function sfx(kind){
 const KEY={};
 const touch={left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0};
 const GAMEKEYS=new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','KeyA','KeyD','KeyW','KeyS','Space','KeyJ','KeyK','KeyL','KeyU','KeyY','ShiftLeft','ShiftRight']);
-addEventListener('keydown',e=>{ if(GAMEKEYS.has(e.code)) e.preventDefault(); KEY[e.code]=true; if(e.code==='KeyY') tryCall(); if(e.code==='Escape') { if(scene==='battle') showLayer('select'); } });
+addEventListener('keydown',e=>{ if(GAMEKEYS.has(e.code)) e.preventDefault(); KEY[e.code]=true; if(e.code==='KeyY') tryCall(); if(e.code==='Enter') tryFinish(); if(e.code==='Escape') { if(scene==='battle') showLayer('select'); } });
 addEventListener('keyup',e=>{ KEY[e.code]=false; });
 addEventListener('blur',()=>{ for(const k in KEY) KEY[k]=false; });
 
@@ -442,6 +444,7 @@ bindHold('t-special','special'); bindHold('t-jump','up');
   st.addEventListener('pointerup',end); st.addEventListener('pointercancel',end);
 })();
 $('#t-yui').addEventListener('click',()=>tryCall());
+$('#t-finish').addEventListener('click',()=>tryFinish());
 
 /* ============================================================
    4. 技データ
@@ -678,12 +681,288 @@ const STAGES=[
             reply:'ありがとうございます。それなら特定できます。……ここと、ここです。',
             fx:'<b>見えなかった床が、全部見えた。</b>'}
   }
+},
+{
+  id:'w8', num:'WORLD 8', title:'調査させよう', skill:'SEARCH', skillJp:'調べてもらう',
+  boss:{name:'カコジョウホウ', quote:'キョネンハ ソウダッタ。', hp:170, color:'#c08a4a',
+        ai:{aggr:0.60,guard:0.28,jump:0.34,range:100,gap:23,hesitate:0}},
+  trouble:'足場の位置がおかしい。乗ろうとすると、すり抜ける。',
+  manual:{no:'10', h:'調査は最新と出典を確認', b:'いつの情報か、どこ発かを一緒に聞きます。'},
+  lesson:'調べものは、いつの情報かを一緒に確認します。',
+  call:{
+    line:'この地図、去年のものですね……。いま必要なのは、どの情報ですか？',
+    options:[
+      {tier:1,chips:[],text:'足場の場所を調べて',
+       reply:'調べます。……ただ、わたしの手元の資料も古いかもしれません。いつ時点のものが要りますか？',
+       fx:'古い地図のまま、少しだけ近づいた。<b>ズレが縮んだ</b>'},
+      {tier:2,chips:['目的'],text:'いまの足場の位置を知りたい',
+       reply:'最新のものを探しますね。……ありました、思っていたより右にあります。',
+       fx:'<b>地図が更新された。</b>ズレがほぼ無くなった。'},
+      {tier:3,chips:['目的','条件'],text:'いまの足場の位置を調べて。いつ時点の情報か、出典もつけて',
+       reply:'今日時点のものです。出典もつけました。ここが正しい位置です。',
+       fx:'<b>地図が最新に更新。</b>足場の位置が確定した。'}
+    ],
+    revise:{text:'いつ時点の情報か、出典もつけて',
+            reply:'今日時点です。出典もつけました。ここが正しい位置です。',
+            fx:'<b>地図が最新に更新。</b>あとから聞いても間に合う。'}
+  }
+},
+{
+  id:'w9', num:'WORLD 9', title:'比較・分析させよう', skill:'COMPARE', skillJp:'比べてもらう',
+  boss:{name:'クラベラレナイ', quote:'ドレモ オナジニ ミエル。', hp:185, color:'#7fd4a8',
+        ai:{aggr:0.58,guard:0.30,jump:0.26,range:100,gap:24,hesitate:0}},
+  trouble:'相手の構えが3色に変わる。効く攻撃と、まるで効かない攻撃がある。',
+  manual:{no:'15', h:'比べてもらう', b:'迷ったら比較表。判断が速くなります。'},
+  lesson:'迷ったら、比較表にしてもらうと決めやすいです。',
+  call:{
+    line:'構えが変わっていますね。……どれが効いたか、覚えていますか？',
+    options:[
+      {tier:1,chips:[],text:'どうすればいい？',
+       reply:'うーん、手当たり次第になっていませんか。……どんな種類があるか教えてもらえると、並べて比べられます。',
+       fx:'当てずっぽうで押している。<b>効かない攻撃の落ち込みが軽減</b>'},
+      {tier:2,chips:['状況'],text:'赤・青・黄の3つの構えがある',
+       reply:'3種類ですね。では並べて比べてみます。',
+       fx:'<b>比較表が出た。</b>どの構えに何が効くか分かる。'},
+      {tier:3,chips:['状況','材料'],text:'赤・青・黄の3つの構えがある。弱・強・ジャンプ攻撃が使える。どれが効くか比較して',
+       reply:'表にしました。赤には弱、青には強、黄にはジャンプ攻撃です。',
+       fx:'<b>比較表と、いま有効な技が表示された。</b>'}
+    ],
+    revise:{text:'赤・青・黄の3つの構えがある。弱・強・ジャンプ攻撃が使える。比較して',
+            reply:'赤には弱、青には強、黄にはジャンプ攻撃。表にしました。',
+            fx:'<b>比較表と、いま有効な技が表示された。</b>'}
+  }
+},
+{
+  id:'w10', num:'WORLD 10', title:'アイデアを増やそう', skill:'IDEA', skillJp:'数を出してもらう',
+  boss:{name:'セイカイサガシ', quote:'セイカイハ ヒトツ ダケ。', hp:175, color:'#ff9ecb',
+        ai:{aggr:0.64,guard:0.26,jump:0.30,range:102,gap:22,hesitate:0}},
+  trouble:'同じ技が通用しない。ひとつの正解を探しても、見つからない。',
+  manual:{no:'14', h:'数を出してもらう', b:'20案出してもらって、選ぶのが人の仕事です。'},
+  lesson:'良い1案より、まず数。選ぶのは人です。',
+  call:{
+    line:'ひとつの正解を探していませんか？ この相手には、たぶん数が効きます。',
+    options:[
+      {tier:1,chips:[],text:'一番強い技はどれ？',
+       reply:'"一番"ですか……。それが決まらないから困っているんですよね。数で攻めてみませんか。',
+       fx:'同じ技の落ち込みが少し軽くなった。'},
+      {tier:2,chips:['目的'],text:'攻め方の案を出して',
+       reply:'5案出します。順番に試してください。外れても大丈夫です。',
+       fx:'<b>同じ技の落ち込みが軽減。</b>技を変えると +15%。'},
+      {tier:3,chips:['目的','条件'],text:'攻め方の案を20個出して。外れてもいいから数がほしい',
+       reply:'20案出しました。全部が当たりじゃなくていいんです。使えるものだけ拾ってください。',
+       fx:'<b>同じ技のペナルティが消えた。</b>技を変えるたび +40%。'}
+    ],
+    revise:{text:'外れてもいいから、攻め方の案を20個出して',
+            reply:'20案出しました。使えるものだけ拾ってください。',
+            fx:'<b>同じ技のペナルティが消えた。</b>技を変えるたび +40%。'}
+  }
+},
+{
+  id:'w11', num:'WORLD 11', title:'企画をつくろう', skill:'BRAIN', skillJp:'白紙から相談する',
+  boss:{name:'マッシロキカクショ', quote:'…………', hp:170, color:'#5c6b8c',
+        ai:{aggr:0.55,guard:0.32,jump:0.22,range:98,gap:26,hesitate:0.12}},
+  trouble:'目の前が真っ白。足場も、地面の目安も見えない。',
+  manual:{no:'11', h:'まとまっていなくても相談できる', b:'「何から考えたらいいか分からない」で大丈夫です。'},
+  lesson:'考えがまとまっていなくても、相談から始められます。',
+  call:{
+    line:'真っ白ですね。……何も決まっていない状態から始めましょうか。',
+    options:[
+      {tier:1,chips:[],text:'何か案ちょうだい',
+       reply:'案、ですか。……まだ何も決まっていないですよね。一緒に考えるところから始めませんか。',
+       fx:'白がすこし薄くなった。'},
+      {tier:2,chips:['状況'],text:'何から考えたらいいか分からない',
+       reply:'それで大丈夫です。まず、これは誰のためのものですか？',
+       fx:'<b>骨組みが1本立った。</b>地面が見える。'},
+      {tier:3,chips:['状況','対象'],text:'何から考えたらいいか分からない。中学生向けにしたい。質問しながら整理して',
+       reply:'進めましょう。目的、いまの状況、次の一手。3本立てれば形になります。',
+       fx:'<b>骨組みが3本立った。</b>白紙が晴れた。'}
+    ],
+    revise:{text:'中学生向けにしたい。質問しながら整理して',
+            reply:'目的、いまの状況、次の一手。3本立てれば形になります。',
+            fx:'<b>骨組みが3本立った。</b>白紙が晴れた。'}
+  }
+},
+{
+  id:'w12', num:'WORLD 12', title:'文章をつくろう', skill:'EDIT', skillJp:'直してもらう',
+  boss:{name:'ナガスギール', quote:'マズ ゼンタイゾウ カラ セツメイ シマスト……', hp:180, color:'#8f7ae6',
+        ai:{aggr:0.56,guard:0.28,jump:0.24,range:100,gap:25,hesitate:0}},
+  trouble:'長い文章の壁が流れてきて、視界をふさぐ。',
+  manual:{no:'19', h:'長さと読み手を指定する', b:'「200字で」「中学生にも分かる言葉で」を添えると、そのまま使える文章になります。'},
+  lesson:'長さと読み手を指定すると、文章は使える形になります。',
+  call:{
+    line:'……長いですよね。すみません。どのくらいに縮めましょう？',
+    options:[
+      {tier:1,chips:[],text:'短くして',
+       reply:'短く、ですね。……どのくらいですか？ 読むのはどんな人ですか？',
+       fx:'壁が少しだけ薄くなった。'},
+      {tier:2,chips:['条件'],text:'200字くらいにして',
+       reply:'200字ですね。削ります。',
+       fx:'<b>壁が小さくなった。</b>'},
+      {tier:3,chips:['条件','対象'],text:'200字で。読むのは初参加の中学生。専門用語なしで',
+       reply:'長さと読み手が決まれば、削るところが決まります。',
+       fx:'<b>壁がほとんど消えた。</b>視界が戻る。'}
+    ],
+    revise:{text:'200字で。読むのは初参加の中学生。専門用語なしで',
+            reply:'長さと読み手が決まりました。ここまで削れます。',
+            fx:'<b>壁がほとんど消えた。</b>'}
+  }
+},
+{
+  id:'w13', num:'WORLD 13', title:'資料をつくろう', skill:'OUTPUT', skillJp:'形を指定する',
+  boss:{name:'カタチキメズ', quote:'イイカンジノ カタチデ。', hp:175, color:'#4ac0d8',
+        ai:{aggr:0.62,guard:0.28,jump:0.28,range:100,gap:23,hesitate:0}},
+  trouble:'手応えがバラバラ。ダメージが「？」のまま安定しない。',
+  manual:{no:'07', h:'形を指定する', b:'表・箇条書き・企画書。そのまま使える形で返ってきます。'},
+  lesson:'ほしい形を先に言うと、そのまま使えるものが返ってきます。',
+  call:{
+    line:'できあがりの形が決まっていないと、毎回ちがうものになってしまいます。',
+    options:[
+      {tier:1,chips:[],text:'いい感じにまとめて',
+       reply:'"いい感じ"だと、毎回ちがう形になってしまうんです。表ですか、文章ですか、企画書ですか？',
+       fx:'ブレが少しだけ小さくなった。'},
+      {tier:2,chips:['ほしい形'],text:'表にして',
+       reply:'表ですね。それなら形が決まります。',
+       fx:'<b>ブレが小さくなった。</b>数字が見えるようになった。'},
+      {tier:3,chips:['ほしい形','条件'],text:'目的・背景・対象・内容・予算・効果の6項目の企画書の形にして',
+       reply:'形が決まりました。ここから先はブレません。',
+       fx:'<b>ダメージが確定した。</b>さらに +15%。'}
+    ],
+    revise:{text:'6項目の企画書の形にして',
+            reply:'形が決まりました。ここから先はブレません。',
+            fx:'<b>ダメージが確定した。</b>'}
+  }
+},
+{
+  id:'w14', num:'WORLD 14', title:'会議を助けてもらおう', skill:'MEETING', skillJp:'会議を整理してもらう',
+  boss:{name:'カイギカオス', quote:'ソレデスネ、デモ、イチオウ、アトデ', hp:190, color:'#ff7a45',
+        ai:{aggr:0.48,guard:0.30,jump:0.18,range:98,gap:28,hesitate:0.10}},
+  trouble:'発言が同時に飛んでくる。何が論点なのか分からない。',
+  manual:{no:'16', h:'会議のあとに渡す', b:'発言をそのまま貼れば、論点と次アクションに分けてくれます。'},
+  lesson:'発言をそのまま渡せば、論点と次アクションに分けてくれます。',
+  call:{
+    line:'すごい量ですね……。この発言、どう扱いましょうか。',
+    options:[
+      {tier:1,chips:[],text:'うるさい',
+       reply:'ですよね。……捨てますか、それとも整理しますか？ たぶん、中に大事なものが混ざっています。',
+       fx:'発言が少し減った。'},
+      {tier:2,chips:['目的'],text:'発言を整理して',
+       reply:'整理します。似たものをまとめますね。',
+       fx:'<b>発言が減って、遅くなった。</b>'},
+      {tier:3,chips:['目的','ほしい形'],text:'この発言を、論点・決まったこと・次アクションの3つに整理して',
+       reply:'3つに分けました。……ほら、こうすると全部は要らないんです。',
+       fx:'<b>発言が3列に整理される。</b>整理されている間、相手はひるむ。'}
+    ],
+    revise:{text:'論点・決まったこと・次アクションの3つに整理して',
+            reply:'3つに分けました。全部は要らなかったですね。',
+            fx:'<b>発言が3列に整理される。</b>'}
+  }
+},
+{
+  id:'w15', num:'WORLD 15', title:'プロジェクトを整理しよう', skill:'PROJECT', skillJp:'整理して渡す',
+  boss:{name:'ヒキツゲナイ', quote:'アノヒトシカ ワカラナイ。', hp:200, color:'#d96b6b',
+        ai:{aggr:0.66,guard:0.28,jump:0.26,range:102,gap:22,hesitate:0}},
+  trouble:'仲間がいるのに動かない。何をすればいいか分からないらしい。',
+  manual:{no:'17', h:'引き継ぎに使う', b:'目的・現状・課題・担当・期限・次アクションの6項目に。'},
+  lesson:'引き継ぎは、6項目に整理してもらうと伝わります。',
+  call:{
+    line:'あの人、動きたそうにしています。……何をすればいいか、分かっていないだけかも。',
+    options:[
+      {tier:1,chips:[],text:'手伝って',
+       reply:'手伝う、というのは……何をすればいいでしょう？ たぶん彼も、同じところで止まっています。',
+       fx:'仲間がこちらを見た。'},
+      {tier:2,chips:['状況'],text:'この状況を仲間に伝えて',
+       reply:'伝えます。いまの状況と、やることですね。',
+       fx:'<b>仲間が構えた。</b>もう少しで動きそう。'},
+      {tier:3,chips:['状況','ほしい形'],text:'目的・現状・課題・担当・期限・次アクションの6つに整理して、仲間に渡して',
+       reply:'6つに整理しました。これなら、はじめての人でも動けます。',
+       fx:'<b>仲間が動き出した。</b>一緒に戦える。'}
+    ],
+    revise:{text:'6項目に整理して、仲間に渡して',
+            reply:'整理しました。これなら、はじめての人でも動けます。',
+            fx:'<b>仲間が動き出した。</b>'}
+  }
+},
+{
+  id:'w16', num:'WORLD 16', title:'ゆいちゃんと一緒に考えよう', skill:'CONSULT', skillJp:'相談する',
+  boss:{name:'ヒトリデヤルン', quote:'ジブンデ ヤッタホウガ ハヤイ。', hp:185, color:'#a8a8a8',
+        ai:{aggr:0.60,guard:0.30,jump:0.26,range:100,gap:24,hesitate:0}},
+  trouble:'ひとりで抱えている。体力がじわじわ減っていく。',
+  manual:{no:'12', h:'決めてもらうのではなく、一緒に考える', b:'下ごしらえは任せて、決めるのは自分。それがいちばん早いです。'},
+  lesson:'全部ひとりでやらなくて大丈夫です。',
+  call:{
+    line:'……だいぶ無理をしていませんか。少し、こちらに預けてください。',
+    options:[
+      {tier:1,chips:[],text:'大丈夫、自分でやる',
+       reply:'そうですか。……もし手が回らなくなったら、いつでも言ってくださいね。',
+       fx:'消耗が少しだけ和らいだ。'},
+      {tier:2,chips:['状況'],text:'正直きつい',
+       reply:'言ってくれてよかったです。どこがいちばん重いですか？',
+       fx:'<b>消耗が半分になった。</b>'},
+      {tier:3,chips:['状況','条件'],text:'正直きつい。全部は無理なので、整理と下ごしらえを手伝って。決めるのは自分でやる',
+       reply:'それがいちばん早いです。下ごしらえはこちらで。決めるのは、あなたです。',
+       fx:'<b>消耗が止まった。</b>ゆいの援護が入る。'}
+    ],
+    revise:{text:'整理と下ごしらえを手伝って。決めるのは自分でやる',
+            reply:'下ごしらえはこちらで。決めるのは、あなたです。',
+            fx:'<b>消耗が止まった。</b>ゆいの援護が入る。'}
+  }
+},
+{
+  id:'w17', num:'WORLD 17', title:'AIに任せる・人が決める', skill:'VERIFY', skillJp:'確かめる',
+  boss:{name:'ゼンブオマカセ', quote:'ゼンブ AIガ ヤッテクレル。', hp:195, color:'#b06bff',
+        ai:{aggr:0.62,guard:0.30,jump:0.28,range:102,gap:23,hesitate:0}},
+  trouble:'弱点が2つ表示されている。どちらかは、たぶん間違っている。',
+  manual:{no:'18', h:'事実と推測を分けてもらう', b:'「どこまでが事実？」と一言聞きます。'},
+  lesson:'AIの答えは、事実と推測を分けて確かめます。最後に決めるのは、あなたです。',
+  call:{
+    line:'弱点は2つ見つけました。……ただ、片方は自信がありません。',
+    options:[
+      {tier:1,chips:[],text:'どっちが本当？',
+       reply:'どちらも、わたしが見つけたものです。確認しないまま使うのは、少し危ないかもしれません。',
+       fx:'外したときの反動が軽くなった。'},
+      {tier:2,chips:['目的'],text:'本当に合ってる？',
+       reply:'確かめます。……片方、根拠が弱いです。',
+       fx:'<b>あやしい方が点滅する。</b>'},
+      {tier:3,chips:['目的','条件'],text:'どこまでが事実で、どこからが推測？ 出典も教えて',
+       reply:'事実はこちらだけです。もう片方は、わたしの推測でした。すみません。',
+       fx:'<b>偽の弱点が消えた。</b>事実だけが残る。'}
+    ],
+    revise:{text:'どこまでが事実で、どこからが推測？',
+            reply:'事実はこちらだけでした。すみません、分けておくべきでした。',
+            fx:'<b>偽の弱点が消えた。</b>'}
+  }
+},
+{
+  id:'wf', num:'WORLD FINAL', title:'AIと一緒にCUEを動かせ！', skill:'ULTIMATE', skillJp:'全部を使う',
+  boss:{name:'ジカンガナイン', quote:'モウ ジカンガ ナイ。', hp:260, color:'#ff3d3d',
+        ai:{aggr:0.70,guard:0.26,jump:0.30,range:104,gap:20,hesitate:0}},
+  trouble:'情報がない。形が決まらない。そして、時間がない。',
+  manual:{no:'20', h:'AIで準備、人と相談、一緒に実行', b:'ゆいに全部やらせるのでもなく、全部抱えるのでもなく。'},
+  lesson:'AIで準備して、人と相談して、一緒に実行する。',
+  call:{
+    line:'3つ同時に来ています。……全部いっぺんには無理です。何から行きますか？',
+    options:[
+      {tier:1,chips:[],text:'助けて',
+       reply:'まかせてください。……といっても、何から手をつけましょうか。',
+       fx:'わずかに前に進んだ。'},
+      {tier:2,chips:['状況','条件'],text:'時間がない。暗いし、手応えも安定しない',
+       reply:'状況は分かりました。優先順位をつけましょう。',
+       fx:'<b>霧が晴れ、手応えが安定した。</b>'},
+      {tier:3,chips:['目的','背景','対象','材料','条件','ほしい形'],
+       text:'目的：CUEを動かしたい。背景：時間がない。対象：一緒にやる仲間。材料：ここまでの作戦。条件：この一戦で。形：手順で',
+       reply:'全部そろいました。手順にします。……最後の一撃だけは、あなたです。',
+       fx:'<b>ULTIMATE COMMAND。</b>すべての妨害が解除。最後は HUMAN FINISH。'}
+    ],
+    revise:{text:'目的・背景・対象・材料・条件・形、ぜんぶ渡す',
+            reply:'そろいました。手順にします。最後の一撃は、あなたです。',
+            fx:'<b>ULTIMATE COMMAND。</b>すべての妨害が解除。'}
+  }
 }
 ];
 const ROADMAP=[
- ['W8','調査させよう'],['W9','比較・分析させよう'],['W10','アイデアを増やそう'],['W11','企画をつくろう'],
- ['W12','文章をつくろう'],['W13','資料をつくろう'],['W14','会議を助けてもらおう'],['W15','プロジェクトを整理しよう'],
- ['W16','ゆいちゃんと一緒に考えよう'],['W17','AIに任せる・人が決める'],['FINAL','AIと一緒にCUEを動かせ！']
+ ['PHASE 3','自由入力のCOMMAND（本物のAIと接続）'],
+ ['PHASE 4','CUE秘書ゆいちゃんと接続して、実務でそのまま使う'],
+ ['PHASE 5','CUE AI ACADEMY（新しい仲間の入口に）']
 ];
 const MANUAL_PAGES={
  1:{no:'01',h:'まず普通に話しかければOK',b:'難しい書き方は要りません。「これ、どうしよう」から始められます。'},
@@ -692,9 +971,20 @@ const MANUAL_PAGES={
  4:{no:'04',h:'誰向けかを伝える',b:'文章や資料では、これが一番効きます。'},
  5:{no:'05',h:'材料を渡す',b:'議事録・メモ・過去資料を見せると精度が上がります。'},
  6:{no:'06',h:'条件を伝える',b:'予算・期限・文字数・人数。現実的な案になります。'},
+ 7:{no:'07',h:'形を指定する',b:'表・箇条書き・企画書。そのまま使える形で返ってきます。'},
  8:{no:'08',h:'まず作らせてから直してOK',b:'一発で完璧を狙わない方が、結果的に早いです。'},
  9:{no:'09',h:'分からなければ質問してもらう',b:'「足りない情報があれば聞いて」と添えるだけです。'},
- 13:{no:'13',h:'短い相談は短いままでいい',b:'全部の要素を毎回書く必要はありません。重い仕事のときだけ材料を足します。'}
+ 10:{no:'10',h:'調査は最新と出典を確認',b:'いつの情報か、どこ発かを一緒に聞きます。'},
+ 11:{no:'11',h:'まとまっていなくても相談できる',b:'「何から考えたらいいか分からない」で大丈夫です。'},
+ 12:{no:'12',h:'決めてもらうのではなく、一緒に考える',b:'下ごしらえは任せて、決めるのは自分。それがいちばん早いです。'},
+ 13:{no:'13',h:'短い相談は短いままでいい',b:'全部の要素を毎回書く必要はありません。重い仕事のときだけ材料を足します。'},
+ 14:{no:'14',h:'数を出してもらう',b:'20案出してもらって、選ぶのが人の仕事です。'},
+ 15:{no:'15',h:'比べてもらう',b:'迷ったら比較表。判断が速くなります。'},
+ 16:{no:'16',h:'会議のあとに渡す',b:'発言をそのまま貼れば、論点と次アクションに分けてくれます。'},
+ 17:{no:'17',h:'引き継ぎに使う',b:'目的・現状・課題・担当・期限・次アクションの6項目に。'},
+ 18:{no:'18',h:'事実と推測を分けてもらう',b:'「どこまでが事実？」と一言聞きます。'},
+ 19:{no:'19',h:'長さと読み手を指定する',b:'「200字で」「中学生にも分かる言葉で」を添えると、そのまま使える文章になります。'},
+ 20:{no:'20',h:'AIで準備、人と相談、一緒に実行',b:'ゆいに全部やらせるのでもなく、全部抱えるのでもなく。'}
 };
 const BOOK=[
  {cat:'イベント・里山',items:[
@@ -734,19 +1024,38 @@ let B=null;   // battle state
 function newBattle(stage){
   const p=makeFighter({x:250,y:GROUND,face:1,color:'#3df0ff',isPlayer:true,name:'YOU',maxHp:100,hp:100});
   const b=makeFighter({x:700,y:GROUND,face:-1,color:stage.boss.color,maxHp:stage.boss.hp,hp:stage.boss.hp,name:stage.boss.name});
-  b.ai=stage.boss.ai;
+  b.ai=Object.assign({},stage.boss.ai);   // 試合中に書き換えるので必ず複製する
   B={ stage, p, b, yui:0, phase:'intro', t:0, timer:99*60, items:[], itemTimer:420,
       calls:0, tier:0, tactic:'', revised:false, lastTier:0, whiffs:0, hazTick:0,
       fx:{revealHp:false, weak:false, fog:0, telegraph:false, revealReal:false, decoyDmg:1, atk:1,
           solid:1, regen:0, infinite:false, armor:false, revGain:0, taken:1,
-          hazards:[], hazardVisible:false, hazardHint:false},
-      history:[], decoys:[], result:null };
+          hazards:[], hazardVisible:false, hazardHint:false,
+          platGhost:0, stance:false, stanceMiss:0.28, compare:0, samePen:1, variety:0, blank:0, pillars:0,
+          fakeKb:5,
+          wallOn:false, wallW:300, wallH:96, wallGap:190, shapeless:0, bulletOn:false, bulletN:5,
+          bulletSpd:3.6, bulletGap:150, bulletSort:false, allyActive:false, drain:0, support:0, timeRush:false,
+          fakeWeak:false, fakeHint:false, humanFinish:false},
+      history:[], decoys:[], result:null,
+      ally:null, bullets:[], walls:[], wallTimer:120, volleyTimer:150, supportTimer:0,
+      lastMove:'', finishReady:false, finishT:0, fakeSide:(Math.random()<0.5?-1:1), fPhase:1 };
   if(stage.id==='w2') B.fx.fog=1;
   if(stage.id==='w3'){ B.decoys=[{off:-150,delay:14},{off:150,delay:26}]; }
   if(stage.id==='w4'){ B.fx.regen=0.13; B.fx.infinite=true; }
   if(stage.id==='w5'){ B.fx.solid=0.28; }
   if(stage.id==='w6'){ B.fx.armor=true; }
   if(stage.id==='w7'){ B.fx.hazards=[{x:150,w:130,on:false},{x:640,w:150,on:false}]; }
+  if(stage.id==='w8'){ B.fx.platGhost=-118; }
+  if(stage.id==='w9'){ B.fx.stance=true; b.stance=0; b.stanceT=0; }
+  if(stage.id==='w10'){ B.fx.samePen=0.3; }
+  if(stage.id==='w11'){ B.fx.blank=1; }
+  if(stage.id==='w12'){ B.fx.wallOn=true; }
+  if(stage.id==='w13'){ B.fx.shapeless=1; }
+  if(stage.id==='w14'){ B.fx.bulletOn=true; }
+  if(stage.id==='w15'){ B.ally=makeFighter({x:150,y:GROUND,face:1,color:'#6bb8ff',name:'なかま',isAlly:true,maxHp:999,hp:999}); B.ally.ai={aggr:0.7,guard:0.2,jump:0.24,range:98,gap:22,hesitate:0}; }
+  if(stage.id==='w16'){ B.fx.drain=0.018; }
+  if(stage.id==='w17'){ B.fx.fakeWeak=true; B.fx.weak=true; B.fx.humanFinish=true;
+    B.realWeak = Math.random()<0.5?'low':'high'; }
+  if(stage.id==='wf'){ B.fx.fog=0.8; B.fx.humanFinish=true; }
   parts=[];pops=[];rings=[];hitstop=0;shake.m=0;slowmo=0;flashScreen=0;
   save.stats.plays++; persist();
 }
@@ -887,14 +1196,44 @@ function resolveHit(att, def, m, isDecoyHit){
   if(def.invuln>0) return;
 
   // ダメージ計算
-  let dmg=m.dmg*att.buffs.atk;
+  let dmg=m.dmg*att.buffs.atk, showQ=false;
   if(att.isPlayer) dmg*=B.fx.atk*B.fx.solid;
-  if(!att.isPlayer) dmg*=B.fx.taken;
+  if(att.isAlly) dmg*=0.6;
+  if(!att.isPlayer && !att.isAlly) dmg*=B.fx.taken;
   if(counter) dmg*=1.4;
-  // 弱点（WORLD1）
   const hb=hitbox(att);
   const lowHit = hb && (hb.y+hb.h) > def.y-46;
-  if(att.isPlayer && B.fx.weak && lowHit) dmg*=1.8;
+  // 弱点（W1／W17は偽の弱点が混ざる）
+  if(att.isPlayer && B.fx.weak){
+    if(B.stage.id==='w17'){
+      const zone = lowHit ? 'low' : ((hb && hb.y < def.y-80) ? 'high' : '');
+      if(zone && zone===B.realWeak){ dmg*=1.8; pop(def.x,def.y-162,'弱点','#ffcf4a',0.9); }
+      else if(zone && B.fx.fakeWeak){
+        dmg*=0.25; pop(def.x,def.y-162,'ちがった','#8194b8',0.85);
+        att.vx=-att.face*B.fx.fakeKb; att.flash=4;
+      }
+    } else if(lowHit) dmg*=1.8;
+  }
+  // W9 構えの相性
+  if(att.isPlayer && B.fx.stance){
+    if(m.name==='special'){ dmg*=1.3; }
+    else {
+      const want=['light','heavy','air'][def.stance||0];
+      if(m.name===want){ dmg*=1.7; pop(def.x,def.y-162,'有効','#9fe870',0.95); }
+      else { dmg*=B.fx.stanceMiss; pop(def.x,def.y-162,'いまひとつ','#8194b8',0.8); }
+    }
+  }
+  // W10 同じ手／別の案
+  if(att.isPlayer && B.stage.id==='w10'){
+    if(m.name===B.lastMove && B.fx.samePen<1){ dmg*=B.fx.samePen; pop(att.x,att.y-158,'同じ手','#8194b8',0.85); }
+    else if(m.name!==B.lastMove && B.fx.variety>0){ dmg*=1+B.fx.variety; pop(att.x,att.y-158,'別の案','#9fe870',0.85); }
+    B.lastMove=m.name;
+  }
+  // W13 形が決まっていないと結果がブレる
+  if(att.isPlayer && B.fx.shapeless>0){
+    const s=B.fx.shapeless, lo=1-0.7*s, hi=1+0.4*s;
+    dmg*=lo+Math.random()*(hi-lo); showQ=s>0.6;
+  }
   if(att.isPlayer && B.stage.id==='w1' && !B.fx.revealHp) dmg*=0.62; // 目的が定まっていない
   if(!att.isPlayer && isDecoyHit) dmg*=B.fx.decoyDmg;
   // コンボ補正（W6のREVISIONでは逆に、当て直すほど強くなる）
@@ -903,6 +1242,12 @@ function resolveHit(att, def, m, isDecoyHit){
   dmg=Math.max(1, Math.round(dmg*scale));
 
   def.hp=Math.max(0,def.hp-dmg);
+  // 最後の一撃だけは、人が決める
+  if(B.fx.humanFinish && !def.isPlayer && def.hp<8){
+    def.hp=8;
+    if(!B.finishReady){ B.finishReady=true; B.finishT=0; flashScreen=12; sfx('ok');
+      pop(def.x,def.y-176,'HUMAN FINISH','#3df0ff',1.25); }
+  }
   const armored = !def.isPlayer && B.fx.armor && m.name!=='special';
   if(armored){
     def.flash=6; def.vx+=att.face*1.1;
@@ -917,7 +1262,7 @@ function resolveHit(att, def, m, isDecoyHit){
   const hx=(att.x+def.x)/2, hy=def.y-70;
   spark(hx,hy, counter?20:12, counter?'#ffcf4a':'#ffffff', counter?4.5:3);
   ring(hx,hy, counter?'#ffcf4a':att.color, m.name==='special'?170:70);
-  pop(def.x, def.y-118, String(dmg), counter?'#ffcf4a':'#fff', m.name==='heavy'||m.name==='special'?1.2:0.85);
+  pop(def.x, def.y-118, showQ?'？':String(dmg), counter?'#ffcf4a':'#fff', m.name==='heavy'||m.name==='special'?1.2:0.85);
   if(counter) pop(def.x, def.y-146,'COUNTER','#ffcf4a',1.0);
   if(att.isPlayer && B.fx.revGain>0 && att.combo>=2) pop(att.x, att.y-150, 'REVISION x'+att.combo,'#9fe870',0.95);
   else if(att.combo>=2) pop(att.x, att.y-150, att.combo+' HIT','#3df0ff',0.9);
@@ -944,6 +1289,12 @@ function checkHits(){
         }
       }
     }
+  }
+  // なかま → 本体（WORLD 15）
+  const al=B.ally;
+  if(al && B.fx.allyActive && al.attack && al.state==='attack' && !al.hitDone &&
+     al.t>=al.attack.startup && al.t<al.attack.startup+al.attack.active){
+    if(overlap(hitbox(al),hurtbox(b))) resolveHit(al,b,al.attack,false);
   }
   // 本体 → プレイヤー
   if(b.attack && b.state==='attack' && !b.hitDone && b.t>=b.attack.startup && b.t<b.attack.startup+b.attack.active){
@@ -1031,6 +1382,151 @@ function drawHazards(){
   }
 }
 
+/* ---- W9 構えの変化 ---- */
+const STANCE=[{c:'#ff5c5c',n:'赤',w:'弱',mv:'light'},{c:'#6bb8ff',n:'青',w:'強',mv:'heavy'},{c:'#ffcf4a',n:'黄',w:'ジャンプ',mv:'air'}];
+function updateStance(){
+  if(!B.fx.stance) return;
+  const b=B.b; b.stanceT=(b.stanceT||0)+1;
+  if(b.stanceT>=210){ b.stanceT=0; b.stance=((b.stance||0)+1)%3; ring(b.x,b.y-60,STANCE[b.stance].c,80); }
+}
+
+/* ---- W12 長文の壁 ---- */
+function updateWalls(){
+  if(B.fx.wallOn){
+    B.wallTimer--;
+    if(B.wallTimer<=0){
+      B.wallTimer=B.fx.wallGap;
+      const dir=Math.random()<0.5?1:-1;
+      B.walls.push({x: dir>0? -B.fx.wallW-10 : W+10, y:96+Math.random()*220,
+                    w:B.fx.wallW, h:B.fx.wallH, vx:dir*1.6, life:900});
+    }
+  }
+  for(let i=B.walls.length-1;i>=0;i--){
+    const w=B.walls[i]; w.x+=w.vx; w.life--;
+    if(w.life<=0 || w.x<-w.w-60 || w.x>W+60) B.walls.splice(i,1);
+  }
+}
+function drawWalls(){
+  for(const w of B.walls){
+    ctx.save(); ctx.globalAlpha=0.92;
+    ctx.fillStyle='#0a1020'; ctx.fillRect(w.x,w.y,w.w,w.h);
+    ctx.strokeStyle='rgba(143,122,230,.6)'; ctx.lineWidth=1; ctx.strokeRect(w.x+.5,w.y+.5,w.w-1,w.h-1);
+    ctx.fillStyle='rgba(176,190,222,.42)';
+    const rows=Math.max(1,Math.floor((w.h-14)/11));
+    for(let r=0;r<rows;r++) ctx.fillRect(w.x+10, w.y+10+r*11, (w.w-20)*(0.5+((r*37)%48)/100), 3);
+    ctx.restore();
+  }
+}
+
+/* ---- W14 発言の弾幕 ---- */
+const TALK=['それは','でも','一応','時間が','あとで','だれが','前にも','たしか'];
+function spawnVolley(){
+  const n=B.fx.bulletN;
+  if(B.fx.bulletSort){
+    for(let i=0;i<n;i++){
+      B.bullets.push({x:B.b.x, y:B.b.y-70, vx:0, vy:0, r:12, txt:TALK[(Math.random()*TALK.length)|0],
+        sorted:true, tx:250+(i%3)*230, ty:118+Math.floor(i/3)*30, life:170});
+    }
+    if(!B.b.dead){ setState(B.b,'crush'); B.b.hitstun=70; pop(B.b.x,B.b.y-150,'整理された','#9fe870',1.0); }
+    ring(B.b.x,B.b.y-70,'#9fe870',150); sfx('ok');
+  } else {
+    for(let i=0;i<n;i++){
+      const a=Math.atan2((B.p.y-60)-(B.b.y-70), B.p.x-B.b.x)+(i-(n-1)/2)*0.20;
+      B.bullets.push({x:B.b.x, y:B.b.y-70, vx:Math.cos(a)*B.fx.bulletSpd, vy:Math.sin(a)*B.fx.bulletSpd,
+        r:12, txt:TALK[(Math.random()*TALK.length)|0], sorted:false, life:280});
+    }
+    sfx('ui');
+  }
+}
+function updateBullets(){
+  if(B.fx.bulletOn){ B.volleyTimer--; if(B.volleyTimer<=0){ B.volleyTimer=B.fx.bulletGap; spawnVolley(); } }
+  const p=B.p;
+  for(let i=B.bullets.length-1;i>=0;i--){
+    const q=B.bullets[i];
+    if(q.sorted){ q.x+=(q.tx-q.x)*0.14; q.y+=(q.ty-q.y)*0.14; q.life--;
+      if(q.life<=0) B.bullets.splice(i,1); continue; }
+    q.x+=q.vx; q.y+=q.vy; q.life--;
+    if(q.life<=0 || q.x<-50 || q.x>W+50 || q.y>GROUND+10){ B.bullets.splice(i,1); continue; }
+    if(!p.dead && p.invuln<=0 && Math.abs(q.x-p.x)<q.r+18 && Math.abs(q.y-(p.y-50))<q.r+40){
+      const d=3; p.hp=Math.max(0,p.hp-d); p.flash=5; B.yui+=d*1.2;
+      p.hitstun=Math.max(p.hitstun,8); setState(p,'hurt'); p.vx=(q.vx>0?1:-1)*2.6;
+      spark(q.x,q.y,8,'#ff7a45',2.4); pop(p.x,p.y-120,String(d),'#ff7a45',0.75);
+      sfx('guard'); doShake(3); B.bullets.splice(i,1);
+    }
+  }
+}
+function drawBullets(){
+  for(const q of B.bullets){
+    ctx.save();
+    ctx.fillStyle= q.sorted?'rgba(159,232,112,.16)':'rgba(255,122,69,.2)';
+    ctx.strokeStyle= q.sorted?'rgba(159,232,112,.85)':'rgba(255,122,69,.9)';
+    ctx.lineWidth=1.5;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(q.x-31,q.y-11,62,22,6); else ctx.rect(q.x-31,q.y-11,62,22);
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle= q.sorted?'#9fe870':'#ffd2bd';
+    ctx.font='700 11px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(q.txt,q.x,q.y);
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    ctx.restore();
+  }
+}
+
+/* ---- W15 なかま ---- */
+function updateAlly(){
+  const al=B.ally; if(!al) return;
+  if(B.fx.allyActive){ aiControl(al,B.b); updateFighter(al,B.b); }
+  else { al.t++; al.vx=0; if(al.state!=='idle') setState(al,'idle'); }
+}
+
+/* ---- W16 消耗とゆいの援護 ---- */
+function updateDrainSupport(){
+  if(B.fx.drain>0 && !B.p.dead && B.p.hp>10) B.p.hp=Math.max(10, B.p.hp-B.fx.drain);
+  if(B.fx.support>0){
+    B.supportTimer--;
+    if(B.supportTimer<=0){
+      B.supportTimer=B.fx.support;
+      if(!B.b.dead){
+        const d=6; B.b.hp=Math.max(0,B.b.hp-d);
+        if(B.fx.humanFinish && B.b.hp<8) B.b.hp=8;
+        B.b.flash=6; setState(B.b,'hurt'); B.b.hitstun=Math.max(B.b.hitstun,14);
+        ring(B.b.x,B.b.y-60,'#9fe870',120); pop(B.b.x,B.b.y-152,'ゆいの援護','#9fe870',0.9);
+        spark(B.b.x,B.b.y-60,10,'#9fe870',2.6); sfx('ok');
+      }
+    }
+  }
+}
+
+/* ---- FINAL 3つのフェーズ ---- */
+function updateFinalPhase(){
+  if(B.stage.id!=='wf') return;
+  const r=B.b.hp/B.b.maxHp;
+  const want = r>0.66?1:(r>0.33?2:3);
+  if(want!==B.fPhase){
+    B.fPhase=want; flashScreen=10; doShake(8); sfx('sp');
+    if(B.tier<3){
+      if(want===2){ B.fx.fog=0; B.fx.shapeless=1; }
+      if(want===3){ B.fx.shapeless=0.5; B.fx.timeRush=true; }
+    }
+    if(want===3){ B.b.ai.aggr=0.85; B.b.ai.gap=16; }
+    if(want>1) pop(W/2,150, want===2?'PHASE 2 － 形が決まらない':'PHASE 3 － 時間がない','#ff3d3d',1.15);
+  }
+  if(B.fx.timeRush && B.tier<3) B.timer-=2;
+}
+
+/* ---- 最後の一撃は人が決める ---- */
+function tryFinish(){
+  if(scene!=='battle'||!B||!B.finishReady||B.phase!=='fight') return;
+  B.finishReady=false; B.b.hp=0;
+  flashScreen=16; doShake(20); slowmo=0;
+  ring(B.b.x,B.b.y-60,'#3df0ff',280); spark(B.b.x,B.b.y-60,30,'#ffffff',6);
+  pop(W/2,200,'HUMAN FINISH','#3df0ff',2.0); sfx('sp');
+  $('#t-finish').classList.remove('on');
+  finish(true);
+}
+function maxCalls(){ return B.stage.id==='wf'?3:2; }
+
 /* ============================================================
    11. メインループ
    ============================================================ */
@@ -1073,6 +1569,7 @@ function tick(){
   if(B.fx.infinite) B.timer=99*60; else B.timer--;
   if(B.fx.regen>0 && B.b.hp>0 && !B.b.dead) B.b.hp=Math.min(B.b.maxHp, B.b.hp+B.fx.regen);
   updateHazards();
+  updateStance(); updateWalls(); updateBullets(); updateDrainSupport(); updateFinalPhase();
   B.yui=Math.min(100, B.yui + 2/60);
   if(B.timer<=0){ finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return; }
 
@@ -1080,8 +1577,10 @@ function tick(){
   aiControl(B.b,B.p);
   updateFighter(B.p,B.b);
   updateFighter(B.b,B.p);
+  updateAlly();
   checkHits();
   updateItems();
+  if(B.finishReady) B.finishT++;
 
   // 履歴（分身用）
   B.history.push({x:B.b.x,y:B.b.y,face:B.b.face,state:B.b.state,t:B.b.t,
@@ -1092,9 +1591,10 @@ function tick(){
   const dd=B.b.x-B.p.x;
   if(Math.abs(dd)<30 && Math.abs(B.p.y-B.b.y)<70){ const push=(30-Math.abs(dd))*0.12*(dd<0?-1:1); B.p.x-=push; B.b.x+=push; }
 
-  // YUIボタン
-  const ready=B.yui>=100 && B.calls<2;
-  $('#t-yui').classList.toggle('on', ready && isTouch);
+  // YUIボタン／HUMAN FINISHボタン
+  const ready=B.yui>=100 && B.calls<maxCalls();
+  $('#t-yui').classList.toggle('on', ready && isTouch && !B.finishReady);
+  $('#t-finish').classList.toggle('on', !!B.finishReady);
 
   // KO
   if(B.b.hp<=0 && !B.b.dead) finish(true);
@@ -1120,12 +1620,18 @@ function render(){
   if(B){
     drawPlatform();
     drawHazards();
+    if(B.fx.blank>0 || B.fx.pillars>0) drawBlank();
     B.items.forEach(drawItem);
     if(B.decoys.length && B.stage.id==='w3') drawDecoys();
+    if(B.ally) drawFighter(B.ally, false);
     drawFighter(B.b, true);
     drawFighter(B.p, false);
+    if(B.stage.id==='w17') drawWeakMarkers();
+    drawBullets();
     drawEffects();
-    if(B.stage.id==='w2' && B.fx.fog>0) drawFog();
+    drawWalls();
+    if(B.fx.fog>0) drawFog();
+    drawCompare();
     drawHUD();
     if(B.phase==='intro') drawIntro();
   } else {
@@ -1158,9 +1664,69 @@ function drawBackground(){
   ctx.moveTo(WALL_R+16,GROUND); ctx.lineTo(WALL_R+16,GROUND-200); ctx.stroke();
 }
 function drawPlatform(){
-  ctx.fillStyle='#16233f'; ctx.fillRect(388,336,184,14);
-  ctx.strokeStyle='rgba(61,240,255,.5)'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(388,336); ctx.lineTo(572,336); ctx.stroke();
+  const off = B ? B.fx.platGhost : 0;   // W8：古い地図はズレて描かれる（当たり判定は本当の位置）
+  ctx.fillStyle= off?'#241f16':'#16233f'; ctx.fillRect(388+off,336,184,14);
+  ctx.strokeStyle= off?'rgba(192,138,74,.6)':'rgba(61,240,255,.5)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(388+off,336); ctx.lineTo(572+off,336); ctx.stroke();
+  if(off){
+    ctx.fillStyle='rgba(192,138,74,.85)'; ctx.font='700 11px "Zen Kaku Gothic New",sans-serif';
+    ctx.textAlign='center'; ctx.fillText('去年の地図', 480+off, 328); ctx.textAlign='left';
+  }
+}
+/* W11：白紙。背景を消してしまう */
+function drawBlank(){
+  const s=B.fx.blank;
+  ctx.save(); ctx.fillStyle='rgba(238,241,246,'+(0.97*s)+')'; ctx.fillRect(0,0,W,H);
+  if(B.fx.pillars>0){
+    const names=['目的','いまの状況','次の一手'];
+    ctx.strokeStyle='rgba(40,60,100,.5)'; ctx.lineWidth=3;
+    ctx.font='700 12px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+    for(let i=0;i<B.fx.pillars;i++){
+      const x=250+i*230;
+      ctx.beginPath(); ctx.moveTo(x,GROUND); ctx.lineTo(x,GROUND-150); ctx.stroke();
+      ctx.fillStyle='rgba(40,60,100,.75)'; ctx.fillText(names[i], x, GROUND-160);
+    }
+    ctx.textAlign='left';
+  }
+  ctx.restore();
+}
+/* W9：構えの比較表 */
+function drawCompare(){
+  const lv=B.fx.compare; if(!lv) return;
+  const x=W-232, y=96, w=208, h=94;
+  ctx.save();
+  ctx.fillStyle='rgba(12,21,40,.92)'; ctx.fillRect(x,y,w,h);
+  ctx.strokeStyle='rgba(159,232,112,.5)'; ctx.lineWidth=1; ctx.strokeRect(x+.5,y+.5,w-1,h-1);
+  ctx.fillStyle='#9fe870'; ctx.font='400 10px "Anton",sans-serif'; ctx.fillText('COMPARE',x+12,y+18);
+  ctx.font='700 12px "Zen Kaku Gothic New",sans-serif';
+  STANCE.forEach((s,i)=>{
+    const yy=y+38+i*18;
+    ctx.fillStyle=s.c; ctx.fillRect(x+12,yy-8,10,10);
+    ctx.fillStyle='#cfd9ef'; ctx.fillText(s.n+'の構え　→　'+s.w+'が有効', x+30, yy);
+  });
+  if(lv>=2){
+    const cur=STANCE[B.b.stance||0];
+    ctx.fillStyle=cur.c; ctx.font='700 12px "Zen Kaku Gothic New",sans-serif';
+    ctx.fillText('いま：'+cur.n+'　→　'+cur.w, x+12, y+h-8);
+  }
+  ctx.restore();
+}
+/* W17：弱点マーカー（片方は偽物かもしれない） */
+function drawWeakMarkers(){
+  const b=B.b, t=performance.now()/300;
+  const zones=[{k:'low',y:b.y-46,h:40,label:'弱点？'},{k:'high',y:b.y-102,h:38,label:'弱点？'}];
+  for(const z of zones){
+    const isFake = z.k!==B.realWeak;
+    if(isFake && !B.fx.fakeWeak) continue;             // VERIFY後は偽が消える
+    const blink = isFake && B.fx.fakeHint ? (0.25+0.55*Math.abs(Math.sin(t*2))) : 1;
+    ctx.save(); ctx.globalAlpha=blink;
+    ctx.strokeStyle= (!B.fx.fakeWeak)?'#ffcf4a':'#e2b04a'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.strokeRect(b.x-24, z.y, 48, z.h); ctx.setLineDash([]);
+    ctx.fillStyle=(!B.fx.fakeWeak)?'#ffcf4a':'#e2b04a';
+    ctx.font='700 10px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(B.fx.fakeWeak?z.label:'弱点', b.x, z.y-5); ctx.textAlign='left';
+    ctx.restore();
+  }
 }
 function drawItem(it){
   ctx.save(); ctx.translate(it.x,it.y);
@@ -1173,6 +1739,12 @@ function drawItem(it){
 }
 
 /* --- 棒人間 --- */
+function darken(hex){
+  if(hex[0]!=='#') return hex;
+  const n=parseInt(hex.slice(1),16), r=(n>>16)&255, g=(n>>8)&255, b=n&255, k=0.45;
+  const m=(v,t)=>Math.round(v*k+t*(1-k));
+  return 'rgb('+m(r,17)+','+m(g,28)+','+m(b,52)+')';
+}
 function poseFor(f){
   const P={lean:0,crouch:0,armA:[2.6,0.5],armB:[0.6,0.4],legA:[1.75,0.1],legB:[1.35,0.1],headT:0};
   const bob=Math.sin(f.t*0.12)*0.06;
@@ -1246,14 +1818,17 @@ function drawStick(f,x,y,color,alpha,scale){
 }
 function drawFighter(f, isBoss){
   let alpha=1;
-  if(B.stage.id==='w2'&&isBoss&&B.fx.fog>0) alpha=0.25+0.75*(1-B.fx.fog);
+  if(isBoss && B.fx.fog>0) alpha=0.25+0.75*(1-B.fx.fog);
   if(isBoss && B.fx.solid<1) alpha=Math.min(alpha, 0.28+0.62*B.fx.solid);
+  let col=f.color;
+  if(isBoss && B.fx.stance) col=STANCE[f.stance||0].c;          // W9 構えの色
+  if(B.fx.blank>0.4) col=darken(col);                            // W11 白紙の上では濃く描く
   // 影
   ctx.save(); ctx.globalAlpha=0.34; ctx.fillStyle='#000';
   ctx.beginPath(); ctx.ellipse(f.x, f.platform?350:GROUND+2, 22, 5, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
   // 無敵中のゴースト
-  if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,f.color,0.28); drawStick(f,f.x-f.vx*1.1,f.y,f.color,0.45); }
-  drawStick(f,f.x,f.y,f.color,alpha);
+  if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,col,0.28); drawStick(f,f.x-f.vx*1.1,f.y,col,0.45); }
+  drawStick(f,f.x,f.y,col,alpha);
   // 本物マーカー
   if(isBoss && B.fx.revealReal){
     const t=performance.now()/300;
@@ -1262,8 +1837,8 @@ function drawFighter(f, isBoss){
     ctx.beginPath(); ctx.moveTo(f.x-9,f.y-134); ctx.lineTo(f.x+9,f.y-134); ctx.lineTo(f.x,f.y-120); ctx.closePath(); ctx.fillStyle='#9fe870'; ctx.fill();
     ctx.restore();
   }
-  // 弱点マーカー
-  if(isBoss && B.fx.weak){
+  // 弱点マーカー（W17は専用の2つ表示を使う）
+  if(isBoss && B.fx.weak && B.stage.id!=='w17'){
     ctx.save(); ctx.strokeStyle='#ffcf4a'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
     ctx.strokeRect(f.x-24, f.y-44, 48, 40);
     ctx.setLineDash([]); ctx.fillStyle='#ffcf4a'; ctx.font='700 10px "Zen Kaku Gothic New",sans-serif';
@@ -1356,7 +1931,7 @@ function drawHUD(){
   ctx.font=fnt('400',10,'"Anton",sans-serif');
   ctx.fillStyle= ready?'#9fe870':'#5f7093';
   ctx.fillText(ready? (isTouch?'YUI CALL READY — YUIボタン':'YUI CALL READY — [Y]') :'YUI CALL', W/2, gy+24);
-  if(B.calls>=2){ ctx.fillStyle='#5f7093'; ctx.fillText('YUI CALL 使用済み', W/2, gy+24); }
+  if(B.calls>=maxCalls()){ ctx.fillStyle='#5f7093'; ctx.fillText('YUI CALL 使用済み', W/2, gy+24); }
   // WORLD 6：一発で完璧に、という思い込み
   if(stage.id==='w6'){
     ctx.font=fnt('400',12,'"Anton",sans-serif');
@@ -1364,7 +1939,26 @@ function drawHUD(){
     else if(B.whiffs>=1){ ctx.fillStyle='#8194b8'; ctx.fillText('ONE CHANCE ... のはずだった', W/2, 112); }
     else { ctx.fillStyle='#ff5c5c'; ctx.fillText('ONE CHANCE', W/2, 112); }
   }
+  // WORLD 16：抱え込んでいる間は消耗する
+  if(B.fx.drain>0){ ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillStyle='#a8a8a8';
+    ctx.fillText('抱え込み中 — 体力がじわじわ減っていく', W/2, 112); }
+  if(B.fx.support>0){ ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillStyle='#9fe870';
+    ctx.fillText('ゆいが援護している', W/2, 112); }
+  // FINAL：フェーズ表示
+  if(stage.id==='wf'){ ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillStyle='#ff3d3d';
+    ctx.fillText('PHASE '+B.fPhase+' / 3', W/2, 112); }
   ctx.textAlign='left';
+  // 最後の一撃
+  if(B.finishReady){
+    ctx.save(); ctx.textAlign='center';
+    ctx.globalAlpha=0.6+0.4*Math.abs(Math.sin(B.finishT/12));
+    ctx.fillStyle='rgba(5,8,15,.8)'; ctx.fillRect(0,192,W,92);
+    ctx.fillStyle='#3df0ff'; ctx.font=fnt('400',28,'"Dela Gothic One","Zen Kaku Gothic New",sans-serif');
+    ctx.fillText('最後に決めるのは、あなたです。', W/2, 234);
+    ctx.fillStyle='#e8eefb'; ctx.font=fnt('400',14,'"Zen Kaku Gothic New",sans-serif');
+    ctx.fillText(isTouch?'FINISH ボタンを押す':'Enter キーで決める', W/2, 264);
+    ctx.restore();
+  }
   // 作戦パネル（小さい画面では箱ごと拡大する）
   if(B.tactic){
     const ts=Math.min(HUD,1.4), pw=Math.round(300*ts), ph=Math.round(64*ts), py=H-28-ph;
@@ -1486,7 +2080,7 @@ function startStage(s){ sfx('ok'); newBattle(s); toBattleScene(); }
 function tryCall(){
   if(scene!=='battle'||!B) return;
   if(B.phase!=='fight') return;
-  if(B.yui<100 || B.calls>=2) return;
+  if(B.yui<100 || B.calls>=maxCalls()) return;
   openCall(false);
 }
 function openCall(forced){
@@ -1514,7 +2108,8 @@ function chooseCommand(o){
   applyTier(o.tier);
   const res=$('#call-result'); res.textContent='';
   const fx=el('div','effect'); fx.innerHTML=sanitize(o.fx); res.appendChild(fx);
-  if(o.chips.length>=2){ res.appendChild(el('span','combo-tag', o.chips.length+' COMBO!')); }
+  if(o.chips.length>=6){ res.appendChild(el('span','combo-tag','6 COMBO! FULL COMMAND!!')); }
+  else if(o.chips.length>=2){ res.appendChild(el('span','combo-tag', o.chips.length+' COMBO!')); }
   const act=$('#call-actions'); act.textContent='';
   if(o.tier===1 && !B.revised){
     const hint=el('p','muted','情報は、あとから足しても大丈夫です。');
@@ -1613,6 +2208,63 @@ function applyTier(tier){
     if(tier===1){ f.taken=0.8; B.tactic='原因は分からない。まずは耐える。'; }
     if(tier===2){ f.taken=0.9; f.hazardHint=true; B.tactic='危険な床がうっすら光る。光を見たら離れる。'; }
     if(tier>=3){ f.taken=1; f.hazardVisible=true; B.tactic='危険な床が全部見えている。避けて戦う。'; }
+  }
+  if(id==='w8'){
+    if(tier===1){ f.platGhost=-70; B.tactic='地図はまだ古い。足場の位置は当てにしない。'; }
+    if(tier===2){ f.platGhost=-18; B.tactic='ほぼ正しい位置。足場が使える。'; }
+    if(tier>=3){ f.platGhost=0; B.tactic='地図は最新。足場の位置は確かめ済み。'; ring(480,336,'#9fe870',190); }
+  }
+  if(id==='w9'){
+    if(tier===1){ f.stanceMiss=0.45; B.tactic='当てずっぽう。効かない攻撃の損は減った。'; }
+    if(tier===2){ f.compare=1; f.stanceMiss=0.45; B.tactic='赤=弱／青=強／黄=ジャンプ攻撃。'; }
+    if(tier>=3){ f.compare=2; f.stanceMiss=0.45; B.tactic='いまの構えに効く技を出す。'; }
+  }
+  if(id==='w10'){
+    if(tier===1){ f.samePen=0.5; B.tactic='同じ手の落ち込みが減った。'; }
+    if(tier===2){ f.samePen=0.75; f.variety=0.15; B.tactic='技を変えるたびに強くなる。'; }
+    if(tier>=3){ f.samePen=1; f.variety=0.4; B.tactic='手数で押す。技を変えるたび +40%。'; }
+  }
+  if(id==='w11'){
+    if(tier===1){ f.blank=0.7; B.tactic='まだ白い。輪郭だけ見える。'; }
+    if(tier===2){ f.blank=0.35; f.pillars=1; B.tactic='目的が1本立った。地面が見える。'; }
+    if(tier>=3){ f.blank=0; f.pillars=3; B.tactic='目的・いまの状況・次の一手。3本で立つ。'; }
+  }
+  if(id==='w12'){
+    if(tier===1){ f.wallW=240; f.wallGap=210; B.tactic='まだ長い。視界が塞がれる。'; }
+    if(tier===2){ f.wallW=150; f.wallH=64; f.wallGap=260; B.tactic='短くなった。隙間から見える。'; }
+    if(tier>=3){ f.wallW=90; f.wallH=40; f.wallGap=360; B.tactic='読み手と長さが決まった。視界が戻る。'; }
+  }
+  if(id==='w13'){
+    if(tier===1){ f.shapeless=0.75; B.tactic='まだブレる。手応えが読めない。'; }
+    if(tier===2){ f.shapeless=0.4; B.tactic='形が決まりかけ。数字が見える。'; }
+    if(tier>=3){ f.shapeless=0; f.atk=1.15; B.tactic='形が確定。ここから先はブレない。'; }
+  }
+  if(id==='w14'){
+    if(tier===1){ f.bulletN=4; f.bulletGap=170; B.tactic='発言が少し減った。'; }
+    if(tier===2){ f.bulletN=3; f.bulletSpd=2.8; f.bulletGap=200; B.tactic='遅くなった。避けられる。'; }
+    if(tier>=3){ f.bulletSort=true; f.bulletGap=170; B.tactic='論点・決定・次アクション。整理中は相手がひるむ。'; }
+  }
+  if(id==='w15'){
+    if(tier===1) B.tactic='仲間はまだ動けない。何をすればいいか分からない。';
+    if(tier===2) B.tactic='もう少しで動く。あと一声。';
+    if(tier>=3){ f.allyActive=true; B.tactic='仲間が動き出した。二人で削る。';
+      if(B.ally) ring(B.ally.x,B.ally.y-60,'#6bb8ff',150); }
+  }
+  if(id==='w16'){
+    if(tier===1){ f.drain=0.012; B.tactic='まだ消耗している。'; }
+    if(tier===2){ f.drain=0.008; B.tactic='消耗が半分になった。'; }
+    if(tier>=3){ f.drain=0; f.support=260; B.supportTimer=180; B.tactic='消耗が止まった。ゆいが援護する。'; }
+  }
+  if(id==='w17'){
+    if(tier===1){ f.fakeKb=2.5; B.tactic='どちらかは偽。外しても大きくは崩れない。'; }
+    if(tier===2){ f.fakeHint=true; f.fakeKb=2.5; B.tactic='あやしい方が点滅している。'; }
+    if(tier>=3){ f.fakeWeak=false; B.tactic='事実だけが残った。最後の一撃は、自分で。'; }
+  }
+  if(id==='wf'){
+    if(tier===1){ f.atk=Math.max(f.atk,1.05); B.tactic='まだ何も片付いていない。'; }
+    if(tier===2){ f.fog=0; f.shapeless=0; B.tactic='視界と手応えは戻った。あとは時間。'; }
+    if(tier>=3){ f.fog=0; f.shapeless=0; f.timeRush=false; f.atk=1.1;
+      B.tactic='ULTIMATE COMMAND。妨害はすべて解除。最後は自分で決める。'; }
   }
 }
 function sanitize(html){
