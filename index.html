@@ -150,6 +150,10 @@
   .vsstatus.warn{background:rgba(255,61,139,.08);border-left-color:var(--mg)}
   .vsstatus.ok{background:rgba(159,232,112,.09);border-left-color:var(--yui)}
   .vsnote{margin-top:14px;display:grid;gap:4px}
+  #vs-lobby{margin-top:14px}
+  .pchip{font-family:var(--font-lt);font-size:12px;letter-spacing:.08em;padding:7px 12px;
+    border:1px solid #2c3c60;color:#54658c}
+  .pchip.on{background:rgba(61,240,255,.08)}
   .toast{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--yui);color:#08130a;
     font-weight:700;font-size:13px;padding:9px 18px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:60}
   .toast.on{opacity:1}
@@ -260,7 +264,7 @@
       <div class="sheet">
         <div class="eyebrow">Special</div>
         <h2 style="margin-top:6px">必殺技をえらぶ</h2>
-        <p class="muted" style="margin-top:8px">えらんだ技は、ストーリーでも通信対戦でも使えます。ステージをクリアすると、その相手の技やステージの仕掛けを、自分の必殺技として覚えます。</p>
+        <p class="muted" id="sp-lead" style="margin-top:8px">えらんだ技はストーリーで使えます。</p>
         <div class="splist" id="sp-list"></div>
         <div class="close-row"><button class="btn" id="sp-back">もどる</button></div>
       </div>
@@ -272,7 +276,7 @@
       <div class="sheet">
         <div class="eyebrow">Versus</div>
         <h2 style="margin-top:6px">通信対戦</h2>
-        <p class="muted" style="margin-top:8px">同じ「あいことば」を入れた2人がつながります。片方が<b>部屋をつくる</b>、もう片方が<b>部屋に入る</b>を押してください。</p>
+        <p class="muted" style="margin-top:8px">同じ「あいことば」を入れた人がつながります。<b>最大4人</b>。1人が<b>部屋をつくる</b>、ほかの人が<b>部屋に入る</b>を押してください。人がそろったら、部屋をつくった人が「大乱闘」か「タッグ戦（2対2）」を選んで始めます。</p>
         <input id="vs-code" class="vsinput" maxlength="12" placeholder="あいことば（英数字 4〜12文字）" autocomplete="off" spellcheck="false" inputmode="latin">
         <div class="row" style="margin-top:10px">
           <button class="btn" id="vs-host">部屋をつくる</button>
@@ -280,6 +284,7 @@
           <button class="btn ghost" id="vs-sp">必殺技をえらぶ</button>
         </div>
         <div id="vs-status" class="vsstatus"></div>
+        <div id="vs-lobby"></div>
         <div class="vsnote">
           <p class="muted">・あいことばは推測されにくいものにしてください。同じ言葉を使っている人がいると、その人につながります</p>
           <p class="muted">・端末どうしを直接つなぎます。ゲームの位置や体力だけを送っていて、個人情報は送っていません</p>
@@ -410,7 +415,7 @@ const el = (t,c,txt)=>{const e=document.createElement(t); if(c)e.className=c; if
 const SAVE_KEY='yuimaster.save.v1';
 const save = loadSave();
 function loadSave(){
-  const base={version:1,cleared:[],manual:[1],skills:[],specials:[],equip:'tomoe',
+  const base={version:1,cleared:[],manual:[1],skills:[],specials:[],equip:'tomoe',equipVs:'tomoe',
               stats:{plays:0,wins:0,calls:0,revisions:0}};
   try{ const raw=localStorage.getItem(SAVE_KEY); if(!raw) return base;
     const d=JSON.parse(raw); return Object.assign(base,d,{stats:Object.assign(base.stats,d.stats||{})});
@@ -513,7 +518,7 @@ $('#t-finish').addEventListener('click',()=>tryFinish());
    ============================================================ */
 const SPECIALS={
   tomoe:{n:'巴投げ',   d:'踏み込んで投げ飛ばす。当たれば大ダメージ。', kind:'move', mv:'special'},
-  stop :{n:'時間止め', d:'当てると相手が4秒動けなくなる。威力は小さい。', kind:'move', mv:'stopgrab'},
+  stop :{n:'時間止め', d:'当てると相手が1.5秒動けなくなる。止めている間のダメージは0.35倍。', kind:'move', mv:'stopgrab'},
   laser:{n:'レーザー', d:'まっすぐ伸びる強力な光線。遠くまで届く。', kind:'move', mv:'laser'},
   w1 :{n:'弱点看破',   d:'6秒間、自分の攻撃が1.8倍。',              kind:'buff', k:'atk', v:1.8, t:360, from:'w1'},
   w2 :{n:'かくれる',   d:'5秒間、ほとんど見えなくなる。',            kind:'buff', k:'invis', v:1, t:300, from:'w2'},
@@ -548,7 +553,8 @@ const MOVES={
   ultimate:{startup:20,active:12,recovery:30,dmg:30, hitstun:30, kbx:11,  kby:-4.0, hx:18, hy:-96, hw:600,hh:46, stop:16, guardDmg:70, meter:0, sfx:'heavy'},
   cast   :{startup:6, active:0, recovery:16, dmg:0,  hitstun:0,  kbx:0,   kby:0,    hx:0,  hy:-70, hw:0,  hh:0,  stop:0,  guardDmg:0,  meter:0, sfx:'ui'}
 };
-const SPEED=3.7, JUMP=-12.4, GRAV=0.62;
+// ジャンプは「攻撃をかわして、相手の後ろに回り込める」高さにしてある
+const SPEED=3.9, JUMP=-15.4, GRAV=0.60;   // 頂点までおよそ198px
 
 /* ============================================================
    5. ファイター
@@ -557,13 +563,13 @@ const SPEED=3.7, JUMP=-12.4, GRAV=0.62;
 const DEFAULT_PLATS=[{x:388,y:336,w:184,type:'solid'}];
 function vsPlats(){
   return [
-    {x:110,y:378,w:150,type:'solid'},
-    {x:700,y:378,w:150,type:'solid'},
-    {x:240,y:300,w:120,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
-    {x:600,y:300,w:120,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
-    {x:420,y:238,w:120,type:'move',x0:420,range:130,ph:0,dx:0},
-    {x:330,y:440,w:80,type:'bounce'},
-    {x:550,y:440,w:80,type:'bounce'}
+    {x:96, y:392,w:170,type:'solid'},
+    {x:694,y:392,w:170,type:'solid'},
+    {x:236,y:310,w:130,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
+    {x:594,y:310,w:130,type:'crumble',fuse:0,on:true,stand:0,respawn:0},
+    {x:415,y:236,w:130,type:'move',x0:415,range:140,ph:0,dx:0},
+    {x:322,y:436,w:84,type:'bounce'},
+    {x:554,y:436,w:84,type:'bounce'}
   ];
 }
 function platsAll(){ return (B && B.plats) ? B.plats : DEFAULT_PLATS; }
@@ -647,7 +653,8 @@ function castSpecial(f, opp){
                    vx:f.face>0?2.0:-2.0, life:900}); break;
     case 'bullets': spawnVolleyFrom(f,opp,def.num); break;
     case 'hazard': B.fx.hazards.push({x:Math.max(WALL_L,Math.min(WALL_R-140,opp.x-70)), w:140,
-                     on:false, life:def.t, owner:f.isPlayer?'p':'b'}); break;
+                     on:false, life:def.t, owner:f.isPlayer?'p':'b',
+                     tgtIdx: B.fs?B.fs.indexOf(opp):-1}); break;
     case 'ally':
       if(!B.ally){ B.ally=makeFighter({x:f.x-70,y:GROUND,face:f.face,color:'#6bb8ff',name:'なかま',isAlly:true,maxHp:999,hp:999});
         B.ally.ai={aggr:0.75,guard:0.18,jump:0.26,range:98,gap:20,hesitate:0}; }
@@ -750,7 +757,7 @@ const STAGES=[
 },
 {
   id:'w4', num:'WORLD 4', title:'条件をつけよう', skill:'CONDITION', skillJp:'条件を伝える',
-  boss:{name:'ジョウケンナシ', quote:'マダマダ、イケルヨネ？', hp:200, color:'#ff8a3d',
+  boss:{name:'ジョウケンナシ', quote:'マダマダ、イケルヨネ？', hp:180, color:'#ff8a3d',
         ai:{aggr:0.50,guard:0.34,jump:0.16,range:98,gap:26,hesitate:0}},
   trouble:'いつ終わるのか分からない。削っても、すぐ元に戻る。',
   manual:{no:'06', h:'条件を伝える', b:'予算・期限・文字数・人数。現実的な案になります。'},
@@ -800,7 +807,7 @@ const STAGES=[
 },
 {
   id:'w6', num:'WORLD 6', title:'一回で完成させようとしない', skill:'REVISION', skillJp:'直して頼み直す',
-  boss:{name:'イッパツデカンペキ', quote:'イチドデ、カンペキニ。', hp:190, color:'#ff5c5c',
+  boss:{name:'イッパツデカンペキ', quote:'イチドデ、カンペキニ。', hp:175, color:'#ff5c5c',
         ai:{aggr:0.66,guard:0.28,jump:0.20,range:104,gap:24,hesitate:0}},
   trouble:'相手が怯まない。一発で決めないと、と焦る。',
   manual:{no:'08', h:'まず作らせてから直してOK', b:'一発で完璧を狙わない方が、結果的に早いです。'},
@@ -956,7 +963,7 @@ const STAGES=[
 },
 {
   id:'w12', num:'WORLD 12', title:'文章をつくろう', skill:'EDIT', skillJp:'直してもらう',
-  boss:{name:'ナガスギール', quote:'マズ ゼンタイゾウ カラ セツメイ シマスト……', hp:180, color:'#8f7ae6',
+  boss:{name:'ナガスギール', quote:'マズ ゼンタイゾウ カラ セツメイ シマスト……', hp:170, color:'#8f7ae6',
         ai:{aggr:0.56,guard:0.28,jump:0.24,range:100,gap:25,hesitate:0}},
   trouble:'長い文章の壁が流れてきて、視界をふさぐ。',
   manual:{no:'19', h:'長さと読み手を指定する', b:'「200字で」「中学生にも分かる言葉で」を添えると、そのまま使える文章になります。'},
@@ -1006,7 +1013,7 @@ const STAGES=[
 },
 {
   id:'w14', num:'WORLD 14', title:'会議を助けてもらおう', skill:'MEETING', skillJp:'会議を整理してもらう',
-  boss:{name:'カイギカオス', quote:'ソレデスネ、デモ、イチオウ、アトデ', hp:190, color:'#ff7a45',
+  boss:{name:'カイギカオス', quote:'ソレデスネ、デモ、イチオウ、アトデ', hp:175, color:'#ff7a45',
         ai:{aggr:0.48,guard:0.30,jump:0.18,range:98,gap:28,hesitate:0.10}},
   trouble:'発言が同時に飛んでくる。何が論点なのか分からない。',
   manual:{no:'16', h:'会議のあとに渡す', b:'発言をそのまま貼れば、論点と次アクションに分けてくれます。'},
@@ -1031,7 +1038,7 @@ const STAGES=[
 },
 {
   id:'w15', num:'WORLD 15', title:'プロジェクトを整理しよう', skill:'PROJECT', skillJp:'整理して渡す',
-  boss:{name:'ヒキツゲナイ', quote:'アノヒトシカ ワカラナイ。', hp:200, color:'#d96b6b',
+  boss:{name:'ヒキツゲナイ', quote:'アノヒトシカ ワカラナイ。', hp:180, color:'#d96b6b',
         ai:{aggr:0.66,guard:0.28,jump:0.26,range:102,gap:22,hesitate:0}},
   trouble:'仲間がいるのに動かない。何をすればいいか分からないらしい。',
   manual:{no:'17', h:'引き継ぎに使う', b:'目的・現状・課題・担当・期限・次アクションの6項目に。'},
@@ -1081,7 +1088,7 @@ const STAGES=[
 },
 {
   id:'w17', num:'WORLD 17', title:'AIに任せる・人が決める', skill:'VERIFY', skillJp:'確かめる',
-  boss:{name:'ゼンブオマカセ', quote:'ゼンブ AIガ ヤッテクレル。', hp:195, color:'#b06bff',
+  boss:{name:'ゼンブオマカセ', quote:'ゼンブ AIガ ヤッテクレル。', hp:180, color:'#b06bff',
         ai:{aggr:0.62,guard:0.30,jump:0.28,range:102,gap:23,hesitate:0}},
   trouble:'弱点が2つ表示されている。どちらかは、たぶん間違っている。',
   manual:{no:'18', h:'事実と推測を分けてもらう', b:'「どこまでが事実？」と一言聞きます。'},
@@ -1106,7 +1113,7 @@ const STAGES=[
 },
 {
   id:'wf', num:'WORLD FINAL', title:'AIと一緒にCUEを動かせ！', skill:'ULTIMATE', skillJp:'全部を使う',
-  boss:{name:'ジカンガナイン', quote:'モウ ジカンガ ナイ。', hp:260, color:'#ff3d3d',
+  boss:{name:'ジカンガナイン', quote:'モウ ジカンガ ナイ。', hp:230, color:'#ff3d3d',
         ai:{aggr:0.70,guard:0.26,jump:0.30,range:104,gap:20,hesitate:0}},
   trouble:'情報がない。形が決まらない。そして、時間がない。',
   manual:{no:'20', h:'AIで準備、人と相談、一緒に実行', b:'ゆいに全部やらせるのでもなく、全部抱えるのでもなく。'},
@@ -1274,7 +1281,7 @@ function updateFighter(f, opp){
     if(pl.on===false) continue;
     if(f.vy>0 && f.y-f.vy<=pl.y+2 && f.y>=pl.y && f.y<=pl.y+26 && f.x>pl.x-8 && f.x<pl.x+pl.w+8){
       if(pl.type==='bounce'){
-        f.y=pl.y-1; f.vy=-17; f.platform=false;
+        f.y=pl.y-1; f.vy=-18.5; f.platform=false;
         ring(f.x,pl.y,'#9fe870',95); spark(f.x,pl.y,8,'#9fe870',2.6); sfx('ui');
       } else {
         f.y=pl.y; f.vy=0; f.platform=true; f.platY=pl.y+14;
@@ -1429,7 +1436,7 @@ function resolveHit(att, def, m, isDecoyHit){
   const aDown=eff(att,'atkDown'); if(aDown) dmg*=aDown;
   if(eff(att,'shapeless')){ dmg*=0.3+Math.random()*0.8; showQ=true; }
   const dDef=eff(def,'def'); if(dDef) dmg*=dDef;
-  if(eff(def,'stop')) dmg*=0.5;
+  if(eff(def,'stop')) dmg*=0.35;   // 止めたうえに大ダメージ、にはしない
   if(att.isPlayer && B.stage.id==='w1' && !B.fx.revealHp) dmg*=0.62; // 目的が定まっていない
   if(!att.isPlayer && isDecoyHit) dmg*=B.fx.decoyDmg;
   // コンボ補正（W6のREVISIONでは逆に、当て直すほど強くなる）
@@ -1454,9 +1461,9 @@ function resolveHit(att, def, m, isDecoyHit){
   }
   def.meter=Math.min(100,def.meter+m.meter*0.5*(B.vs?1.8:1));
   // 必殺技の追加効果
-  if(m.name==='stopgrab'){ addEff(def,'stop',240); ring(def.x,def.y-60,'#6bb8ff',170);
-    pop(def.x,def.y-162,'STOP 4びょう','#6bb8ff',1.05); sfx('sp'); }
-  if(m.name==='ultimate'){ addEff(def,'stop',120); ring(def.x,def.y-60,'#6bb8ff',170); }
+  if(m.name==='stopgrab'){ addEff(def,'stop',90); ring(def.x,def.y-60,'#6bb8ff',170);
+    pop(def.x,def.y-162,'STOP 1.5びょう','#6bb8ff',1.05); sfx('sp'); }
+  if(m.name==='ultimate'){ addEff(def,'stop',60); ring(def.x,def.y-60,'#6bb8ff',170); }
   att.combo++; att.comboTimer=48;
 
   const hx=(att.x+def.x)/2, hy=def.y-70;
@@ -1537,7 +1544,7 @@ function updateItems(){
   for(let i=B.items.length-1;i>=0;i--){
     const it=B.items[i]; it.vy=Math.min(5,it.vy+0.3); it.y+=it.vy; it.life--;
     if(it.y>GROUND-14){ it.y=GROUND-14; it.vy=0; }
-    for(const f of [B.p,B.b]){
+    for(const f of (B.fs||[B.p,B.b])){
       if(!f.dead && Math.abs(f.x-it.x)<34 && Math.abs((f.y-48)-it.y)<58){
         if(it.k==='heal'){ f.hp=Math.min(f.maxHp,f.hp+16); pop(f.x,f.y-130,'+16','#9fe870',1); }
         if(it.k==='atk'){ f.buffs.atk=1.4; f.buffTimer=600; pop(f.x,f.y-130,'力','#ff6b6b',1); }
@@ -1556,7 +1563,9 @@ function updateHazards(){
   for(let i=B.fx.hazards.length-1;i>=0;i--){
     const h=B.fx.hazards[i];
     if(h.life!==undefined){ h.life--; if(h.life<=0){ B.fx.hazards.splice(i,1); continue; } }
-    const t = h.owner ? (h.owner==='p'?B.b:B.p) : B.p;   // 必殺技で置いた床は相手だけを踏み抜く
+    // 必殺技で置いた床は、狙った相手だけを踏み抜く
+    const t = (h.tgtIdx>=0 && B.fs && B.fs[h.tgtIdx]) ? B.fs[h.tgtIdx]
+            : (h.owner ? (h.owner==='p'?B.b:B.p) : B.p);
     h.on=false;
     if(t.dead) continue;
     const inside = t.onGround && !t.platform && t.x>h.x && t.x<h.x+h.w;
@@ -1629,7 +1638,8 @@ function spawnVolleyFrom(src,dst,n){
   for(let i=0;i<n;i++){
     const a=Math.atan2((dst.y-60)-(src.y-70), dst.x-src.x)+(i-(n-1)/2)*0.20;
     B.bullets.push({x:src.x, y:src.y-70, vx:Math.cos(a)*3.8, vy:Math.sin(a)*3.8,
-      r:12, txt:TALK[(Math.random()*TALK.length)|0], sorted:false, life:280, foe:(dst===B.p?'p':'b')});
+      r:12, txt:TALK[(Math.random()*TALK.length)|0], sorted:false, life:280,
+      foe:(dst===B.p?'p':'b'), foeIdx: B.fs?B.fs.indexOf(dst):-1});
   }
   sfx('ui');
 }
@@ -1655,7 +1665,7 @@ function updateBullets(){
   if(B.fx.bulletOn){ B.volleyTimer--; if(B.volleyTimer<=0){ B.volleyTimer=B.fx.bulletGap; spawnVolley(); } }
   for(let i=B.bullets.length-1;i>=0;i--){
     const q=B.bullets[i];
-    const p = q.foe==='b' ? B.b : B.p;
+    const p = (q.foeIdx>=0 && B.fs && B.fs[q.foeIdx]) ? B.fs[q.foeIdx] : (q.foe==='b'?B.b:B.p);
     if(q.sorted){ q.x+=(q.tx-q.x)*0.14; q.y+=(q.ty-q.y)*0.14; q.life--;
       if(q.life<=0) B.bullets.splice(i,1); continue; }
     q.x+=q.vx; q.y+=q.vy; q.life--;
@@ -1776,7 +1786,8 @@ function tick(){
     return;
   }
   if(B.phase==='over'){ B.t++;
-    updateFighter(B.p,B.b); updateFighter(B.b,B.p);
+    if(B.vs && B.fs){ for(const f of B.fs) updateFighter(f, foeOf(f)); }
+    else { updateFighter(B.p,B.b); updateFighter(B.b,B.p); }
     if(B.vs && NET.role==='host') sendSnapshot();
     if(B.t>110) endBattle();
     return;
@@ -1791,10 +1802,30 @@ function tick(){
   updateHazards(); updatePlats();
   updateStance(); updateWalls(); updateBullets(); updateDrainSupport(); updateFinalPhase();
   if(!B.vs) B.yui=Math.min(100, B.yui + 2/60);
-  if(B.timer<=0){ finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return; }
+  // 必殺ゲージは、殴らなくても時間で溜まる
+  const mRate = B.vs?0.10:0.07;
+  for(const f of (B.fs||[B.p,B.b])) if(f && !f.dead) f.meter=Math.min(100,f.meter+mRate);
+  if(B.timer<=0){
+    if(B.vs){ vsTimeUp(); return; }
+    finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return;
+  }
+
+  // ---- 通信対戦（ホスト）：全員ぶんをここで動かす ----
+  if(B.vs){
+    netHostStep();
+    for(const f of B.fs) updateFighter(f, foeOf(f));
+    updateAlly(); updateBullets(); updateWalls(); updateHazards();
+    checkHitsVs();
+    updateItems();
+    pushApartVs();
+    vsCheckEnd();
+    sendSnapshot();
+    $('#t-yui').classList.remove('on');
+    return;
+  }
 
   playerControl(B.p,B.b);
-  if(B.vs) netHostStep(); else aiControl(B.b,B.p);
+  aiControl(B.b,B.p);
   updateFighter(B.p,B.b);
   updateFighter(B.b,B.p);
   updateAlly();
@@ -1810,8 +1841,6 @@ function tick(){
   // 押し合い
   const dd=B.b.x-B.p.x;
   if(Math.abs(dd)<30 && Math.abs(B.p.y-B.b.y)<70){ const push=(30-Math.abs(dd))*0.12*(dd<0?-1:1); B.p.x-=push; B.b.x+=push; }
-
-  if(B.vs) sendSnapshot();
 
   // YUIボタン／HUMAN FINISHボタン
   const ready=!B.vs && B.yui>=100 && B.calls<maxCalls();
@@ -1846,15 +1875,25 @@ function render(){
     B.items.forEach(drawItem);
     if(B.decoys.length && B.stage.id==='w3') drawDecoys();
     if(B.ally) drawFighter(B.ally, false);
-    drawFighter(B.b, true);
-    drawFighter(B.p, false);
-    if(B.stage.id==='w17') drawWeakMarkers();
-    if(B.vs){ // 自分が動かしているほうに目印
-      const me = NET.role==='host'?B.p:B.b;
-      ctx.save(); ctx.fillStyle='#9fe870';
-      ctx.beginPath(); ctx.moveTo(me.x-8,me.y-136); ctx.lineTo(me.x+8,me.y-136); ctx.lineTo(me.x,me.y-124);
-      ctx.closePath(); ctx.fill(); ctx.restore();
+    if(B.vs && B.fs){
+      if(B.mode==='tag'){
+        for(const f of B.fs){ if(f.dead) continue;
+          ctx.save(); ctx.fillStyle= f.team===0?'rgba(61,240,255,.75)':'rgba(255,138,61,.75)';
+          ctx.fillRect(f.x-13, f.y+4, 26, 3); ctx.restore(); }
+      }
+      for(let i=B.fs.length-1;i>=0;i--) if(i!==B.mySlot) drawFighter(B.fs[i], false);
+      drawFighter(B.fs[B.mySlot], false);
+      const me=B.fs[B.mySlot];
+      if(me && !me.dead){
+        ctx.save(); ctx.fillStyle='#9fe870';
+        ctx.beginPath(); ctx.moveTo(me.x-8,me.y-142); ctx.lineTo(me.x+8,me.y-142); ctx.lineTo(me.x,me.y-130);
+        ctx.closePath(); ctx.fill(); ctx.restore();
+      }
+    } else {
+      drawFighter(B.b, true);
+      drawFighter(B.p, false);
     }
+    if(B.stage.id==='w17') drawWeakMarkers();
     drawBullets();
     drawEffects();
     drawWalls();
@@ -2197,9 +2236,37 @@ function bar(x,y,w,h,ratio,color,flip){
   ctx.fillStyle=color;
   ctx.fillRect(flip? x+w-2-ww : x+2, y+2, ww, h-4);
 }
+function drawHUDVs(){
+  const n=B.fs.length;
+  const slots=[[28,22,false],[W-328,22,true],[28,66,false],[W-328,66,true]];
+  for(let i=0;i<n;i++){
+    const f=B.fs[i], s=slots[i], x=s[0], y=s[1], flip=s[2];
+    ctx.fillStyle= f.dead?'#54658c':P_COLORS[i];
+    ctx.font=fnt('400',11,'"Zen Kaku Gothic New",sans-serif');
+    ctx.textAlign= flip?'right':'left';
+    ctx.fillText('P'+(i+1)+(i===B.mySlot?'（あなた）':'')
+      +(B.mode==='tag'?(f.team===0?'／Aチーム':'／Bチーム'):'')
+      +(f.dead?'　K.O.':''), flip?x+300:x, y-4);
+    ctx.textAlign='left';
+    bar(x,y,300,16, f.dead?0:f.hp/f.maxHp, f.dead?'#3a4560':P_COLORS[i], flip);
+    bar(x,y+19,300,6, f.meter/100, f.meter>=spCost()?'#ffcf4a':'rgba(255,207,74,.35)', flip);
+  }
+  ctx.textAlign='center';
+  ctx.fillStyle= B.timer<600?'#ff3d8b':'#e8eefb'; ctx.font=fnt('400',26,'"Anton",sans-serif');
+  ctx.fillText(String(Math.ceil(B.timer/60)), W/2, 44);
+  ctx.font=fnt('400',10,'"Anton",sans-serif'); ctx.fillStyle='#5f7093';
+  ctx.fillText(B.mode==='tag'?'TAG BATTLE':'BATTLE ROYALE', W/2, 62);
+  const me=B.fs[B.mySlot];
+  if(me && !me.dead && me.meter>=spCost()){
+    ctx.fillStyle='#ffcf4a'; ctx.font=fnt('400',11,'"Zen Kaku Gothic New",sans-serif');
+    ctx.fillText((SPECIALS[me.sp]||SPECIALS.tomoe).n+' 発動できる', W/2, 82);
+  }
+  ctx.textAlign='left';
+}
 function drawHUD(){
   const {p,b,stage}=B;
   ctx.textBaseline='alphabetic';
+  if(B.vs && B.fs){ drawHUDVs(); return; }
   // プレイヤー
   bar(28,24,330,20,p.hp/p.maxHp,'#3df0ff',false);
   bar(28,48,220,7,p.guard/p.guardMax,'rgba(140,200,255,.65)',false);
@@ -2316,9 +2383,12 @@ function drawAttract(){
 /* ============================================================
    12.5 通信対戦（WebRTCで端末どうしを直接つなぐ）
    ============================================================ */
-const NET={peer:null,conn:null,role:null,code:'',connected:false,pending:0,lastMask:-1,
-  cur:{left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0},
-  prv:{left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0}};
+const NET={peer:null,conn:null,conns:[null,null,null,null],role:null,code:'',connected:false,
+  mySlot:0, slotCount:1, spBySlot:['tomoe','tomoe','tomoe','tomoe'],
+  pend:[0,0,0,0], lastMask:-1,
+  cur:[0,1,2,3].map(()=>({left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0})),
+  prv:[0,1,2,3].map(()=>({left:0,right:0,up:0,light:0,heavy:0,guard:0,special:0,dodge:0}))};
+const P_COLORS=['#3df0ff','#ff3d8b','#9fe870','#ffcf4a'];
 const VS_STAGE={ id:'vs', num:'VERSUS', title:'通信対戦', skill:'', skillJp:'',
   boss:{name:'あいて', quote:'イザ ジンジョウニ', hp:100, color:'#ff3d8b',
         ai:{aggr:0,guard:0,jump:0,range:100,gap:60,hesitate:0}},
@@ -2362,61 +2432,143 @@ function decF(f,a){
   f.platform=!!on; if(on) f.platY=on.y+14;
   f.onGround = f.y>=GROUND-0.01 || f.platform;
 }
+function broadcast(msg){
+  for(const c of NET.conns){ if(c&&c.open){ try{ c.send(msg); }catch(e){} } }
+}
 function sendSnapshot(){
-  const c=NET.conn; if(!c||!c.open) return;
-  try{
-    c.send({s:[ B.timer|0, encF(B.p), encF(B.b),
-      B.plats.map(p=>[Math.round(p.x), p.on===false?0:1, p.fuse|0]),
-      B.items.map(it=>[it.x|0,it.y|0,it.k]),
-      B.phase==='intro'?0:(B.phase==='over'?2:1), B.t|0,
-      B.result===null?-1:(B.result?1:0) ]});
-  }catch(e){}
+  if(!NET.conns.some(c=>c&&c.open)) return;
+  broadcast({s:[ B.timer|0, B.fs.map(encF),
+    B.plats.map(p=>[Math.round(p.x), p.on===false?0:1, p.fuse|0]),
+    B.items.map(it=>[it.x|0,it.y|0,it.k]),
+    B.phase==='intro'?0:(B.phase==='over'?2:1), B.t|0,
+    (B.result===null||B.result===undefined)?-1:B.result,
+    B.bullets.map(q=>[q.x|0,q.y|0,Math.max(0,TALK.indexOf(q.txt)),q.sorted?1:0]),
+    B.walls.map(w=>[w.x|0,w.y|0,w.w|0,w.h|0]),
+    B.fx.hazards.map(h=>[h.x|0,h.w|0,h.on?1:0]),
+    (B.ally&&B.fx.allyActive)?encF(B.ally):null ]});
 }
 function applySnapshot(s){
-  if(!B||!B.vs) return;
+  if(!B||!B.vs||!B.fs) return;
   B.timer=s[0];
-  const before=[B.p.hp,B.b.hp];
-  decF(B.p,s[1]); decF(B.b,s[2]);
-  s[3].forEach((a,i)=>{ const pl=B.plats[i]; if(!pl) return; pl.x=a[0]; pl.on=!!a[1]; pl.fuse=a[2]; });
-  B.items=s[4].map(a=>{ const d=ITEMS.find(z=>z.k===a[2])||ITEMS[0];
+  const arr=s[1], before=B.fs.map(f=>f.hp);
+  for(let i=0;i<B.fs.length && i<arr.length;i++) decF(B.fs[i],arr[i]);
+  s[2].forEach((a,i)=>{ const pl=B.plats[i]; if(!pl) return; pl.x=a[0]; pl.on=!!a[1]; pl.fuse=a[2]; });
+  B.items=s[3].map(a=>{ const d=ITEMS.find(z=>z.k===a[2])||ITEMS[0];
     return {x:a[0],y:a[1],vy:0,life:99,k:d.k,c:d.c,ch:d.ch}; });
-  const ph=s[5]; B.phase = ph===0?'intro':(ph===2?'over':'fight');
-  B.t=s[6]; B.result = s[7]<0?null:!!s[7];
+  const ph=s[4]; B.phase = ph===0?'intro':(ph===2?'over':'fight');
+  B.t=s[5]; B.result = s[6]<0?null:s[6];
+  // 必殺技で出たもの（弾・壁・見えない床・なかま）も同期する
+  B.bullets=(s[7]||[]).map(a=>({x:a[0],y:a[1],vx:0,vy:0,r:12,txt:TALK[a[2]]||'…',sorted:!!a[3],life:99}));
+  B.walls=(s[8]||[]).map(a=>({x:a[0],y:a[1],w:a[2],h:a[3],vx:0,life:99}));
+  B.fx.hazards=(s[9]||[]).map(a=>({x:a[0],w:a[1],on:!!a[2]}));
+  if(s[10]){
+    if(!B.ally){ B.ally=makeFighter({x:0,y:GROUND,color:'#6bb8ff',isAlly:true,maxHp:999,hp:999}); }
+    decF(B.ally,s[10]); B.fx.allyActive=true;
+  } else { B.fx.allyActive=false; }
   // 当たった演出は、体力の減りから起こす
-  [[B.p,before[0]],[B.b,before[1]]].forEach(pair=>{
-    const f=pair[0], d=pair[1]-f.hp;
+  B.fs.forEach((f,i)=>{
+    const d=before[i]-f.hp;
     if(d>0.4){ f.flash=6; spark(f.x,f.y-70,10,'#ffffff',3); pop(f.x,f.y-118,String(Math.round(d)),'#fff',0.9);
       doShake(4); sfx('hit'); }
   });
 }
-function onNetData(d){
+function onNetData(d,slot){
   if(!d) return;
-  if(d.sp){ NET.foeSp=d.sp; if(B&&B.vs) B.b.sp=d.sp; return; }
-  if(d.e==='go'||d.e==='rs'){ startVsBattle(); return; }
-  if(d.i!==undefined){ NET.pending=d.i|0; return; }
+  if(d.slot!==undefined){ NET.mySlot=d.slot|0; netLobby(); return; }
+  if(d.sp){ NET.spBySlot[slot!==undefined?slot:1]=d.sp; netLobby(); return; }
+  if(d.e==='go'){ startVsBattle(d.cfg); return; }
+  if(d.i!==undefined){ if(slot!==undefined) NET.pend[slot]=d.i|0; return; }
   if(d.s){ applySnapshot(d.s); return; }
 }
-function onNetLost(){
+function onNetLost(slot){
+  if(NET.role==='host'){
+    if(slot!==undefined){ NET.conns[slot]=null;
+      if(B&&B.vs&&B.fs&&B.fs[slot]){ B.fs[slot].hp=0; }
+      netLobby(); netStatus('P'+(slot+1)+' の接続が切れました','warn');
+    }
+    return;
+  }
   if(!NET.connected) return;
   NET.connected=false; NET.conn=null;
-  netStatus('相手との接続が切れました。もう一度つなぎ直してください','warn');
+  netStatus('部屋との接続が切れました。もう一度つなぎ直してください','warn');
   if(scene==='battle'){ showLayer('vs'); B=null; }
 }
-function bindConn(c){
-  NET.conn=c;
+function mySp(){ const id=save.equipVs||'tomoe'; return SPECIALS[id]?id:'tomoe'; }
+function bindConn(c,slot){
+  if(slot===undefined){ NET.conn=c; }        // ゲスト側
+  else { NET.conns[slot]=c; }                // ホスト側
   c.on('open',()=>{
-    NET.connected=true; netStatus('つながりました。はじめます','ok'); sfx('ok');
-    try{ c.send({sp: spUnlocked(save.equip)?save.equip:'tomoe'}); }catch(e){}
-    if(NET.role==='host') setTimeout(()=>{ try{c.send({e:'go'});}catch(e){} startVsBattle(); },500);
+    NET.connected=true; sfx('ok');
+    if(NET.role==='host'){
+      try{ c.send({slot:slot}); }catch(e){}
+      netLobby();
+    } else {
+      netStatus('部屋に入りました。ホストが始めるのを待っています','ok');
+      try{ c.send({sp:mySp()}); }catch(e){}
+    }
   });
-  c.on('data',onNetData);
-  c.on('close',onNetLost);
-  c.on('error',onNetLost);
+  // 席が詰められることがあるので、その都度いまの席を引き直す
+  const cur=()=> (slot===undefined ? undefined : Math.max(1,NET.conns.indexOf(c)));
+  c.on('data',d=>onNetData(d,cur()));
+  c.on('close',()=>onNetLost(cur()));
+  c.on('error',()=>onNetLost(cur()));
 }
 function netCleanup(){
   try{ if(NET.conn) NET.conn.close(); }catch(e){}
+  for(const c of NET.conns){ try{ if(c) c.close(); }catch(e){} }
   try{ if(NET.peer) NET.peer.destroy(); }catch(e){}
-  NET.conn=null; NET.peer=null; NET.connected=false; NET.role=null; NET.pending=0; NET.lastMask=-1;
+  NET.conn=null; NET.conns=[null,null,null,null]; NET.peer=null; NET.connected=false;
+  NET.role=null; NET.pend=[0,0,0,0]; NET.lastMask=-1; NET.mySlot=0;
+  const lb=$('#vs-lobby'); if(lb) lb.textContent='';
+}
+/* ---- 待ち合わせ画面（ホストだけ人数とモードを操作する） ---- */
+function netPlayers(){ return 1 + NET.conns.filter(c=>c&&c.open).length; }
+function netLobby(){
+  const lb=$('#vs-lobby'); if(!lb) return;
+  lb.textContent='';
+  if(NET.role!=='host'){
+    if(NET.connected) lb.appendChild(el('p','muted','あなたは P'+(NET.mySlot+1)+' です。ホストが始めると自動で始まります。'));
+    return;
+  }
+  const n=netPlayers();
+  lb.appendChild(el('div','eyebrow','Players '+n+' / 4'));
+  const row=el('div','row'); row.style.marginTop='10px';
+  for(let i=0;i<4;i++){
+    const on = i===0 || (NET.conns[i]&&NET.conns[i].open);
+    const chip=el('div','pchip'+(on?' on':''), 'P'+(i+1)+(i===0?'（あなた）':(on?'':' 待ち')));
+    chip.style.borderColor=on?P_COLORS[i]:'';
+    chip.style.color=on?P_COLORS[i]:'';
+    row.appendChild(chip);
+  }
+  lb.appendChild(row);
+  const act=el('div','row'); act.style.marginTop='12px';
+  const br=el('button','btn','大乱闘ではじめる（'+n+'人）');
+  br.onclick=()=>hostStart('royale');
+  if(n<2){ br.disabled=true; br.style.opacity='.45'; }
+  act.appendChild(br);
+  const tg=el('button','btn ghost','タッグ戦ではじめる（2対2）');
+  tg.onclick=()=>hostStart('tag');
+  if(n!==4){ tg.disabled=true; tg.style.opacity='.45'; }
+  act.appendChild(tg);
+  lb.appendChild(act);
+  if(n<2) lb.appendChild(el('p','muted','あいことばを伝えて、参加してもらってください。2人からはじめられます。'));
+  else if(n<4) lb.appendChild(el('p','muted','4人そろうとタッグ戦もえらべます。'));
+}
+function compactSlots(){
+  const act=NET.conns.filter(c=>c&&c.open);
+  NET.conns=[null,null,null,null];
+  act.forEach((c,i)=>{ NET.conns[i+1]=c; try{ c.send({slot:i+1}); }catch(e){} });
+}
+function hostStart(mode){
+  compactSlots();
+  const n=netPlayers();
+  const sps=[mySp()];
+  for(let i=1;i<4;i++) sps.push(NET.spBySlot[i]||'tomoe');
+  const teams = mode==='tag' ? [0,0,1,1] : [0,1,2,3];
+  const cfg={mode, n, sps, teams};
+  broadcast({e:'go', cfg});
+  sfx('ok');
+  setTimeout(()=>startVsBattle(cfg), 260);
 }
 async function vsStart(role){
   const raw=$('#vs-code').value.trim();
@@ -2438,30 +2590,114 @@ async function vsStart(role){
     else netStatus('つながりませんでした（'+t+'）。もう一度ためしてください','warn');
   });
   if(role==='host'){
-    NET.peer.on('open',()=>netStatus('あいことば「'+raw+'」で待っています。相手に伝えて、「部屋に入る」を押してもらってください'));
-    NET.peer.on('connection',c=>{ if(NET.conn){ try{c.close();}catch(e){} return; } bindConn(c); });
+    NET.mySlot=0;
+    NET.peer.on('open',()=>{ netStatus('あいことば「'+raw+'」で待っています。参加する人に伝えてください（最大4人）'); netLobby(); });
+    NET.peer.on('connection',c=>{
+      let slot=-1;
+      for(let i=1;i<4;i++){ if(!NET.conns[i]||!NET.conns[i].open){ slot=i; break; } }
+      if(slot<0){ try{c.close();}catch(e){} return; }
+      bindConn(c,slot);
+    });
   } else {
     NET.peer.on('open',()=>{ netStatus('部屋をさがしています…'); bindConn(NET.peer.connect(id+'-h')); });
   }
 }
-function startVsBattle(){
+function startVsBattle(cfg){
+  cfg=cfg||{mode:'royale',n:2,sps:['tomoe','tomoe'],teams:[0,1]};
   newBattle(VS_STAGE);
-  B.vs=true; B.plats=vsPlats(); B.yui=0; B.itemTimer=300; B.overT=0;
-  B.p.x=190; B.b.x=770;
-  B.b.sp = (NET.foeSp && SPECIALS[NET.foeSp]) ? NET.foeSp : 'tomoe';
-  NET.pending=0; NET.lastMask=-1;
-  maskTo(0,NET.cur); maskTo(0,NET.prv);
+  B.vs=true; B.mode=cfg.mode; B.plats=vsPlats(); B.yui=0; B.itemTimer=240; B.overT=0;
+  const N=Math.max(2,Math.min(4,cfg.n));
+  const XS = cfg.mode==='tag' ? [140,300,660,820] : [140,380,620,860];
+  B.fs=[];
+  for(let i=0;i<N;i++){
+    const f = i===0?B.p : (i===1?B.b : makeFighter({}));
+    f.x=XS[i]; f.y=GROUND; f.vx=0; f.vy=0;
+    f.maxHp=100; f.hp=100; f.meter=0; f.guard=f.guardMax; f.dead=false;
+    f.state='idle'; f.t=0; f.attack=null; f.hitstun=0; f.blockstun=0; f.invuln=0;
+    f.eff={}; f.clones=0; f.combo=0; f.buffs={atk:1,spd:1}; f.buffTimer=0;
+    f.color=P_COLORS[i]; f.team=cfg.teams[i]; f.sp=cfg.sps[i]||'tomoe';
+    f.pname='P'+(i+1); f.face = (XS[i] < W/2) ? 1 : -1;
+    B.fs.push(f);
+  }
+  B.p=B.fs[0]; B.b=B.fs[1];
+  B.mySlot=Math.min(NET.mySlot||0, N-1);
+  B.result=null;
+  NET.pend=[0,0,0,0];
+  for(let i=0;i<4;i++){ maskTo(0,NET.cur[i]); maskTo(0,NET.prv[i]); }
   toBattleScene();
 }
+function foeOf(f){
+  if(!B.fs) return B.b;
+  let best=null,bd=1e9;
+  for(const g of B.fs){ if(g===f||g.dead||g.team===f.team) continue;
+    const d=Math.abs(g.x-f.x); if(d<bd){bd=d;best=g;} }
+  return best || B.fs.find(g=>g!==f) || f;
+}
 function netHostStep(){
-  Object.assign(NET.prv,NET.cur);
-  maskTo(NET.pending,NET.cur);
-  applyControl(B.b,B.p,NET.cur,NET.prv);
+  for(let i=0;i<B.fs.length;i++){
+    const f=B.fs[i];
+    Object.assign(NET.prv[i],NET.cur[i]);
+    if(i===B.mySlot) Object.assign(NET.cur[i], {left:IN.left,right:IN.right,up:IN.up,light:IN.light,
+      heavy:IN.heavy,guard:IN.guard,special:IN.special,dodge:IN.dodge});
+    else maskTo(NET.pend[i],NET.cur[i]);
+    applyControl(f, foeOf(f), NET.cur[i], NET.prv[i]);
+  }
 }
 function netGuestStep(){
   const m=inputMask(IN);
   if(NET.conn&&NET.conn.open){ try{ NET.conn.send({i:m}); }catch(e){} }
   NET.lastMask=m;
+}
+/* ---- 4人ぶんの当たり判定と決着 ---- */
+function checkHitsVs(){
+  const al=B.ally;
+  if(al && B.fx.allyActive && al.attack && al.state==='attack' && !al.hitDone &&
+     al.t>=al.attack.startup && al.t<al.attack.startup+al.attack.active){
+    const at=B.allyTarget;
+    if(at && !at.dead && overlap(hitbox(al),hurtbox(at))) resolveHit(al,at,al.attack,false);
+  }
+  for(const a of B.fs){
+    if(a.dead||!a.attack||a.state!=='attack'||a.hitDone) continue;
+    if(!(a.t>=a.attack.startup && a.t<a.attack.startup+a.attack.active)) continue;
+    const hb=hitbox(a);
+    for(const d of B.fs){
+      if(d===a||d.dead||d.team===a.team) continue;
+      if(overlap(hb,hurtbox(d))){ resolveHit(a,d,a.attack,false); break; }
+    }
+  }
+}
+function pushApartVs(){
+  for(let i=0;i<B.fs.length;i++) for(let j=i+1;j<B.fs.length;j++){
+    const a=B.fs[i], b2=B.fs[j];
+    if(a.dead||b2.dead) continue;
+    const dd=b2.x-a.x;
+    if(Math.abs(dd)<30 && Math.abs(a.y-b2.y)<70){
+      const push=(30-Math.abs(dd))*0.10*(dd<0?-1:1);
+      a.x-=push; b2.x+=push;
+    }
+  }
+}
+function vsTimeUp(){
+  const sum={};
+  for(const f of B.fs){ if(f.dead) continue; sum[f.team]=(sum[f.team]||0)+f.hp; }
+  let best=-1,bv=-1;
+  for(const k in sum){ if(sum[k]>bv){ bv=sum[k]; best=Number(k); } }
+  B.result=best; B.phase='over'; B.t=0;
+  pop(W/2,180,'TIME UP','#ffcf4a',1.9); flashScreen=8;
+}
+function vsCheckEnd(){
+  for(const f of B.fs){
+    if(!f.dead && f.hp<=0){
+      f.dead=true; f.vx=(f.x<W/2?1:-1)*7; f.vy=-9;
+      pop(f.x,f.y-140,'K.O.','#ff3d8b',1.5); doShake(14); flashScreen=8; sfx('ko');
+    }
+  }
+  const teams=[...new Set(B.fs.filter(f=>!f.dead).map(f=>f.team))];
+  if(teams.length<=1 && B.phase==='fight'){
+    B.result = teams.length?teams[0]:-1;
+    B.phase='over'; B.t=0; doShake(16); flashScreen=10;
+    pop(W/2,180,'FINISH','#3df0ff',2.1);
+  }
 }
 
 /* ============================================================
@@ -2485,23 +2721,29 @@ function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on
 // タイトル
 $('#b-start').onclick=()=>{ audio(); sfx('ui'); buildWorlds(); showLayer('select'); };
 $('#b-how').onclick=()=>{ sfx('ui'); buildHow(); showLayer('how'); };
-$('#b-vs').onclick=()=>{ audio(); sfx('ui'); netStatus(''); showLayer('vs'); };
+$('#b-vs').onclick=()=>{ audio(); sfx('ui'); netStatus(''); netLobby(); showLayer('vs'); };
 $('#vs-host').onclick=()=>vsStart('host');
 $('#vs-join').onclick=()=>vsStart('guest');
 $('#vs-back').onclick=()=>{ sfx('ui'); netCleanup(); netStatus(''); showLayer('title'); };
 let lastSp='select';
 function worldNameOf(id){ const s=STAGES.find(x=>x.id===id); return s?s.num:''; }
 function buildSpecials(){
+  const forVs = lastSp==='vs';           // 通信対戦では全部の技を使える
+  const cur = forVs ? save.equipVs : save.equip;
   const list=$('#sp-list'); list.textContent='';
+  const head0=$('#sp-lead');
+  if(head0) head0.textContent = forVs
+    ? '通信対戦では、まだクリアしていない技もぜんぶ使えます。'
+    : 'えらんだ技はストーリーで使えます。ステージをクリアすると、その相手の技や仕掛けを覚えます。';
   Object.keys(SPECIALS).forEach(id=>{
-    const d=SPECIALS[id], un=spUnlocked(id);
-    const b=el('button','spcard'+(save.equip===id?' on':'')+(un?'':' locked'));
-    const head=el('div','sphead');
-    head.appendChild(el('div','spname', d.n));
-    head.appendChild(el('div','spmeta', un?(save.equip===id?'えらんでいる':'えらぶ'):(worldNameOf(d.from)+' クリアで習得')));
-    b.appendChild(head);
+    const d=SPECIALS[id], un=forVs||spUnlocked(id);
+    const b=el('button','spcard'+(cur===id?' on':'')+(un?'':' locked'));
+    const h=el('div','sphead');
+    h.appendChild(el('div','spname', d.n));
+    h.appendChild(el('div','spmeta', un?(cur===id?'えらんでいる':'えらぶ'):(worldNameOf(d.from)+' クリアで習得')));
+    b.appendChild(h);
     b.appendChild(el('p','muted', d.d));
-    if(un) b.onclick=()=>{ save.equip=id; persist(); sfx('ok'); buildSpecials(); };
+    if(un) b.onclick=()=>{ if(forVs) save.equipVs=id; else save.equip=id; persist(); sfx('ok'); buildSpecials(); };
     list.appendChild(b);
   });
 }
@@ -2767,18 +3009,32 @@ function endBattle(){
   const s=B.stage;
   const sheet=$('#result-sheet'); sheet.textContent='';
   if(B.vs){
-    const iWon = NET.role==='host' ? !!win : !win;
-    sheet.appendChild(el('div','eyebrow','Versus'));
+    const me=B.fs&&B.fs[B.mySlot];
+    const myTeam = me?me.team:0;
+    const iWon = B.result===myTeam;
+    sheet.appendChild(el('div','eyebrow', B.mode==='tag'?'Tag Battle':'Battle Royale'));
     const h=el('h1'); h.textContent=iWon?'WIN':'LOSE'; h.style.color=iWon?'#3df0ff':'#ff3d8b';
     sheet.appendChild(h);
-    sheet.appendChild(el('p','muted', iWon?'勝ちました。':'負けました。もう一度どうぞ。'));
+    if(B.fs){
+      const rank=el('div','list');
+      B.fs.forEach((f,i)=>{
+        const c=el('div','manual-card');
+        const no=el('div','no','P'+(i+1)); no.style.color=P_COLORS[i]; c.appendChild(no);
+        const bx=el('div');
+        bx.appendChild(el('h3',null,(i===B.mySlot?'あなた':'P'+(i+1))
+          +(B.mode==='tag'?(f.team===0?'／Aチーム':'／Bチーム'):'')));
+        bx.appendChild(el('p','muted', f.dead?'K.O.':'のこり体力 '+Math.max(0,Math.round(f.hp))));
+        c.appendChild(bx); rank.appendChild(c);
+      });
+      sheet.appendChild(rank);
+    }
     const row=el('div','close-row');
     if(NET.role==='host'){
       const again=el('button','btn','もう一度');
-      again.onclick=()=>{ if(NET.conn&&NET.conn.open){ try{NET.conn.send({e:'rs'});}catch(e){} } startVsBattle(); };
+      again.onclick=()=>hostStart(B.mode);
       row.appendChild(again);
     } else {
-      row.appendChild(el('p','muted','相手が「もう一度」を押すと、また始まります。'));
+      row.appendChild(el('p','muted','ホストが「もう一度」を押すと、また始まります。'));
     }
     const quit=el('button','btn ghost sm','やめる');
     quit.onclick=()=>{ netCleanup(); netStatus(''); showLayer('title'); };
