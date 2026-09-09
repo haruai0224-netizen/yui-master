@@ -2331,6 +2331,11 @@ function buildHow(){
   const nb=el('div'); nb.appendChild(el('h3',null,'強攻撃3発でガードを崩せる'));
   nb.appendChild(el('p','muted','相手の攻撃に合わせて当てると COUNTER で1.4倍。壁に叩きつけると追加ダメージ。'));
   note.appendChild(nb); list.appendChild(note);
+  const vs=el('div','manual-card');
+  vs.appendChild(el('div','no','VS'));
+  const vb=el('div'); vb.appendChild(el('h3',null,'通信対戦のステージ'));
+  vb.appendChild(el('p','muted','ジャンプで乗れる台が3段。緑のバネ台は高く跳ね上がり、いちばん上の動く足場まで届きます。紫の床は乗り続けると割れて落ち、しばらくすると戻ります。'));
+  vs.appendChild(vb); list.appendChild(vs);
 }
 function buildWorlds(){
   const list=$('#worldlist'); list.textContent='';
