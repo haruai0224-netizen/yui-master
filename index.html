@@ -131,17 +131,55 @@
   .bookitem{background:#0c1528;border:1px solid #22304f;padding:12px 14px;display:grid;gap:9px}
   .bookitem p{font-size:13px;color:#d5deef}
   .bookitem .row{justify-content:flex-end}
-  .splist{display:grid;gap:8px;margin-top:16px}
-  .spcard{text-align:left;background:#0c1528;border:1px solid #22304f;border-left:3px solid #22304f;
-    padding:12px 14px;color:var(--paper);font:inherit;cursor:pointer;display:grid;gap:5px}
-  .spcard:hover{border-color:var(--cy)}
-  .spcard.on{border-left-color:var(--cy);background:#122040}
-  .spcard.locked{opacity:.42;cursor:default}
-  .spcard.locked:hover{border-color:#22304f}
-  .sphead{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-  .spname{font-family:var(--font-dp);font-size:15px}
-  .spmeta{font-family:var(--font-lt);font-size:11px;letter-spacing:.1em;color:var(--dim);white-space:nowrap}
-  .spcard.on .spmeta{color:var(--cy)}
+  /* ---------- 必殺技えらび ---------- */
+  .spsheet{width:min(1000px,94%)}
+  .sp-top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .sp-count{font-family:var(--font-lt);font-size:13px;letter-spacing:.12em;color:var(--dim);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sp-count b{font-family:var(--font-lt);font-size:26px;color:var(--paper);letter-spacing:.02em;font-weight:400}
+  .sp-equip{margin-top:14px;display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center;
+    padding:14px 18px;background:linear-gradient(90deg,rgba(61,240,255,.09),rgba(61,240,255,0) 70%);
+    border-left:4px solid var(--tc,var(--cy))}
+  .sp-equip .lbl{grid-row:1/3;font-family:var(--font-lt);font-size:11px;letter-spacing:.18em;color:var(--dim);
+    writing-mode:vertical-rl;text-orientation:upright;line-height:1}
+  .sp-equip .nm{font-family:var(--font-dp);font-size:clamp(20px,3vw,28px);line-height:1.2}
+  .sp-equip .ds{font-size:13px;color:#cfd9ef;line-height:1.6}
+  .sp-filters{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .sp-tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .sp-tab{font:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;cursor:pointer;color:#aebbd6;
+    background:transparent;border:1px solid #2c3c60;letter-spacing:.04em}
+  .sp-tab:hover{border-color:#4a5d88;color:var(--paper)}
+  .sp-tab[aria-selected="true"]{color:var(--ink);background:var(--tc,var(--cy));border-color:var(--tc,var(--cy))}
+  .sp-tab:focus-visible,.spc:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .sp-only{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer}
+  .sp-sec{margin-top:18px}
+  .sp-sech{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .sp-sech h3{font-size:14px}
+  .sp-sech span{font-family:var(--font-lt);font-size:11px;letter-spacing:.12em;color:var(--dim);font-variant-numeric:tabular-nums}
+  .sp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:8px;margin-top:10px}
+  .spc{position:relative;text-align:left;font:inherit;color:var(--paper);cursor:pointer;
+    display:flex;flex-direction:column;gap:5px;padding:11px 12px 10px;background:#0c1528;
+    border:1px solid #1f2b47;border-top:3px solid var(--tc,#2c3c60);transition:transform .08s,border-color .12s}
+  .spc:hover{border-color:#3a4c75;transform:translateY(-1px)}
+  .spc-ty{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--tc)}
+  .spc-n{font-family:var(--font-dp);font-size:15px;line-height:1.25}
+  .spc-d{font-size:12px;line-height:1.55;color:#aebbd6;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden;min-height:37px}
+  .spc-src{font-size:10.5px;color:var(--dim);letter-spacing:.04em;margin-top:auto}
+  .spc.on{background:#13244a;box-shadow:inset 0 0 0 1px var(--cy)}
+  .spc.on::after{content:"装備中";position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;
+    color:var(--ink);background:var(--cy);padding:2px 6px;letter-spacing:.06em}
+  .spc.locked{opacity:.42;cursor:default}
+  .spc.locked:hover{transform:none;border-color:#1f2b47}
+  .spc.locked .spc-src{color:#8194b8}
+  .sp-empty{color:var(--dim);font-size:13px;margin-top:10px}
+  .spnow{font-size:12px}
+  .spnow b{color:var(--cy);font-weight:700}
+  .wsec{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:4px}
+  .world.kyo{border-left-color:var(--mg)}
+  .world.kyo .n{color:var(--mg)}
+  .wreward{margin-top:5px;font-size:12px;color:#cfd9ef}
+  .wrk{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--ink);background:var(--yui);padding:1px 6px;margin-right:7px}
   .vsinput{width:100%;margin-top:16px;padding:13px 14px;font:inherit;font-size:16px;letter-spacing:.12em;
     background:#0c1528;color:var(--paper);border:1px solid var(--line);outline:none}
   .vsinput:focus{border-color:var(--cy)}
@@ -228,6 +266,7 @@
         <div class="row" style="margin-top:26px">
           <button class="btn" id="b-start">はじめる</button>
           <button class="btn ghost" id="b-vs">通信対戦</button>
+          <button class="btn ghost" id="b-sp0">必殺技</button>
           <button class="btn ghost" id="b-how">あそびかた</button>
           <button class="btn ghost" id="b-manual0">ゆいちゃん取扱説明書</button>
           <button class="btn ghost" id="b-book0">MY COMMAND BOOK</button>
@@ -261,11 +300,21 @@
     <!-- SPECIAL -->
     <div class="layer" id="sp">
       <div class="scrim"></div>
-      <div class="sheet">
-        <div class="eyebrow">Special</div>
-        <h2 style="margin-top:6px">必殺技をえらぶ</h2>
-        <p class="muted" id="sp-lead" style="margin-top:8px">えらんだ技はストーリーで使えます。</p>
-        <div class="splist" id="sp-list"></div>
+      <div class="sheet spsheet">
+        <div class="sp-top">
+          <div>
+            <div class="eyebrow" id="sp-mode">Special Moves</div>
+            <h2 style="margin-top:6px">必殺技をえらぶ</h2>
+          </div>
+          <div class="sp-count" id="sp-count"></div>
+        </div>
+        <p class="muted" id="sp-lead" style="margin-top:6px"></p>
+        <div class="sp-equip" id="sp-equip"></div>
+        <div class="sp-filters">
+          <div class="sp-tabs" id="sp-tabs" role="tablist" aria-label="種類でしぼりこむ"></div>
+          <label class="sp-only" id="sp-only-wrap"><input type="checkbox" id="sp-only"> 覚えた技だけ</label>
+        </div>
+        <div id="sp-list"></div>
         <div class="close-row"><button class="btn" id="sp-back">もどる</button></div>
       </div>
     </div>
@@ -516,35 +565,59 @@ $('#t-finish').addEventListener('click',()=>tryFinish());
    必殺技ライブラリ
    3つは最初から。残りはステージを攻略すると覚える
    ============================================================ */
+/* 種類（一覧ページの絞り込みに使う） */
+const SP_TYPES={melee:{n:'近接',c:'#3df0ff'}, range:{n:'飛び道具',c:'#ffcf4a'}, buff:{n:'強化',c:'#9fe870'},
+                hinder:{n:'妨害',c:'#ff3d8b'}, move:{n:'移動',c:'#b06bff'}, summon:{n:'呼び出し',c:'#6bb8ff'}};
 const SPECIALS={
-  tomoe:{n:'巴投げ',   d:'踏み込んで投げ飛ばす。当たれば大ダメージ。', kind:'move', mv:'special'},
-  stop :{n:'時間止め', d:'当てると相手が5秒止まる。その間はギミックも時間も止まり、ゲージも溜まらない。', kind:'move', mv:'stopgrab'},
-  laser:{n:'レーザー', d:'まっすぐ伸びる強力な光線。遠くまで届く。', kind:'move', mv:'laser'},
-  upper:{n:'昇龍',     d:'跳び上がりながら打ち上げる。出はじめは無敵。対空に強い。', kind:'move', mv:'upper', rise:true},
-  wave :{n:'地割れ',   d:'地面を伝う衝撃波。走って追いかけ、遠くの相手にも当たる。', kind:'wave'},
-  guardc:{n:'カウンター構え', d:'0.8秒だけ構える。その間に攻撃されると、無効にして強く打ち返す。', kind:'buff', k:'counter', v:1, t:48},
-  pull :{n:'引き寄せ', d:'相手を自分の目の前まで引き寄せる。ダメージはない。', kind:'pull'},
-  rush :{n:'連打',     d:'その場で4連打。ガードの上からもよく削る。', kind:'move', mv:'rush'},
-  w1 :{n:'弱点看破',   d:'6秒間、自分の攻撃が1.8倍。',              kind:'buff', k:'atk', v:1.8, t:360, from:'w1'},
-  w2 :{n:'かくれる',   d:'5秒間、ほとんど見えなくなる。',            kind:'buff', k:'invis', v:1, t:300, from:'w2'},
-  w3 :{n:'分身',       d:'6秒間、分身が出て狙いを外させる。',        kind:'clone', t:360, from:'w3'},
-  w4 :{n:'再生',       d:'8秒かけて体力が少しずつ戻る。',            kind:'buff', k:'regen', v:1, t:480, from:'w4'},
-  w5 :{n:'すり抜け',   d:'5秒間、受けるダメージが0.35倍。',          kind:'buff', k:'def', v:0.35, t:300, from:'w5'},
-  w6 :{n:'不動',       d:'6秒間、攻撃を受けてもひるまない。',        kind:'buff', k:'armor', v:1, t:360, from:'w6'},
-  w7 :{n:'見えない床', d:'相手の足元に、見えない床を8秒つくる。',    kind:'hazard', t:480, from:'w7'},
-  w8 :{n:'地図の更新', d:'5秒間、足場がすべて消える。',              kind:'platsoff', t:300, from:'w8'},
-  w9 :{n:'相性',       d:'5秒間、相手の攻撃が半分になる。',          kind:'foe', k:'atkDown', v:0.5, t:300, from:'w9'},
-  w10:{n:'手数',       d:'6秒間、技の出が1.6倍速くなる。',           kind:'buff', k:'atkSpd', v:1.6, t:360, from:'w10'},
-  w11:{n:'白紙',       d:'相手の必殺ゲージを空にする。',              kind:'drain', from:'w11'},
-  w12:{n:'長文の壁',   d:'相手の視界をふさぐ壁を流す。',              kind:'wall', from:'w12'},
-  w13:{n:'ブレ',       d:'5秒間、相手のダメージが不安定になる。',     kind:'foe', k:'shapeless', v:1, t:300, from:'w13'},
-  w14:{n:'発言弾幕',   d:'発言の弾を6発ばらまく。',                  kind:'bullets', num:6, from:'w14'},
-  w15:{n:'なかま',     d:'8秒間、なかまが一緒に戦ってくれる。',      kind:'ally', t:480, from:'w15'},
-  w16:{n:'ゆいの援護', d:'8秒間、2秒ごとに相手へダメージ。',         kind:'support', t:480, from:'w16'},
-  w17:{n:'見抜く',     d:'かかっている効果を、両方とも打ち消す。',    kind:'cleanse', from:'w17'},
-  wf :{n:'ULTIMATE',   d:'極太の光線。当たると相手は2秒止まる。',     kind:'move', mv:'ultimate', from:'wf'}
+  // ---- 最初から使える（13種） ----
+  tomoe:{n:'巴投げ',   ty:'melee', d:'踏み込んで投げ飛ばす。当たれば大ダメージ。', kind:'move', mv:'special'},
+  stop :{n:'時間止め', ty:'hinder',d:'当てると相手が5秒止まる。その間はギミックも時間も止まり、ゲージも溜まらない。', kind:'move', mv:'stopgrab'},
+  laser:{n:'レーザー', ty:'range', d:'まっすぐ伸びる強力な光線。遠くまで届く。', kind:'move', mv:'laser'},
+  upper:{n:'昇龍',     ty:'melee', d:'跳び上がりながら打ち上げる。出はじめは無敵。対空に強い。', kind:'move', mv:'upper', rise:true},
+  wave :{n:'地割れ',   ty:'range', d:'地面を伝う衝撃波。走って追いかけ、遠くの相手にも当たる。', kind:'wave'},
+  guardc:{n:'カウンター構え', ty:'buff', d:'0.8秒だけ構える。その間に攻撃されると、無効にして強く打ち返す。', kind:'buff', k:'counter', v:1, t:48},
+  pull :{n:'引き寄せ', ty:'move',  d:'相手を自分の目の前まで引き寄せる。ダメージはない。', kind:'pull'},
+  rush :{n:'連打',     ty:'melee', d:'その場で4連打。ガードの上からもよく削る。', kind:'move', mv:'rush'},
+  dash :{n:'突進',     ty:'melee', d:'画面の半分を一気に駆け抜けて体当たり。離れた相手に届く。', kind:'move', mv:'dash'},
+  spin :{n:'竜巻',     ty:'melee', d:'その場で回転して、前後の両方をまとめて打つ。囲まれたときに。', kind:'move', mv:'spin'},
+  tele :{n:'瞬間移動', ty:'move',  d:'いちばん近い相手の、背中側へ一瞬で回り込む。', kind:'tele'},
+  bolt :{n:'落雷',     ty:'range', d:'相手の足元に予告のあと雷が落ちる。動けばよけられる。', kind:'bolt'},
+  quake:{n:'地震',     ty:'range', d:'地面にいる相手全員にダメージ。ジャンプ中の相手には効かない。', kind:'quake'},
+  // ---- ストーリーでゲット ----
+  w1 :{n:'弱点看破',   ty:'buff',  d:'6秒間、自分の攻撃が1.8倍。',              kind:'buff', k:'atk', v:1.8, t:360, from:'w1'},
+  w2 :{n:'かくれる',   ty:'buff',  d:'5秒間、ほとんど見えなくなる。',            kind:'buff', k:'invis', v:1, t:300, from:'w2'},
+  w3 :{n:'分身',       ty:'buff',  d:'6秒間、分身が出て狙いを外させる。',        kind:'clone', t:360, from:'w3'},
+  w4 :{n:'再生',       ty:'buff',  d:'8秒かけて体力が少しずつ戻る。',            kind:'buff', k:'regen', v:1, t:480, from:'w4'},
+  w5 :{n:'すり抜け',   ty:'buff',  d:'5秒間、受けるダメージが0.35倍。',          kind:'buff', k:'def', v:0.35, t:300, from:'w5'},
+  w6 :{n:'不動',       ty:'buff',  d:'6秒間、攻撃を受けてもひるまない。',        kind:'buff', k:'armor', v:1, t:360, from:'w6'},
+  w7 :{n:'見えない床', ty:'hinder',d:'相手の足元に、見えない床を8秒つくる。',    kind:'hazard', t:480, from:'w7'},
+  w8 :{n:'地図の更新', ty:'hinder',d:'5秒間、足場がすべて消える。',              kind:'platsoff', t:300, from:'w8'},
+  w9 :{n:'相性',       ty:'hinder',d:'5秒間、相手の攻撃が半分になる。',          kind:'foe', k:'atkDown', v:0.5, t:300, from:'w9'},
+  w10:{n:'手数',       ty:'buff',  d:'6秒間、技の出が1.6倍速くなる。',           kind:'buff', k:'atkSpd', v:1.6, t:360, from:'w10'},
+  w11:{n:'白紙',       ty:'hinder',d:'相手の必殺ゲージを空にする。',              kind:'drain', from:'w11'},
+  w12:{n:'長文の壁',   ty:'hinder',d:'相手の視界をふさぐ壁を流す。',              kind:'wall', from:'w12'},
+  w13:{n:'ブレ',       ty:'hinder',d:'5秒間、相手のダメージが不安定になる。',     kind:'foe', k:'shapeless', v:1, t:300, from:'w13'},
+  w14:{n:'発言弾幕',   ty:'range', d:'発言の弾を6発ばらまく。',                  kind:'bullets', num:6, from:'w14'},
+  w15:{n:'なかま',     ty:'summon',d:'8秒間、なかまが一緒に戦ってくれる。',      kind:'ally', t:480, from:'w15'},
+  w16:{n:'ゆいの援護', ty:'summon',d:'8秒間、2秒ごとに相手へダメージ。',         kind:'support', t:480, from:'w16'},
+  w17:{n:'見抜く',     ty:'buff',  d:'かかっている効果を、両方とも打ち消す。',    kind:'cleanse', from:'w17'},
+  w18:{n:'鉄壁',       ty:'buff',  d:'6秒間、ガードが割れず、ガードの上から削られもしない。', kind:'buff', k:'iron', v:1, t:360, from:'w18'},
+  w19:{n:'お手本',     ty:'buff',  d:'次の3回の攻撃が、すべてカウンター扱い（1.4倍）になる。', kind:'buff', k:'model', v:3, t:900, from:'w19'},
+  w20:{n:'巨大化',     ty:'buff',  d:'6秒間、体が1.5倍に。リーチと威力が上がるが、当たりやすくもなる。', kind:'buff', k:'giant', v:1, t:360, from:'w20'},
+  w21:{n:'さかさま',   ty:'hinder',d:'4秒間、相手の左右の動きが逆になる。',       kind:'foe', k:'reverse', v:1, t:240, from:'w21'},
+  w22:{n:'スロー',     ty:'hinder',d:'5秒間、相手だけ動きが半分の速さになる。',   kind:'foe', k:'slow', v:1, t:300, from:'w22'},
+  w23:{n:'反射',       ty:'buff',  d:'5秒間、受けたダメージの半分を相手に返す。', kind:'buff', k:'reflect', v:1, t:300, from:'w23'},
+  w24:{n:'わな',       ty:'hinder',d:'足元にわなを3つ置く。相手が拾うとダメージ。', kind:'trap', from:'w24'},
+  w25:{n:'見切り',     ty:'buff',  d:'6秒間、相手の攻撃を40%の確率でかわし、背後に回る。', kind:'buff', k:'dodge', v:1, t:360, from:'w25'},
+  w26:{n:'時間かせぎ', ty:'buff',  d:'残り時間を20秒のばし、体力を10回復する。',  kind:'timeplus', from:'w26'},
+  w27:{n:'見えない攻撃',ty:'buff', d:'6秒間、自分の攻撃の動きが見えなくなり、威力も1.2倍。', kind:'buff', k:'invatk', v:1, t:360, from:'w27'},
+  wf :{n:'ULTIMATE',   ty:'range', d:'極太の光線。当たると相手は1.5秒止まる。',   kind:'move', mv:'ultimate', from:'wf'},
+  // ---- 強敵を倒してゲット ----
+  k1 :{n:'神速',       ty:'move',  d:'6秒間、移動が1.6倍、技の出が1.3倍速くなる。', kind:'buff', k:'haste', v:1, t:360, from:'k1'},
+  k2 :{n:'まねっこ分身',ty:'summon',d:'6秒間、左右に出た分身が、自分と同じ攻撃をする（威力は半分）。', kind:'buff', k:'mirror', v:1, t:360, from:'k2'},
+  k3 :{n:'嵐',         ty:'range', d:'相手のまわりに、少しずつずらして雷が3回落ちる。', kind:'storm', from:'k3'}
 };
-const SP_BASE=['tomoe','stop','laser','upper','wave','guardc','pull','rush'];
+const SP_BASE=['tomoe','stop','laser','upper','wave','guardc','pull','rush','dash','spin','tele','bolt','quake'];
 function spUnlocked(id){ return SP_BASE.includes(id) || save.specials.includes(id); }
 function spCost(){ return (B&&B.vs)?45:55; }
 // 時間が止まっている間は、世界のほうも止まる
@@ -565,7 +638,9 @@ const MOVES={
   ultimate:{startup:20,active:12,recovery:30,dmg:30, hitstun:30, kbx:11,  kby:-4.0, hx:18, hy:-96, hw:600,hh:46, stop:16, guardDmg:70, meter:0, sfx:'heavy'},
   cast   :{startup:6, active:0, recovery:16, dmg:0,  hitstun:0,  kbx:0,   kby:0,    hx:0,  hy:-70, hw:0,  hh:0,  stop:0,  guardDmg:0,  meter:0, sfx:'ui'},
   upper  :{startup:5, active:9, recovery:28, dmg:16, hitstun:30, kbx:3.0, kby:-11,  hx:2,  hy:-126,hw:56, hh:104,stop:11, guardDmg:26, meter:0, sfx:'heavy'},
-  rush   :{startup:6, active:26,recovery:22, dmg:4,  hitstun:8,  kbx:1.4, kby:0,    hx:14, hy:-82, hw:58, hh:44, stop:4,  guardDmg:9,  meter:0, sfx:'hit', multi:7}
+  rush   :{startup:6, active:26,recovery:22, dmg:4,  hitstun:8,  kbx:1.4, kby:0,    hx:14, hy:-82, hw:58, hh:44, stop:4,  guardDmg:9,  meter:0, sfx:'hit', multi:7},
+  dash   :{startup:7, active:18,recovery:20, dmg:14, hitstun:24, kbx:10,  kby:-3.5, hx:-4, hy:-86, hw:64, hh:50, stop:9,  guardDmg:30, meter:0, sfx:'heavy', lunge:15},
+  spin   :{startup:6, active:28,recovery:20, dmg:5,  hitstun:14, kbx:5,   kby:-2.5, hx:-66,hy:-84, hw:132,hh:56, stop:5,  guardDmg:10, meter:0, sfx:'hit', multi:8}
 };
 // ジャンプは「攻撃をかわして、相手の後ろに回り込める」高さにしてある
 const SPEED=3.9, JUMP=-15.4, GRAV=0.60;   // 頂点までおよそ198px
@@ -621,14 +696,25 @@ function makeFighter(o){
     buffs:{atk:1,spd:1},buffTimer:0,platform:false,aiTimer:0,aiPlan:'',hesitate:0,blink:0,name:''
   },o);
 }
+// 体の大きさ（巨大化・W20のボス）
+function fscale(f){
+  let s=1;
+  if(B && B.fx && B.fx.giantBoss && f===B.b) s*=B.fx.giantBoss;
+  if(eff(f,'giant')) s*=1.5;
+  return s;
+}
+// スローは2フレームに1回だけ動く
+let FRAMEN=0;
+function slowSkip(f){ return !!eff(f,'slow') && (FRAMEN%2===1); }
 function hurtbox(f){
-  const crouch = (f.state==='guard')?8:0;
-  return {x:f.x-17,y:f.y-96+crouch,w:34,h:96-crouch};
+  const s=fscale(f), crouch=(f.state==='guard')?8:0;
+  return {x:f.x-17*s, y:f.y-(96-crouch)*s, w:34*s, h:(96-crouch)*s};
 }
 function hitbox(f){
   const m=f.attack; if(!m) return null;
-  const x = f.face>0 ? f.x+m.hx : f.x-m.hx-m.hw;
-  return {x, y:f.y+m.hy, w:m.hw, h:m.hh};
+  const s=fscale(f);
+  const x = f.face>0 ? f.x+m.hx*s : f.x-(m.hx+m.hw)*s;
+  return {x, y:f.y+m.hy*s, w:m.hw*s, h:m.hh*s};
 }
 function overlap(a,b){ return a&&b&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y; }
 function setState(f,s){ if(f.state!==s){ f.state=s; f.t=0; } }
@@ -660,6 +746,42 @@ function castSpecial(f, opp){
       wave:true, dmg:15, sorted:false, life:150, team:f.team, foe:(f===B.p?'b':'p'), foeIdx:-1});
     ring(f.x,GROUND-10,'#ffcf4a',150); spark(f.x+f.face*40,GROUND,14,'#ffcf4a',3);
     doShake(8); return;
+  }
+  if(def.kind==='tele'){   // 瞬間移動：いちばん近い相手の背中側へ
+    const tgt=opp;
+    spark(f.x,f.y-60,14,'#b06bff',3);
+    f.x=Math.max(WALL_L,Math.min(WALL_R, tgt.x - tgt.face*60));
+    f.y=Math.min(f.y, tgt.y); f.vx=0;
+    f.face = tgt.x<f.x?-1:1; f.invuln=16; setState(f,'idle');
+    ring(f.x,f.y-60,'#b06bff',150); spark(f.x,f.y-60,14,'#b06bff',3);
+    pop(f.x,f.y-150,'瞬間移動','#b06bff',0.95); sfx('ui'); return;
+  }
+  if(def.kind==='bolt'){   // 落雷：相手の足元に予告→落ちる
+    startAttack(f,'cast'); f.invuln=8;
+    B.bolts.push({x:opp.x, t:40, team:f.team, owner:f});
+    return;
+  }
+  if(def.kind==='storm'){  // 嵐：少しずつずらして3回
+    startAttack(f,'cast'); f.invuln=8;
+    [-70,0,70].forEach((dx,i)=>B.bolts.push({x:Math.max(WALL_L,Math.min(WALL_R,opp.x+dx)), t:36+i*22, team:f.team, owner:f}));
+    pop(f.x,f.y-150,'嵐','#ffcf4a',1.0); return;
+  }
+  if(def.kind==='quake'){  // 地震：地面にいる相手だけ
+    startAttack(f,'cast'); f.invuln=10;
+    quakeFrom(f);
+    return;
+  }
+  if(def.kind==='trap'){   // わな：足元に3つ置く
+    startAttack(f,'cast'); f.invuln=8;
+    [-60,0,60].forEach(dx=>B.items.push({x:Math.max(WALL_L,Math.min(WALL_R,f.x+dx)), y:GROUND-14, vy:0, life:900,
+      k:'trap', c:'#ff3d8b', ch:'罠', trap:true, team:f.team, ownerF:f}));
+    pop(f.x,f.y-150,'わな','#ff3d8b',1.0); return;
+  }
+  if(def.kind==='timeplus'){ // 時間かせぎ
+    startAttack(f,'cast'); f.invuln=8;
+    if(!B.fx.infinite) B.timer+=20*60;
+    f.hp=Math.min(f.maxHp,f.hp+10);
+    ring(f.x,f.y-60,'#9fe870',160); pop(f.x,f.y-150,'+20びょう','#9fe870',1.0); sfx('ok'); return;
   }
   if(def.kind==='pull'){   // 引き寄せ
     startAttack(f,'cast'); f.invuln=8;
@@ -1142,6 +1264,256 @@ const STAGES=[
   }
 },
 {
+  id:'w18', num:'WORLD 18', title:'役割を決めて頼もう', skill:'ROLE', skillJp:'役割を与える',
+  boss:{name:'ナンデモヤール', quote:'ナンデモ デキルヨ。ナンデモ ヤルヨ。', hp:170, color:'#c9a0ff',
+        ai:{aggr:0.60,guard:0.30,jump:0.25,range:100,gap:22,hesitate:0}},
+  trouble:'相手の戦い方がころころ変わる。攻めたり、守ったり、逃げたり。',
+  manual:{no:'21', h:'役割を与える', b:'「あなたは〇〇として」と添えると、答えの立ち位置がぶれなくなります。'},
+  lesson:'役割を決めて頼むと、答えの立ち位置がぶれなくなります。',
+  call:{
+    line:'動きが読めませんね……。どの立場から作戦を考えましょうか？',
+    options:[
+      {tier:1,chips:[],text:'作戦ある？',
+       reply:'いくつか考えられますが……攻める人、守る人、逃げる人。どの立場で考えるかで答えが変わるんです。',
+       fx:'相手の型の切り替えが、少しゆっくりになった。'},
+      {tier:2,chips:['役割'],text:'守る人の立場で考えて',
+       reply:'守る人の立場ですね。それなら、まず相手が何をしてくるかを読みます。',
+       fx:'<b>相手の型が見えるようになった。</b>頭の上に表示される。'},
+      {tier:3,chips:['役割','目的'],text:'あなたは守りの名人として、相手の型を読んで反撃する作戦を立てて',
+       reply:'名人として考えますね。……相手は3つの型を順番に回しています。逃げの型のときが、いちばん打ち込めます。',
+       fx:'<b>型が順番どおりに回るように。</b>表示つき。攻撃の予兆も出て、ダメージ1.4倍。'}
+    ],
+    revise:{text:'守りの名人として、相手の型を読んで反撃する作戦を立てて',
+            reply:'その立場で考えました。型は順番どおりに回っています。',
+            fx:'<b>型が読めるようになった。</b>ダメージ1.4倍。'}
+  }
+},
+{
+  id:'w19', num:'WORLD 19', title:'例を見せよう', skill:'EXAMPLE', skillJp:'お手本を見せる',
+  boss:{name:'ミホンナシ', quote:'ミホン？ ソンナノ イラナイヨ。', hp:160, color:'#ffd166',
+        ai:{aggr:0.58,guard:0.30,jump:0.24,range:100,gap:24,hesitate:0}},
+  trouble:'攻撃がほとんど効かない。決まった順番で当てたときだけ、大きく効くらしい。',
+  manual:{no:'22', h:'例を見せる', b:'ほしい形の見本を1つ渡すと、同じ形にそろえて返してくれます。'},
+  lesson:'「こんな感じで」と例を見せると、ゆいはその形に合わせて返してくれます。',
+  call:{
+    line:'効く順番があるみたいですね。……手がかりになる例はありますか？',
+    options:[
+      {tier:1,chips:[],text:'効く攻撃を教えて',
+       reply:'順番があるみたいです。……例があれば、それに合わせて探せるんですが。',
+       fx:'<b>順番の1つ目が分かった。</b>'},
+      {tier:2,chips:['材料'],text:'さっき、弱攻撃の次に当てた攻撃が少し効いた',
+       reply:'その例、助かります！ それなら2つ目までは分かります。',
+       fx:'<b>順番の2つ目まで分かった。</b>'},
+      {tier:3,chips:['材料','ほしい形'],text:'こんな感じで、という例を見せるね。この例と同じ形で、3つ目まで順番を教えて',
+       reply:'例と同じ形で考えました。3つとも出します。',
+       fx:'<b>順番が全部見えた。</b>そのとおりに当てると3倍のダメージ。'}
+    ],
+    revise:{text:'この例と同じ形で、3つ目まで教えて',
+            reply:'例に合わせました。3つとも出します。',
+            fx:'<b>順番が全部見えた。</b>'}
+  }
+},
+{
+  id:'w20', num:'WORLD 20', title:'大きな仕事は分けて頼もう', skill:'STEP', skillJp:'段階に分ける',
+  boss:{name:'ゼンブイッキ', quote:'ゼンブ イッキニ ヤレバ イイ。', hp:190, color:'#e07a5f',
+        ai:{aggr:0.55,guard:0.25,jump:0.10,range:118,gap:30,hesitate:0,spd:0.75}},
+  trouble:'相手が大きすぎる。リーチも威力も段違い。',
+  manual:{no:'23', h:'段階に分ける', b:'「まず骨組み、次に中身」と順番に頼むと、途中で直しやすくなります。'},
+  lesson:'大きな仕事は、段階に分けて頼むと、扱える大きさになります。',
+  call:{
+    line:'大きすぎますね……。一度に全部だと、手がつけられません。',
+    options:[
+      {tier:1,chips:[],text:'こいつを倒したい',
+       reply:'倒したいのは分かりました。……ただ、一度に全部だと大きすぎます。分けて考えませんか？',
+       fx:'相手が少しだけ小さくなった。'},
+      {tier:2,chips:['条件'],text:'倒すまでを3つの段階に分けて',
+       reply:'3段階ですね。まず足を止める、次に崩す、最後に決める。',
+       fx:'<b>相手が小さくなり、体力が3段に分かれた。</b>'},
+      {tier:3,chips:['ほしい形','条件'],text:'まず骨組みだけ作って。次に中身、最後に仕上げ、の順で一段ずつ進めたい',
+       reply:'一段ずつ進めましょう。……いまは1段目。足元を止めるところからです。',
+       fx:'<b>相手が普通の大きさに。</b>1段削るたびに、相手が大きくひるむ。'}
+    ],
+    revise:{text:'骨組み、中身、仕上げの順で一段ずつ進めたい',
+            reply:'一段ずつ進めましょう。',
+            fx:'<b>相手が普通の大きさに。</b>1段ごとに大きくひるむ。'}
+  }
+},
+{
+  id:'w21', num:'WORLD 21', title:'やさしい言葉にしてもらおう', skill:'PLAIN', skillJp:'言いかえてもらう',
+  boss:{name:'カタカナスギール', quote:'アジェンダ ヲ フィックス シテ アサイン ヲ……', hp:165, color:'#81b29a',
+        ai:{aggr:0.62,guard:0.28,jump:0.26,range:100,gap:22,hesitate:0}},
+  trouble:'言葉がむずかしくて伝わらない。左右の操作が逆になってしまう。',
+  manual:{no:'24', h:'やさしい言葉にしてもらう', b:'「専門用語やカタカナ語なしで」と一言そえると、誰にでも伝わります。'},
+  lesson:'読む人に合わせた言葉を指定すると、伝わる文章になります。',
+  call:{
+    line:'言っていることが、ぜんぜん頭に入ってきませんね……。',
+    options:[
+      {tier:1,chips:[],text:'わかりやすくして',
+       reply:'わかりやすく、ですね。……どなた向けに、でしょう？',
+       fx:'ときどき、正しい向きに戻るようになった。'},
+      {tier:2,chips:['対象'],text:'中学生にも分かる言葉にして',
+       reply:'中学生にも分かる言葉にしますね。',
+       fx:'<b>操作の逆転が、ときどきだけになった。</b>'},
+      {tier:3,chips:['対象','条件'],text:'専門用語やカタカナ語を使わずに、中学生にも分かる言葉で言いかえて',
+       reply:'言いかえました。「アジェンダ」は「話し合うこと」、「アサイン」は「担当を決める」です。',
+       fx:'<b>操作が元どおりになった。</b>'}
+    ],
+    revise:{text:'カタカナ語を使わずに、中学生にも分かる言葉で',
+            reply:'言いかえました。',
+            fx:'<b>操作が元どおりになった。</b>'}
+  }
+},
+{
+  id:'w22', num:'WORLD 22', title:'要点だけにしてもらおう', skill:'SUMMARY', skillJp:'要約してもらう',
+  boss:{name:'ヨミキレナイ', quote:'ゼンブ ヨンデカラ ハナシマショウ。', hp:150, color:'#a8dadc',
+        ai:{aggr:0.60,guard:0.30,jump:0.22,range:100,gap:24,hesitate:0}},
+  trouble:'なにもかもが遅い。時間だけがどんどん過ぎていく。',
+  manual:{no:'25', h:'要約してもらう', b:'「結論から、要点を3つだけ」と頼むと、長い資料が一気に読めます。'},
+  lesson:'「結論から、要点を3つ」と頼むと、長い資料もすぐ使える形になります。',
+  call:{
+    line:'……長すぎて、読み終わる前に時間が来てしまいそうです。',
+    options:[
+      {tier:1,chips:[],text:'短くして',
+       reply:'短く、ですね。……どこを残せばいいでしょう？',
+       fx:'少しだけ速くなった。'},
+      {tier:2,chips:['ほしい形'],text:'要点だけにして',
+       reply:'要点だけにします。',
+       fx:'<b>かなり速くなった。</b>'},
+      {tier:3,chips:['ほしい形','条件'],text:'結論を最初に、要点を3つだけ。細かい説明はいらない',
+       reply:'結論から言います。……ほら、身軽になったでしょう。',
+       fx:'<b>速さが元に戻った。</b>さらに少しだけ速く動ける。'}
+    ],
+    revise:{text:'結論を最初に、要点を3つだけ',
+            reply:'結論から言いますね。',
+            fx:'<b>速さが元に戻った。</b>'}
+  }
+},
+{
+  id:'w23', num:'WORLD 23', title:'厳しめに見てもらおう', skill:'CRITIQUE', skillJp:'弱点を聞く',
+  boss:{name:'ホメテホシイン', quote:'ボクノ イイトコロ ダケ オシエテ。', hp:170, color:'#f4a6c8',
+        ai:{aggr:0.60,guard:0.25,jump:0.25,range:100,gap:23,hesitate:0}},
+  trouble:'攻撃がはね返される。当てるほど、自分にもダメージが返ってくる。',
+  manual:{no:'26', h:'厳しめに見てもらう', b:'「良いところは不要、弱点を3つ」と頼むと、直すのに使える答えになります。'},
+  lesson:'「厳しめに」と頼むと、ほめ言葉ではなく、使える指摘が返ってきます。',
+  call:{
+    line:'あの子、ほめられることしか受けつけていませんね……。',
+    options:[
+      {tier:1,chips:[],text:'どう思う？',
+       reply:'とてもいいと思います！……と、つい言ってしまいそうになります。本当はどう見てほしいですか？',
+       fx:'はね返りが、少しだけ弱まった。'},
+      {tier:2,chips:['目的'],text:'弱点を教えて',
+       reply:'弱点ですね。背中側の守りが薄いです。',
+       fx:'<b>はね返りが止まった。</b>'},
+      {tier:3,chips:['目的','条件'],text:'良いところは言わなくていい。厳しめに、弱点と直し方を3つ教えて',
+       reply:'では遠慮なく。1つ目、背中が空いています。2つ目、攻撃のあとが遅い。3つ目……',
+       fx:'<b>はね返しの盾が割れた。</b>ダメージが1.3倍通る。'}
+    ],
+    revise:{text:'良いところは不要。厳しめに、弱点を3つ',
+            reply:'遠慮なく言いますね。',
+            fx:'<b>盾が割れた。</b>ダメージ1.3倍。'}
+  }
+},
+{
+  id:'w24', num:'WORLD 24', title:'個人情報は入れないで', skill:'PRIVACY', skillJp:'伏せて相談する',
+  boss:{name:'ナンデモハリツケ', quote:'ナマエモ ジュウショモ ゼンブ ハッチャエ！', hp:165, color:'#ef476f',
+        ai:{aggr:0.60,guard:0.28,jump:0.26,range:100,gap:22,hesitate:0}},
+  trouble:'降ってくるアイテムを拾うと、逆にダメージを受けて、相手が強くなる。',
+  manual:{no:'27', h:'個人情報は入れない', b:'名前・住所・連絡先は伏せて、「Aさん」のような例に置きかえてから相談します。'},
+  lesson:'名前や連絡先は伏せて、例に置きかえて渡せば、安心して相談できます。',
+  call:{
+    line:'このアイテム……名前や住所が書いてあります。',
+    options:[
+      {tier:1,chips:[],text:'このアイテム何？',
+       reply:'名前や住所が書いてあります。……これ、ここに出してもいいものでしょうか？',
+       fx:'<b>わなの見分けがつくようになった。</b>（赤く光る）'},
+      {tier:2,chips:['条件'],text:'名前は出さないで',
+       reply:'名前を伏せますね。',
+       fx:'<b>わなが半分に減った。</b>見分けもつく。'},
+      {tier:3,chips:['条件','材料'],text:'名前・住所・連絡先は伏せて、「Aさん」のような例に置きかえて考えて',
+       reply:'伏せて、例に置きかえました。これで安心して使えます。',
+       fx:'<b>わなが全部、役に立つアイテムに変わった。</b>'}
+    ],
+    revise:{text:'名前・住所・連絡先は伏せて、例に置きかえて',
+            reply:'伏せて置きかえました。',
+            fx:'<b>わなが全部、役に立つアイテムに変わった。</b>'}
+  }
+},
+{
+  id:'w25', num:'WORLD 25', title:'同じ失敗をくり返さない', skill:'REFLECT', skillJp:'振り返りを渡す',
+  boss:{name:'オナジシッパイ', quote:'マエモ コウダッタ。ツギモ コウナル。', hp:170, color:'#9aa0a6',
+        ai:{aggr:0.66,guard:0.24,jump:0.20,range:102,gap:20,hesitate:0}},
+  trouble:'同じ技を受けるたびに、ダメージがどんどん大きくなる。',
+  manual:{no:'28', h:'振り返りを渡す', b:'うまくいかなかった記録を渡すと、次にどうするかを一緒に考えられます。'},
+  lesson:'前回の振り返りを渡すと、同じ失敗をしないための答えが返ってきます。',
+  call:{
+    line:'同じ技を、何度も受けてしまっていますね……。',
+    options:[
+      {tier:1,chips:[],text:'なんで痛いの？',
+       reply:'同じ技を何度も受けているみたいです。……前回、何で失敗したか覚えていますか？',
+       fx:'ダメージの増え方が、ゆるやかになった。'},
+      {tier:2,chips:['材料'],text:'強攻撃ばかり受けてる',
+       reply:'強攻撃ですね。それなら、強攻撃の前には一歩下がる、を試しましょう。',
+       fx:'<b>同じ技で増えるダメージが止まった。</b>'},
+      {tier:3,chips:['材料','目的'],text:'さっきの戦いの振り返りを渡すね。受けた技と、そのときの状況。これを見て、同じ失敗をしない方法を教えて',
+       reply:'振り返りを読みました。……同じ技は、もう見切れます。',
+       fx:'<b>同じ技を2回目以降に受けると、ダメージが半分になる。</b>'}
+    ],
+    revise:{text:'振り返りを渡すね。これを見て、同じ失敗をしない方法を',
+            reply:'振り返りを読みました。',
+            fx:'<b>同じ技は2回目から半分に。</b>'}
+  }
+},
+{
+  id:'w26', num:'WORLD 26', title:'締切から逆算しよう', skill:'SCHEDULE', skillJp:'逆算してもらう',
+  boss:{name:'シメキリオバケ', quote:'アト 30ビョウ！ イヤ 20ビョウ！', hp:150, color:'#ff9f1c',
+        ai:{aggr:0.62,guard:0.30,jump:0.25,range:100,gap:22,hesitate:0}},
+  trouble:'残り時間がものすごい速さで減っていく。時間切れは負け。',
+  manual:{no:'29', h:'締切から逆算する', b:'「〇日までに」と伝えて区切りを決めてもらうと、今日やることが見えます。'},
+  lesson:'締切から逆算して区切ってもらうと、間に合う計画になります。',
+  call:{
+    line:'落ち着いてください。……締切はいつですか？ そこから逆に数えましょう。',
+    options:[
+      {tier:1,chips:[],text:'間に合わない！',
+       reply:'落ち着いてください。締切から逆に数えれば、まだ間に合います。',
+       fx:'時間の減り方が、少しゆるやかになった。'},
+      {tier:2,chips:['条件'],text:'あと30秒で倒したい',
+       reply:'30秒から逆算します。前半で崩して、後半で決めます。',
+       fx:'<b>時間の減り方がふつうに戻った。</b>'},
+      {tier:3,chips:['条件','ほしい形'],text:'締切はあと30秒。そこから逆算して、10秒ごとの目標を決めて',
+       reply:'10秒ごとに区切りました。最初の10秒で崩す、次で削る、最後で決めます。',
+       fx:'<b>時間がふつうに戻り、10秒ごとの目標を達成すると体力が回復する。</b>'}
+    ],
+    revise:{text:'締切から逆算して、10秒ごとの目標を決めて',
+            reply:'10秒ごとに区切りました。',
+            fx:'<b>時間がふつうに戻り、区切りごとに回復。</b>'}
+  }
+},
+{
+  id:'w27', num:'WORLD 27', title:'事例を調べてもらおう', skill:'RESEARCH', skillJp:'事例を集める',
+  boss:{name:'ジレイシラズ', quote:'ソンナ ヤリカタ、ミタコトナイ。', hp:170, color:'#577590',
+        ai:{aggr:0.64,guard:0.28,jump:0.26,range:102,gap:21,hesitate:0}},
+  trouble:'相手の攻撃の動きが見えない。いつの間にか殴られている。',
+  manual:{no:'30', h:'事例を調べてもらう', b:'「似た事例を3つ、うまくいった理由つきで」と頼むと、自分のケースに使えます。'},
+  lesson:'似た事例を調べてもらうと、はじめての相手でも対処の手がかりが見つかります。',
+  call:{
+    line:'見たことのない動きですね……。似た相手の例を探してみましょうか？',
+    options:[
+      {tier:1,chips:[],text:'どうやって攻撃してるの？',
+       reply:'はじめて見る動きです。……似た相手の事例があれば、たどれるかもしれません。',
+       fx:'攻撃の瞬間だけ、うっすら見えるようになった。'},
+      {tier:2,chips:['目的'],text:'似た相手の事例を調べて',
+       reply:'似た事例がありました。攻撃の前に、肩が下がるそうです。',
+       fx:'<b>攻撃の動きが見えるようになった。</b>'},
+      {tier:3,chips:['目的','ほしい形'],text:'似た相手と戦った事例を3つ調べて。どう攻撃してきて、どう対処したかを比べて',
+       reply:'3つの事例を比べました。どれも攻撃の直前に、同じ合図があります。',
+       fx:'<b>攻撃が見えるうえ、直前に合図が出るようになった。</b>'}
+    ],
+    revise:{text:'似た事例を3つ、対処のしかたつきで',
+            reply:'3つ比べました。',
+            fx:'<b>攻撃が見え、合図も出る。</b>'}
+  }
+},
+{
   id:'wf', num:'WORLD FINAL', title:'AIと一緒にCUEを動かせ！', skill:'ULTIMATE', skillJp:'全部を使う',
   boss:{name:'ジカンガナイン', quote:'モウ ジカンガ ナイ。', hp:230, color:'#ff3d3d',
         ai:{aggr:0.70,guard:0.26,jump:0.30,range:104,gap:20,hesitate:0}},
@@ -1168,6 +1540,88 @@ const STAGES=[
   }
 }
 ];
+/* ============================================================
+   強敵ステージ：これまでの頼み方を組み合わせて挑む。倒すと、その技を覚える
+   ============================================================ */
+const KYO_STAGES=[
+{
+  id:'k1', num:'強敵 1', kyo:true, need:'w3', title:'速すぎる相手', skill:'SPEED', skillJp:'手順にしてもらう',
+  boss:{name:'ハヤスギル', quote:'カンガエル ヒマ ナンテ ナイ！', hp:210, color:'#00e5ff',
+        ai:{aggr:0.80,guard:0.20,jump:0.30,range:104,gap:14,hesitate:0,spd:1.6}},
+  trouble:'相手が速すぎる。数秒おきに、画面の端から突っ込んでくる。',
+  manual:{no:'32', h:'手順にしてもらう', b:'「3つの段階で」と形を決めると、そのまま動ける手順になります。'},
+  lesson:'速い相手ほど、状況と手札をまとめて伝えると、手順になって返ってきます。',
+  call:{
+    line:'速すぎて目で追えませんね……。いったん整理しましょう。',
+    options:[
+      {tier:1,chips:[],text:'速くて勝てない',
+       reply:'速い、ですね。……何がいちばん困っていますか？',
+       fx:'相手の速さが少し落ちた。'},
+      {tier:2,chips:['目的','状況'],text:'突進してくるのがいちばん困る。止め方を教えて',
+       reply:'突進ですね。突っ込んでくる直前に、足が止まる瞬間があります。',
+       fx:'<b>突進の前に予兆が出るようになった。</b>'},
+      {tier:3,chips:['目的','状況','材料','ほしい形'],text:'相手は速くて、数秒おきに突進してくる。こちらはジャンプとガードが使える。突進を読んで反撃する手順を、3つの段階で',
+       reply:'3段階にしました。①予兆を見る ②ジャンプでかわす ③背中に強攻撃。……速さも、読めればこわくありません。',
+       fx:'<b>速さが元に戻り、突進の予兆が出る。</b>かわした直後はダメージ1.5倍。'}
+    ],
+    revise:{text:'突進を読んで反撃する手順を、3つの段階で',
+            reply:'3段階にしました。',
+            fx:'<b>速さが元に戻り、予兆も出る。</b>'}
+  }
+},
+{
+  id:'k2', num:'強敵 2', kyo:true, need:'k1', title:'なんでも真似する相手', skill:'COMPARE+', skillJp:'違いを比べる',
+  boss:{name:'ゼンブマネル', quote:'キミノ ワザ、ボクモ ツカエルヨ。', hp:220, color:'#d0d0ff',
+        ai:{aggr:0.66,guard:0.28,jump:0.26,range:102,gap:20,hesitate:0}},
+  trouble:'こちらが選んだ必殺技を、そっくりそのまま真似して撃ってくる。',
+  manual:{no:'33', h:'違いを比べてもらう', b:'似ているものは「違いを表にして」と頼むと、見分けがつきます。'},
+  lesson:'真似されたときは、違いを比べて表にしてもらうと、突破口が見えてきます。',
+  call:{
+    line:'……あなたの技を、そのまま真似しています。',
+    options:[
+      {tier:1,chips:[],text:'真似しないで',
+       reply:'お願いしても、止めてくれなさそうです。……どう対処しましょう？',
+       fx:'真似の間隔が少し長くなった。'},
+      {tier:2,chips:['目的'],text:'真似できない攻め方を考えて',
+       reply:'真似されるのは必殺技だけです。ふつうの技で押しましょう。',
+       fx:'<b>真似した技の威力が下がった。</b>'},
+      {tier:3,chips:['状況','目的','ほしい形'],text:'相手はこちらの必殺技を真似してくる。真似された技の弱点と、真似できない攻め方を比べて、表にして',
+       reply:'比べました。真似された技は、出はじめの隙が大きい。そこを、ふつうの技で割り込めます。',
+       fx:'<b>真似した技の威力が半分に。</b>真似した直後は、相手に必ず隙ができる。'}
+    ],
+    revise:{text:'真似された技の弱点と、真似できない攻め方を比べて表に',
+            reply:'比べて表にしました。',
+            fx:'<b>真似した技の威力が半分に。</b>'}
+  }
+},
+{
+  id:'k3', num:'強敵 3', kyo:true, need:'k2', title:'嵐を呼ぶ相手', skill:'PRIORITY', skillJp:'優先順位をつける',
+  boss:{name:'テンサイ', quote:'カミナリモ ジシンモ、ゼンブ ドウジニ。', hp:230, color:'#ffe066',
+        ai:{aggr:0.62,guard:0.30,jump:0.24,range:100,gap:22,hesitate:0}},
+  trouble:'雷が次々に落ち、ときどき地震も来る。やることが多すぎて、手が回らない。',
+  manual:{no:'31', h:'優先順位をつけてもらう', b:'やることが多すぎるときは「優先順位をつけて、上から順に」と頼みます。'},
+  lesson:'情報が多すぎるときは、優先順位をつけてもらうと動けます。',
+  call:{
+    line:'空が荒れています……。何から手をつければいいか、分からない感じですね。',
+    options:[
+      {tier:1,chips:[],text:'助けて',
+       reply:'はい！……まず、何がいちばん危ないですか？',
+       fx:'雷の回数が少し減った。'},
+      {tier:2,chips:['状況'],text:'雷と地震が危ない。どっちから避ければいい？',
+       reply:'地震はジャンプでかわせます。雷は、光った場所から離れれば大丈夫です。',
+       fx:'<b>雷の予告が長くなった。</b>'},
+      {tier:3,chips:['状況','材料','ほしい形'],text:'雷と地震が同時に来て、足場もある。優先順位をつけて、上から順に対処法を教えて',
+       reply:'優先順位をつけました。①地震はジャンプ ②雷は予告から離れる ③足場の上なら両方しのげる。',
+       fx:'<b>雷と地震が半分に。</b>足場の上にいる間は、雷が当たらない。'}
+    ],
+    revise:{text:'優先順位をつけて、上から順に対処法を',
+            reply:'優先順位をつけました。',
+            fx:'<b>雷と地震が半分に。</b>'}
+  }
+}
+];
+function stageById(id){ return STAGES.find(s=>s.id===id) || KYO_STAGES.find(s=>s.id===id); }
+
 const ROADMAP=[
  ['PHASE 3','自由入力のCOMMAND（本物のAIと接続）'],
  ['PHASE 4','CUE秘書ゆいちゃんと接続して、実務でそのまま使う'],
@@ -1193,7 +1647,20 @@ const MANUAL_PAGES={
  17:{no:'17',h:'引き継ぎに使う',b:'目的・現状・課題・担当・期限・次アクションの6項目に。'},
  18:{no:'18',h:'事実と推測を分けてもらう',b:'「どこまでが事実？」と一言聞きます。'},
  19:{no:'19',h:'長さと読み手を指定する',b:'「200字で」「中学生にも分かる言葉で」を添えると、そのまま使える文章になります。'},
- 20:{no:'20',h:'AIで準備、人と相談、一緒に実行',b:'ゆいに全部やらせるのでもなく、全部抱えるのでもなく。'}
+ 20:{no:'20',h:'AIで準備、人と相談、一緒に実行',b:'ゆいに全部やらせるのでもなく、全部抱えるのでもなく。'},
+ 21:{no:'21',h:'役割を与える',b:'「あなたは〇〇として」と添えると、答えの立ち位置がぶれなくなります。'},
+ 22:{no:'22',h:'例を見せる',b:'ほしい形の見本を1つ渡すと、同じ形にそろえて返してくれます。'},
+ 23:{no:'23',h:'段階に分ける',b:'「まず骨組み、次に中身」と順番に頼むと、途中で直しやすくなります。'},
+ 24:{no:'24',h:'やさしい言葉にしてもらう',b:'「専門用語やカタカナ語なしで」と一言そえると、誰にでも伝わります。'},
+ 25:{no:'25',h:'要約してもらう',b:'「結論から、要点を3つだけ」と頼むと、長い資料が一気に読めます。'},
+ 26:{no:'26',h:'厳しめに見てもらう',b:'「良いところは不要、弱点を3つ」と頼むと、直すのに使える答えになります。'},
+ 27:{no:'27',h:'個人情報は入れない',b:'名前・住所・連絡先は伏せて、「Aさん」のような例に置きかえてから相談します。'},
+ 28:{no:'28',h:'振り返りを渡す',b:'うまくいかなかった記録を渡すと、次にどうするかを一緒に考えられます。'},
+ 29:{no:'29',h:'締切から逆算する',b:'「〇日までに」と伝えて区切りを決めてもらうと、今日やることが見えます。'},
+ 30:{no:'30',h:'事例を調べてもらう',b:'「似た事例を3つ、うまくいった理由つきで」と頼むと、自分のケースに使えます。'},
+ 31:{no:'31',h:'優先順位をつけてもらう',b:'やることが多すぎるときは「優先順位をつけて、上から順に」と頼みます。'},
+ 32:{no:'32',h:'手順にしてもらう',b:'「3つの段階で」と形を決めると、そのまま動ける手順になります。'},
+ 33:{no:'33',h:'違いを比べてもらう',b:'似ているものは「違いを表にして」と頼むと、見分けがつきます。'}
 };
 const BOOK=[
  {cat:'イベント・里山',items:[
@@ -1243,8 +1710,15 @@ function newBattle(stage){
           fakeKb:5,
           wallOn:false, wallW:300, wallH:96, wallGap:190, shapeless:0, bulletOn:false, bulletN:5,
           bulletSpd:3.6, bulletGap:150, bulletSort:false, allyActive:false, drain:0, support:0, timeRush:false,
-          fakeWeak:false, fakeHint:false, humanFinish:false},
+          fakeWeak:false, fakeHint:false, humanFinish:false,
+          roleCycle:false, roleShow:false, roleLock:false, seq:false, seqShown:0,
+          giantBoss:0, segments:false, revMode:0, revNow:false, slowWorld:0, pSpd:1,
+          bossReflect:0, bossTake:1, critBonus:0, trapRate:0, trapReveal:false,
+          repeat:false, repeatMul:0, learned:false, timeRate:1, timeoutLose:false, checkpoints:false,
+          hideAtk:0, kyoDash:false, dashGap:190, dashTell:false, dashBonus:false,
+          copyGap:0, copyWeak:1, stormGap:0, quakeGap:0, stormSafePlat:false},
       history:[], decoys:[], result:null, platsOffT:0, allyT:0, supportT:0, allyTarget:null, supportTarget:null,
+      bolts:[], hitCount:{}, seq:null, seqIdx:0, roleT:0, ckT:0, ckHp:0, revT:0,
       ally:null, bullets:[], walls:[], wallTimer:120, volleyTimer:150, supportTimer:0,
       lastMove:'', finishReady:false, finishT:0, fakeSide:(Math.random()<0.5?-1:1), fPhase:1 };
   p.sp = spUnlocked(save.equip)?save.equip:'tomoe';
@@ -1266,6 +1740,22 @@ function newBattle(stage){
   if(stage.id==='w17'){ B.fx.fakeWeak=true; B.fx.weak=true; B.fx.humanFinish=true;
     B.realWeak = Math.random()<0.5?'low':'high'; }
   if(stage.id==='wf'){ B.fx.fog=0.8; B.fx.humanFinish=true; }
+  // ---- WORLD 18〜27 ----
+  if(stage.id==='w18'){ B.fx.roleCycle=true; b.aiBase=Object.assign({},b.ai); b.style='atk'; B.roleT=60; }
+  if(stage.id==='w19'){ B.fx.seq=true;
+    const pool=['light','heavy','air']; B.seq=[0,1,2].map(()=>pool[(Math.random()*3)|0]); B.seqIdx=0; }
+  if(stage.id==='w20'){ B.fx.giantBoss=1.7; }
+  if(stage.id==='w21'){ B.fx.revMode=2; B.fx.revNow=true; }
+  if(stage.id==='w22'){ B.fx.slowWorld=0.5; B.timer=60*60; }
+  if(stage.id==='w23'){ B.fx.bossReflect=0.4; B.fx.bossTake=0.45; }
+  if(stage.id==='w24'){ B.fx.trapRate=1; B.itemTimer=120; }
+  if(stage.id==='w25'){ B.fx.repeat=true; B.fx.repeatMul=0.35; }
+  if(stage.id==='w26'){ B.fx.timeRate=3; B.fx.timeoutLose=true; }
+  if(stage.id==='w27'){ B.fx.hideAtk=1; }
+  // ---- 強敵 ----
+  if(stage.id==='k1'){ B.fx.kyoDash=true; B.dashT=150; }
+  if(stage.id==='k2'){ B.fx.copyGap=330; B.copyT=240; }
+  if(stage.id==='k3'){ B.fx.stormGap=130; B.fx.quakeGap=480; B.stormT=100; B.quakeT=420; B.plats=vsPlats(); }
   parts=[];pops=[];rings=[];hitstop=0;shake.m=0;slowmo=0;flashScreen=0;
   save.stats.plays++; persist();
 }
@@ -1279,7 +1769,8 @@ function updateFighter(f, opp){
   if(f.clones>0) f.clones--;
   if(eff(f,'regen') && f.hp<f.maxHp) f.hp=Math.min(f.maxHp, f.hp+0.05);
   if(eff(f,'stop')){ f.vx=0; f.vy=0; if(f.flash>0)f.flash--; return; }   // 時間止め：完全に固まる
-  f.t += (f.state==='attack' ? (eff(f,'atkSpd')||1) : 1);
+  if(slowSkip(f)) return;                                                   // スロー：2フレームに1回だけ動く
+  f.t += (f.state==='attack' ? (eff(f,'atkSpd')||1)*(eff(f,'haste')?1.3:1) : 1);
   if(f.flash>0)f.flash--;
   if(f.invuln>0)f.invuln--;
   if(f.comboTimer>0){f.comboTimer--; if(f.comboTimer===0)f.combo=0;}
@@ -1295,6 +1786,8 @@ function updateFighter(f, opp){
     const m=f.attack;
     // 連打：一定間隔でもう一度当たるようにする
     if(m.multi && f.hitDone && f.t>=m.startup && f.t<m.startup+m.active && (f.t|0)%m.multi===0) f.hitDone=false;
+    // 突進：出ている間は前へ進み続ける
+    if(m.lunge && f.t>=m.startup-2 && f.t<m.startup+m.active) f.vx=f.face*m.lunge;
     if(f.t>=total(m)){
       if(!f.hitDone && f.isPlayer && B) B.whiffs++;
       f.attack=null; setState(f,'idle');
@@ -1341,20 +1834,23 @@ function wallSlam(f){
 }
 
 function applyControl(p, opp, cur, prv){
-  if(p.dead || eff(p,'stop')) return;
+  if(p.dead || eff(p,'stop') || slowSkip(p)) return;
   const hit=k=>cur[k]&&!prv[k];
+  // さかさま（必殺技／WORLD 21）：左右の入力が入れ替わる
+  const rev = !!eff(p,'reverse') || (p.isPlayer && B && B.fx && B.fx.revNow);
+  const L = rev?cur.right:cur.left, R = rev?cur.left:cur.right;
   const busy = ['attack','hurt','crush','block','dodge'].includes(p.state);
   if(!busy){
     if(hit('special') && p.meter>=spCost()){ castSpecial(p,opp); return; }
     if(hit('light')){ startAttack(p, p.onGround?'light':'air'); sfx('ui'); return; }
     if(hit('heavy')){ startAttack(p, p.onGround?'heavy':'air'); return; }
-    if(hit('dodge') && p.onGround){ setState(p,'dodge'); p.invuln=10; p.vx=(cur.left?-1:cur.right?1:-p.face)*9.5; sfx('ui'); return; }
+    if(hit('dodge') && p.onGround){ setState(p,'dodge'); p.invuln=10; p.vx=(L?-1:R?1:-p.face)*9.5; sfx('ui'); return; }
     if(cur.guard && p.onGround){ setState(p,'guard'); p.vx=0; }
     else {
       if(p.state==='guard') setState(p,'idle');
-      const sp=SPEED*p.buffs.spd;
-      if(cur.left&&!cur.right){ p.vx=-sp; if(p.onGround)setState(p,'walk'); }
-      else if(cur.right&&!cur.left){ p.vx=sp; if(p.onGround)setState(p,'walk'); }
+      const sp=SPEED*p.buffs.spd*(eff(p,'haste')?1.6:1)*((p.isPlayer&&B&&B.fx&&B.fx.pSpd)||1);
+      if(L&&!R){ p.vx=-sp; if(p.onGround)setState(p,'walk'); }
+      else if(R&&!L){ p.vx=sp; if(p.onGround)setState(p,'walk'); }
       else if(p.onGround && p.state==='walk') setState(p,'idle');
       if(hit('up') && p.onGround){ p.vy=JUMP; p.onGround=false; setState(p,'jump'); sfx('ui'); }
     }
@@ -1364,16 +1860,17 @@ function applyControl(p, opp, cur, prv){
 function playerControl(p, opp){ applyControl(p, opp, IN, PREV); }
 
 function aiControl(f, opp){
-  if(f.dead||opp.dead||eff(f,'stop')) return;
+  if(f.dead||opp.dead||eff(f,'stop')||slowSkip(f)) return;
   const a=f.ai; const d=opp.x-f.x, ad=Math.abs(d);
   if(f.hesitate>0){ f.hesitate--; f.vx*=0.8; return; }
   const busy=['attack','hurt','crush','block','dodge'].includes(f.state);
   if(busy) return;
   f.face = d<0?-1:1;
   f.aiTimer--;
+  const spdM=(a.spd||1)*(eff(f,'haste')?1.6:1), rv=eff(f,'reverse')?-1:1;
   if(f.aiTimer>0){
-    if(f.aiPlan==='approach'){ f.vx=(d<0?-1:1)*SPEED*0.86; setState(f,'walk'); }
-    else if(f.aiPlan==='retreat'){ f.vx=(d<0?1:-1)*SPEED*0.8; setState(f,'walk'); }
+    if(f.aiPlan==='approach'){ f.vx=(d<0?-1:1)*SPEED*0.86*spdM*rv; setState(f,'walk'); }
+    else if(f.aiPlan==='retreat'){ f.vx=(d<0?1:-1)*SPEED*0.8*spdM*rv; setState(f,'walk'); }
     else if(f.aiPlan==='guard'){ setState(f,'guard'); f.vx=0; }
     else { f.vx*=0.8; if(f.onGround&&f.state!=='guard')setState(f,'idle'); }
     return;
@@ -1400,7 +1897,7 @@ function aiControl(f, opp){
 }
 
 function resolveHit(att, def, m, isDecoyHit){
-  const counter = def.state==='attack' && def.attack && def.t<def.attack.startup+def.attack.active;
+  let counter = def.state==='attack' && def.attack && def.t<def.attack.startup+def.attack.active;
   const facingRight = att.x<def.x;
   const blocking = (def.state==='guard'||def.state==='block') && def.onGround && ((facingRight&&def.face<0)||(!facingRight&&def.face>0));
   att.hitDone=true;
@@ -1409,9 +1906,11 @@ function resolveHit(att, def, m, isDecoyHit){
   att.meter=Math.min(100,att.meter+mGain);
 
   if(blocking){
-    const chip=Math.max(1,Math.round(m.dmg*0.14));
+    const iron=!!eff(def,'iron');                      // 鉄壁：削られず、割れない
+    const chip=iron?0:Math.max(1,Math.round(m.dmg*0.14));
     def.hp=Math.max(0,def.hp-chip);
-    def.guard-=m.guardDmg; def.blockstun=Math.max(def.blockstun, 8+((m.dmg/3)|0)); setState(def,'block');
+    if(!iron) def.guard-=m.guardDmg;
+    def.blockstun=Math.max(def.blockstun, 8+((m.dmg/3)|0)); setState(def,'block');
     def.vx=(att.face)*m.kbx*0.45;
     spark(def.x+def.face*-18, def.y-70, 8, '#8fd8ff', 2.4);
     sfx('guard'); doShake(3);
@@ -1438,6 +1937,16 @@ function resolveHit(att, def, m, isDecoyHit){
     def.face = att.x<def.x?-1:1;
     return;
   }
+  // 見切り：ときどき攻撃をかわして、相手の背後へ
+  if(eff(def,'dodge') && !def.dead && Math.random()<0.4){
+    def.x=Math.max(WALL_L,Math.min(WALL_R, att.x - att.face*58));
+    def.face = att.x<def.x?-1:1; def.invuln=14; def.vx=0;
+    spark(def.x,def.y-60,12,'#b06bff',3); pop(def.x,def.y-152,'みきり','#b06bff',1.0); sfx('ui');
+    return;
+  }
+  // お手本：次の数回はカウンター扱い
+  const md=att.eff&&att.eff.model;
+  if(md && md.t>0 && md.v>0){ counter=true; md.v--; if(md.v<=0) md.t=0; pop(att.x,att.y-152,'お手本','#9fe870',0.85); }
 
   // ダメージ計算
   let dmg=m.dmg*att.buffs.atk, showQ=false;
@@ -1478,6 +1987,38 @@ function resolveHit(att, def, m, isDecoyHit){
     const s=B.fx.shapeless, lo=1-0.7*s, hi=1+0.4*s;
     dmg*=lo+Math.random()*(hi-lo); showQ=s>0.6;
   }
+  // W19 お手本どおりの順番で当てたときだけ大きく効く
+  if(att.isPlayer && B.fx.seq){
+    if(['light','heavy','air'].includes(m.name)){
+      const seq=B.seq;
+      if(m.name===seq[B.seqIdx]) B.seqIdx++;
+      else B.seqIdx = (m.name===seq[0])?1:0;
+      if(B.seqIdx>=3){ dmg*=3.2; B.seqIdx=0; flashScreen=6;
+        pop(def.x,def.y-172,'お手本どおり！','#9fe870',1.25); ring(def.x,def.y-60,'#9fe870',190); }
+      else dmg*=0.35;
+    } else dmg*=0.6;
+  }
+  // W23 ほめ言葉しか返ってこない：当てるほど自分に跳ね返る
+  if(att.isPlayer && B.fx.bossReflect>0){
+    const rd=Math.max(1,Math.round(m.dmg*B.fx.bossReflect));
+    att.hp=Math.max(1,att.hp-rd); att.flash=4; pop(att.x,att.y-122,String(rd),'#ff3d8b',0.8);
+    dmg*=B.fx.bossTake;
+  }
+  if(att.isPlayer && B.fx.critBonus) dmg*=B.fx.critBonus;
+  // W25 同じ技を何度も受けると痛くなる（振り返りを渡すと見切れる）
+  if(def.isPlayer && B.fx.repeat && !att.isPlayer){
+    B.hitCount[m.name]=(B.hitCount[m.name]||0)+1; const c=B.hitCount[m.name];
+    if(B.fx.learned && c>=2){ dmg*=0.5; pop(def.x,def.y-152,'見切った','#9fe870',0.85); }
+    else if(B.fx.repeatMul>0 && c>=2){ dmg*=1+B.fx.repeatMul*(c-1); pop(def.x,def.y-152,'また同じ','#ff3d8b',0.85); }
+  }
+  // 巨大化は威力も上がる／見えない攻撃は1.2倍
+  const fsA=fscale(att); if(fsA>1) dmg*=1+(fsA-1)*0.6;
+  if(eff(att,'invatk')) dmg*=1.2;
+  // 強敵：スキ（突進の空振り直後・真似の直後）は1.5倍
+  if(def.vulnT>0) dmg*=1.5;
+  if(att===B.b && m.name==='dash') B.dashHit=true;
+  // 強敵2：真似した必殺技は、作戦しだいで弱くなる
+  if(B.stage.id==='k2' && att===B.b && SP_MOVES.includes(m.name)) dmg*=B.fx.copyWeak;
   // 必殺技でかかっている効果
   const aAtk=eff(att,'atk'); if(aAtk) dmg*=aAtk;
   const aDown=eff(att,'atkDown'); if(aDown) dmg*=aDown;
@@ -1492,6 +2033,13 @@ function resolveHit(att, def, m, isDecoyHit){
   dmg=Math.max(1, Math.round(dmg*scale));
 
   def.hp=Math.max(0,def.hp-dmg);
+  // 反射：受けたダメージの半分を返す
+  if(eff(def,'reflect') && !att.isAlly){
+    const rd=Math.max(1,Math.round(dmg*0.5));
+    att.hp=Math.max(0,att.hp-rd);
+    if(B.fx.humanFinish && !att.isPlayer && att.hp<8) att.hp=8;
+    att.flash=5; pop(att.x,att.y-122,String(rd),'#9fe870',0.85); ring(def.x,def.y-60,'#9fe870',100);
+  }
   // 最後の一撃だけは、人が決める
   if(B.fx.humanFinish && !def.isPlayer && def.hp<8){
     def.hp=8;
@@ -1585,22 +2133,42 @@ const ITEMS=[{k:'heal',c:'#9fe870',ch:'回'},{k:'atk',c:'#ff6b6b',ch:'力'},{k:'
 function updateItems(){
   if(worldStopped()) return;
   B.itemTimer--;
-  if(B.itemTimer<=0){ B.itemTimer=560+((Math.random()*260)|0);
+  if(B.itemTimer<=0){
+    const w24 = B.stage.id==='w24';                      // WORLD 24 は個人情報のわなが降ってくる
+    B.itemTimer = w24 ? 150+((Math.random()*90)|0) : 560+((Math.random()*260)|0);
     const it=ITEMS[(Math.random()*ITEMS.length)|0];
-    B.items.push({x:140+Math.random()*(W-280),y:-30,vy:0,life:720,...it});
+    const o={x:140+Math.random()*(W-280),y:-30,vy:0,life:720,...it};
+    if(w24 && Math.random()<B.fx.trapRate){
+      o.privacy=true; o.x=Math.max(WALL_L+20,Math.min(WALL_R-20,B.p.x+(Math.random()-0.5)*260));
+    }
+    B.items.push(o);
   }
   for(let i=B.items.length-1;i>=0;i--){
     const it=B.items[i]; it.vy=Math.min(5,it.vy+0.3); it.y+=it.vy; it.life--;
     if(it.y>GROUND-14){ it.y=GROUND-14; it.vy=0; }
+    let taken=false;
     for(const f of (B.fs||[B.p,B.b])){
-      if(!f.dead && Math.abs(f.x-it.x)<34 && Math.abs((f.y-48)-it.y)<58){
+      if(f.dead || Math.abs(f.x-it.x)>=34 || Math.abs((f.y-48)-it.y)>=58) continue;
+      if(it.trap){                                         // 必殺技「わな」：置いた側は拾わない
+        const own=it.ownerF;
+        if(f===own || (B.fs && own && f.team===own.team)) continue;
+        f.hp=Math.max(0,f.hp-10); if(B.fx.humanFinish && !f.isPlayer && f.hp<8) f.hp=8;
+        f.flash=6; if(!eff(f,'stop')){ setState(f,'hurt'); f.hitstun=22; f.vy=-5; }
+        pop(f.x,f.y-128,'わな 10','#ff3d8b',1.0); spark(it.x,it.y,14,'#ff3d8b',3); sfx('heavy');
+      } else if(it.privacy){                               // WORLD 24：個人情報を拾うと自分が損をする
+        if(!f.isPlayer) continue;
+        f.hp=Math.max(1,f.hp-8); f.flash=6; B.b.buffs.atk=1.35; B.b.buffTimer=600;
+        pop(f.x,f.y-128,'個人情報がもれた','#ff3d8b',0.95); spark(it.x,it.y,12,'#ff3d8b',3); sfx('guard');
+        B.yui+=8;
+      } else {
         if(it.k==='heal'){ f.hp=Math.min(f.maxHp,f.hp+16); pop(f.x,f.y-130,'+16','#9fe870',1); }
         if(it.k==='atk'){ f.buffs.atk=1.4; f.buffTimer=600; pop(f.x,f.y-130,'力','#ff6b6b',1); }
         if(it.k==='spd'){ f.buffs.spd=1.45; f.buffTimer=600; pop(f.x,f.y-130,'速','#6bb8ff',1); }
-        ring(it.x,it.y,it.c,60); sfx('pick'); B.items.splice(i,1); break;
+        ring(it.x,it.y,it.c,60); sfx('pick');
       }
+      taken=true; break;
     }
-    if(it.life<=0) B.items.splice(i,1);
+    if(taken || it.life<=0) B.items.splice(i,1);
   }
 }
 
@@ -1642,6 +2210,178 @@ function drawHazards(){
       ctx.globalAlpha=pulse; ctx.fillStyle='#ff3d8b'; ctx.fillRect(h.x,GROUND-3,h.w,3);
     }
     ctx.restore();
+  }
+}
+
+/* ---- WORLD 18〜27・強敵の仕掛け ---- */
+const ROLE_AI={atk:{aggr:0.92,guard:0.08,range:104,gap:14,jump:0.30},
+               def:{aggr:0.25,guard:0.72,range:96, gap:26,jump:0.08},
+               run:{aggr:0.08,guard:0.18,range:70, gap:18,jump:0.45}};
+const ROLE_JP={atk:'攻め',def:'守り',run:'逃げ'};
+const SP_MOVES=['special','stopgrab','laser','ultimate','upper','rush','dash','spin'];
+function quakeFrom(f){
+  doShake(18); flashScreen=Math.max(flashScreen,6); sfx('heavy');
+  for(const g of foesOf(f)){
+    if(g.dead) continue;
+    if(g.onGround){
+      g.hp=Math.max(0,g.hp-12); if(B.fx.humanFinish && !g.isPlayer && g.hp<8) g.hp=8;
+      g.flash=6; if(!eff(g,'stop')){ setState(g,'hurt'); g.hitstun=26; g.vy=-6; }
+      pop(g.x,g.y-122,'12','#ffcf4a',1.0); spark(g.x,GROUND,14,'#ffcf4a',3.2);
+      if(g.isPlayer) B.yui+=14;
+    } else pop(g.x,g.y-122,'よけた','#8194b8',0.8);
+  }
+  for(let k=0;k<12;k++) spark(Math.random()*W, GROUND, 4, '#8194b8', 2.4);
+}
+function updateStoryGimmicks(){
+  if(worldStopped()) return;
+  const id=B.stage.id, f=B.fx, bs=B.b;
+  const bossBusy=['attack','hurt','crush','block','dodge'].includes(bs.state) || bs.dead || eff(bs,'stop');
+  // W18 役割が決まっていない：型がころころ変わる
+  if(f.roleCycle && !bs.dead){
+    B.roleT--;
+    if(B.roleT<=0){
+      const order=['atk','def','run'];
+      B.roleT = f.roleLock ? 210 : 80+((Math.random()*80)|0);
+      bs.style = f.roleLock ? order[(order.indexOf(bs.style)+1)%3] : order[(Math.random()*3)|0];
+      bs.ai = Object.assign({}, bs.aiBase, ROLE_AI[bs.style]);
+    }
+  }
+  // W21 言葉が通じない：左右が逆になる（「ときどき」の段階あり）
+  if(id==='w21'){
+    if(f.revMode===2) f.revNow=true;
+    else if(f.revMode===1){ B.revT--; if(B.revT<=0){ B.revT=90+((Math.random()*90)|0); f.revNow=Math.random()<0.35; } }
+    else f.revNow=false;
+  }
+  // W26 締切から逆算：10秒ごとの目標
+  if(id==='w26' && f.checkpoints){
+    B.ckT++;
+    if(B.ckT>=600){
+      B.ckT=0;
+      const lost=(B.ckHp-bs.hp)/bs.maxHp;
+      if(lost>=0.12){ B.p.hp=Math.min(B.p.maxHp,B.p.hp+10); ring(B.p.x,B.p.y-60,'#9fe870',140);
+        pop(B.p.x,B.p.y-142,'目標クリア +10','#9fe870',1.0); sfx('ok'); }
+      else pop(B.p.x,B.p.y-142,'目標まであと少し','#8194b8',0.85);
+      B.ckHp=bs.hp;
+    }
+  }
+  // W20 仕事を分ける：1段削るごとに大きくひるむ
+  if(id==='w20' && f.segments && !bs.dead){
+    const seg=Math.ceil(bs.hp/bs.maxHp*3);
+    if(B.segLast===undefined) B.segLast=seg;
+    if(seg<B.segLast){
+      B.segLast=seg;
+      if(!eff(bs,'stop')){ setState(bs,'crush'); bs.hitstun=70; }
+      pop(bs.x,bs.y-172,(3-seg)+'段目クリア','#9fe870',1.2); ring(bs.x,bs.y-60,'#9fe870',200); flashScreen=6; sfx('ok');
+    }
+  }
+  // 強敵1 ハヤスギル：数秒おきに突進してくる
+  if(f.kyoDash && !bs.dead){
+    B.dashT--;
+    if(B.dashT<=0 && !bossBusy){
+      B.dashT=f.dashGap+((Math.random()*60)|0);
+      bs.face = B.p.x<bs.x?-1:1;
+      startAttack(bs,'dash'); B.dashing=true; B.dashHit=false;
+      sfx('sp'); ring(bs.x,bs.y-60,'#00e5ff',130);
+    }
+    if(B.dashing && bs.state!=='attack'){
+      B.dashing=false;
+      if(f.dashBonus && !B.dashHit){ bs.vulnT=90; pop(bs.x,bs.y-164,'スキ！','#9fe870',1.1); }
+    }
+  }
+  // 強敵2 ゼンブマネル：こちらの必殺技をそのまま真似する
+  if(f.copyGap>0 && !bs.dead){
+    B.copyT--;
+    if(B.copyT<=0 && !bossBusy){
+      B.copyT=f.copyGap+((Math.random()*80)|0);
+      bs.sp=B.p.sp; bs.meter=100;
+      pop(bs.x,bs.y-178,'まねした！','#d0d0ff',1.0);
+      castSpecial(bs,B.p);
+      if(f.copyVuln) bs.vulnT=Math.max(bs.vulnT||0,80);
+    }
+  }
+  // 強敵3 テンサイ：雷と地震
+  if(f.stormGap>0 && !bs.dead){
+    B.stormT--;
+    if(B.stormT<=0){
+      B.stormT=f.stormGap+((Math.random()*50)|0);
+      const n=f.stormLess?1:2;
+      for(let i=0;i<n;i++){
+        const x=Math.max(WALL_L,Math.min(WALL_R, B.p.x+(Math.random()-0.5)*(i?320:110)));
+        B.bolts.push({x, t:f.stormTell||40, owner:bs, safePlat:f.stormSafePlat});
+      }
+    }
+    B.quakeT--;
+    if(B.quakeT<=0){ B.quakeT=f.quakeGap+((Math.random()*120)|0); B.quakeWarn=48; }
+    if(B.quakeWarn>0){ B.quakeWarn--; if(B.quakeWarn===0) quakeFrom(bs); }
+  }
+  if(bs.vulnT>0) bs.vulnT--;
+}
+
+/* ---- 敵の一覧（1人用は相手1人、対戦はチームで判定） ---- */
+function foesOf(f){
+  if(B.fs) return B.fs.filter(g=>g!==f && !g.dead && g.team!==f.team);
+  if(f===B.p) return [B.b];
+  return [B.p];
+}
+/* ---- 落雷・嵐 ---- */
+function updateBolts(){
+  if(!B.bolts || !B.bolts.length || worldStopped()) return;
+  for(let i=B.bolts.length-1;i>=0;i--){
+    const b=B.bolts[i]; b.t--;
+    if(b.t===0){
+      flashScreen=Math.max(flashScreen,5); doShake(9); sfx('heavy'); b.strike=10;
+      const own=b.owner;
+      for(const g of (B.fs||[B.p,B.b])){
+        if(!g || g.dead || g===own) continue;
+        if(B.fs && own && g.team===own.team) continue;
+        if(b.safePlat && g.platform) continue;            // 強敵3：足場の上なら雷は当たらない
+        if(Math.abs(g.x-b.x)<44){
+          const d=18; g.hp=Math.max(0,g.hp-d); if(B.fx.humanFinish && !g.isPlayer && g.hp<8) g.hp=8;
+          g.flash=6; if(!eff(g,'stop')){ setState(g,'hurt'); g.hitstun=28; g.vy=-7; }
+          pop(g.x,g.y-122,String(d),'#ffcf4a',1.1); spark(g.x,g.y-60,18,'#ffcf4a',4);
+          if(g.isPlayer) B.yui+=d*1.2;
+        }
+      }
+    }
+    if(b.t<0){ b.strike--; if(b.strike<=0) B.bolts.splice(i,1); }
+  }
+}
+function drawBolts(){
+  if(!B.bolts) return;
+  for(const b of B.bolts){
+    ctx.save();
+    if(b.t>0){
+      ctx.globalAlpha=0.35+0.45*Math.abs(Math.sin(b.t*0.4));
+      ctx.strokeStyle='#ffcf4a'; ctx.lineWidth=2; ctx.setLineDash([6,6]);
+      ctx.beginPath(); ctx.moveTo(b.x,40); ctx.lineTo(b.x,GROUND); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.ellipse(b.x,GROUND,44,7,0,0,Math.PI*2); ctx.stroke();
+    } else {
+      ctx.strokeStyle='#fff6c8'; ctx.lineWidth=5; ctx.shadowColor='#ffcf4a'; ctx.shadowBlur=20;
+      ctx.beginPath(); let x=b.x, y=30; ctx.moveTo(x,y);
+      while(y<GROUND){ y+=34; x=b.x+(Math.random()-0.5)*26; ctx.lineTo(x,y); }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+/* ---- まねっこ分身：分身も同じ攻撃をする ---- */
+function mirrorHits(a){
+  if(!eff(a,'mirror') || !a.attack || a.state!=='attack') return;
+  if(!(a.t>=a.attack.startup && a.t<a.attack.startup+a.attack.active)) return;
+  if(a.mirrorDone===a.attack) return;
+  const hb=hitbox(a); if(!hb || !hb.w) return;
+  for(const off of [-130,130]){
+    const box={x:hb.x+off, y:hb.y, w:hb.w, h:hb.h};
+    for(const d of foesOf(a)){
+      if(d.dead || d.invuln>0) continue;
+      if(overlap(box,hurtbox(d))){
+        const dm=Math.max(1,Math.round(a.attack.dmg*0.5));
+        d.hp=Math.max(0,d.hp-dm); if(B.fx.humanFinish && !d.isPlayer && d.hp<8) d.hp=8;
+        d.flash=5; if(!eff(d,'stop')){ setState(d,'hurt'); d.hitstun=Math.max(d.hitstun,12); d.vx=(off>0?1:-1)*3; }
+        pop(d.x,d.y-122,String(dm),'#6bb8ff',0.85); spark(d.x,d.y-60,8,'#6bb8ff',2.4);
+        a.mirrorDone=a.attack; sfx('hit'); return;
+      }
+    }
   }
 }
 
@@ -1842,6 +2582,7 @@ function loop(now){
 }
 function tick(){
   readInput();
+  FRAMEN++;
   // 演出更新（常に動く）
   for(let i=parts.length-1;i>=0;i--){ const q=parts[i]; q.life--; q.x+=q.vx; q.y+=q.vy; q.vy+=0.14; q.vx*=0.97; if(q.life<=0)parts.splice(i,1); }
   for(let i=pops.length-1;i>=0;i--){ const q=pops[i]; q.life--; q.y+=q.vy; q.vy*=0.92; if(q.life<=0)pops.splice(i,1); }
@@ -1871,10 +2612,11 @@ function tick(){
   if(slowmo>0){ slowmo--; if(slowmo%2===0) return; }
   // 通信対戦の参加側は、自分の入力を送って、ホストから届いた状態を映すだけ
   if(B.vs && NET.role==='guest'){ netGuestStep(); return; }
-  if(B.fx.infinite) B.timer=99*60; else if(!worldStopped()) B.timer--;
+  if(B.fx.infinite) B.timer=99*60; else if(!worldStopped()) B.timer-=(B.fx.timeRate||1);
   if(B.fx.regen>0 && B.b.hp>0 && !B.b.dead) B.b.hp=Math.min(B.b.maxHp, B.b.hp+B.fx.regen);
-  updateHazards(); updatePlats();
+  updateHazards(); updatePlats(); updateBolts();
   updateStance(); updateWalls(); updateBullets(); updateDrainSupport(); updateFinalPhase();
+  if(!B.vs) updateStoryGimmicks();
   if(!B.vs) B.yui=Math.min(100, B.yui + 2/60);
   // 必殺ゲージは、殴らなくても時間で溜まる（ただし時間が止まっている間は溜まらない）
   if(!worldStopped()){
@@ -1883,15 +2625,23 @@ function tick(){
   }
   if(B.timer<=0){
     if(B.vs){ vsTimeUp(); return; }
+    if(B.fx.timeoutLose){ finish(false); return; }        // WORLD 26：締切を過ぎたら負け
     finish(B.p.hp/B.p.maxHp >= B.b.hp/B.b.maxHp); return;
+  }
+  // WORLD 22：長すぎて全部がゆっくりになる（時間だけは普通に減る）
+  if(!B.vs && B.fx.slowWorld && B.fx.slowWorld<1){
+    B.slowAcc=(B.slowAcc||0)+B.fx.slowWorld;
+    if(B.slowAcc<1) return;
+    B.slowAcc-=1;
   }
 
   // ---- 通信対戦（ホスト）：全員ぶんをここで動かす ----
   if(B.vs){
     netHostStep();
     for(const f of B.fs) updateFighter(f, foeOf(f));
-    updateAlly(); updateBullets(); updateWalls(); updateHazards();
+    updateAlly(); updateBullets(); updateWalls(); updateHazards(); updateBolts();
     checkHitsVs();
+    for(const f of B.fs) mirrorHits(f);
     updateItems();
     pushApartVs();
     vsCheckEnd();
@@ -1906,6 +2656,7 @@ function tick(){
   updateFighter(B.b,B.p);
   updateAlly();
   checkHits();
+  mirrorHits(B.p); mirrorHits(B.b);
   updateItems();
   if(B.finishReady) B.finishT++;
 
@@ -1971,6 +2722,7 @@ function render(){
     }
     if(B.stage.id==='w17') drawWeakMarkers();
     drawBullets();
+    drawBolts();
     drawEffects();
     drawWalls();
     if(B.fx.fog>0) drawFog();
@@ -2122,12 +2874,16 @@ function drawWeakMarkers(){
   }
 }
 function drawItem(it){
+  // WORLD 24 の個人情報は、見分けられるようになるまで普通のアイテムに見える
+  const danger = it.trap || (it.privacy && B && B.fx.trapReveal);
+  const c = danger ? '#ff3d8b' : it.c;
+  const ch = it.trap ? '罠' : ((it.privacy && B && B.fx.trapReveal) ? '個' : it.ch);
   ctx.save(); ctx.translate(it.x,it.y);
   ctx.rotate(Math.sin(performance.now()/300)*0.25);
-  ctx.strokeStyle=it.c; ctx.lineWidth=2; ctx.shadowColor=it.c; ctx.shadowBlur=12;
+  ctx.strokeStyle=c; ctx.lineWidth=2; ctx.shadowColor=c; ctx.shadowBlur=danger?18:12;
   ctx.beginPath(); ctx.moveTo(0,-14); ctx.lineTo(13,0); ctx.lineTo(0,14); ctx.lineTo(-13,0); ctx.closePath(); ctx.stroke();
-  ctx.shadowBlur=0; ctx.fillStyle=it.c; ctx.font='700 13px "Zen Kaku Gothic New",sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(it.ch,0,1);
+  ctx.shadowBlur=0; ctx.fillStyle=c; ctx.font='700 13px "Zen Kaku Gothic New",sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(ch,0,1);
   ctx.restore();
 }
 
@@ -2221,9 +2977,40 @@ function drawFighter(f, isBoss){
   ctx.beginPath(); ctx.ellipse(f.x, f.platform?(f.platY||350):GROUND+2, 22, 5, 0,0,Math.PI*2); ctx.fill(); ctx.restore();
   // 無敵中のゴースト
   if(eff(f,'invis')) alpha=Math.min(alpha,0.16);
-  if(f.clones>0){ drawStick(f,f.x-130,f.y,col,0.42); drawStick(f,f.x+130,f.y,col,0.42); }
-  if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,col,0.28); drawStick(f,f.x-f.vx*1.1,f.y,col,0.45); }
-  drawStick(f,f.x,f.y,col,alpha);
+  const sc=fscale(f);
+  // 見えない攻撃（必殺技／WORLD 27のボス）：攻撃中も立ちポーズに見せる
+  let pose=f;
+  const hideA = eff(f,'invatk') ? 1 : ((isBoss && B.fx.hideAtk>0) ? B.fx.hideAtk : 0);
+  if(hideA>0 && f.state==='attack'){
+    pose=Object.assign({},f,{state:'idle',attack:null});
+    if(hideA<1) drawStick(f,f.x,f.y,col,alpha*(1-hideA)*0.9,sc);   // うっすら本当の動き
+  }
+  if(f.clones>0){ drawStick(pose,f.x-130,f.y,col,0.42,sc); drawStick(pose,f.x+130,f.y,col,0.42,sc); }
+  if(eff(f,'mirror')){ drawStick(pose,f.x-130,f.y,'#6bb8ff',0.55,sc); drawStick(pose,f.x+130,f.y,'#6bb8ff',0.55,sc); }
+  if(eff(f,'haste') && Math.abs(f.vx)>1){ drawStick(pose,f.x-f.vx*3,f.y,col,0.22,sc); drawStick(pose,f.x-f.vx*1.6,f.y,col,0.38,sc); }
+  if(isBoss && B.fx.kyoDash && f.state==='attack' && f.attack && f.attack.name==='dash'){
+    drawStick(f,f.x-f.face*40,f.y,col,0.3,sc); drawStick(f,f.x-f.face*80,f.y,col,0.16,sc); }
+  if(f.state==='dodge'){ drawStick(f,f.x-f.vx*2.2,f.y,col,0.28,sc); drawStick(f,f.x-f.vx*1.1,f.y,col,0.45,sc); }
+  drawStick(pose,f.x,f.y,col,(hideA>0&&f.state==='attack'&&hideA<1)?alpha*0.6:alpha,sc);
+  // 強敵1：突進の予兆
+  if(isBoss && B.fx.dashTell && B.dashT>0 && B.dashT<=32 && !f.dead){
+    ctx.save(); ctx.fillStyle='#00e5ff'; ctx.globalAlpha=0.5+0.5*Math.abs(Math.sin(B.dashT*0.5));
+    ctx.fillRect(f.x-26, f.y-152*sc, 52*(1-B.dashT/32), 6); ctx.strokeStyle='rgba(0,229,255,.6)';
+    ctx.strokeRect(f.x-26, f.y-152*sc, 52, 6);
+    ctx.font='700 11px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center'; ctx.fillText('突進', f.x, f.y-158*sc);
+    ctx.restore();
+  }
+  // W18：型の表示
+  if(isBoss && B.fx.roleShow && f.style && !f.dead){
+    ctx.save(); ctx.fillStyle= f.style==='run'?'#9fe870':(f.style==='atk'?'#ff3d8b':'#6bb8ff');
+    ctx.font='700 13px "Zen Kaku Gothic New",sans-serif'; ctx.textAlign='center';
+    ctx.fillText(ROLE_JP[f.style]+'の型', f.x, f.y-150*sc); ctx.restore();
+  }
+  // 強敵：スキ
+  if(f.vulnT>0){
+    ctx.save(); ctx.strokeStyle='#9fe870'; ctx.lineWidth=2; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.arc(f.x,f.y-52*sc,48*sc,0,Math.PI*2); ctx.stroke(); ctx.restore();
+  }
   if(eff(f,'stop')){
     ctx.save(); ctx.strokeStyle='#6bb8ff'; ctx.lineWidth=2; ctx.shadowColor='#6bb8ff'; ctx.shadowBlur=12;
     ctx.beginPath(); ctx.arc(f.x,f.y-52,46,0,Math.PI*2); ctx.stroke();
@@ -2367,8 +3154,9 @@ function drawHUD(){
   bar(28,59,220,9,p.meter/100, p.meter>=spCost()?'#ffcf4a':'rgba(255,207,74,.4)',false);
   ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif');
   ctx.fillText(B.vs?(NET.role==='host'?'あなた':'あいて'):'YOU',28,18);
-  if(p.meter>=spCost()){ ctx.fillStyle='#ffcf4a'; ctx.font=fnt('400',11,'"Zen Kaku Gothic New",sans-serif');
-    ctx.fillText((SPECIALS[p.sp]||SPECIALS.tomoe).n+(isTouch?' 発動できる':' 発動できる [U]'),256,68); }
+  { const ready=p.meter>=spCost();   // 装備している必殺技の名前はいつも見せる
+    ctx.fillStyle= ready?'#ffcf4a':'#6f82a8'; ctx.font=fnt('400',11,'"Zen Kaku Gothic New",sans-serif');
+    ctx.fillText('必殺：'+(SPECIALS[p.sp]||SPECIALS.tomoe).n+(ready?(isTouch?'　発動できる':'　発動できる [U]'):''),256,68); }
   // ボス
   ctx.textAlign='right';
   ctx.fillStyle='#8194b8'; ctx.font=fnt('400',11,'"Anton",sans-serif');
@@ -2411,6 +3199,32 @@ function drawHUD(){
   // FINAL：フェーズ表示
   if(stage.id==='wf'){ ctx.font=fnt('400',11,'"Anton",sans-serif'); ctx.fillStyle='#ff3d3d';
     ctx.fillText('PHASE '+B.fPhase+' / 3', W/2, 112); }
+  // WORLD 18〜27・強敵の状態表示
+  const note=(t,c)=>{ ctx.font=fnt('400',11,'"Zen Kaku Gothic New",sans-serif'); ctx.fillStyle=c; ctx.fillText(t, W/2, 112); };
+  if(stage.id==='w18' && !B.fx.roleShow) note('相手の型：？','#c9a0ff');
+  if(stage.id==='w21' && B.fx.revNow) note('左右が逆になっている','#81b29a');
+  if(stage.id==='w22' && B.fx.slowWorld>0) note('ぜんぶが遅い（時間だけは普通に減る）','#a8dadc');
+  if(stage.id==='w23' && B.fx.bossReflect>0) note('攻撃の一部がはね返ってくる','#f4a6c8');
+  if(stage.id==='w25' && B.fx.repeatMul>0) note('同じ技を受けるほど痛くなる','#9aa0a6');
+  if(stage.id==='w26') note(B.fx.timeoutLose && B.fx.timeRate>1 ? '時間切れは負け／時間が'+B.fx.timeRate+'倍速で減る' : '時間切れは負け','#ff9f1c');
+  if(stage.id==='k3' && B.quakeWarn>0) note('地震が来る！ ジャンプ！','#ffcf4a');
+  // WORLD 19：お手本の順番
+  if(stage.id==='w19' && B.seq){
+    const MJ={light:'弱',heavy:'強',air:'空中'};
+    const bw=62, gap=10, x0=W/2-(bw*3+gap*2)/2, y0=122;
+    for(let i=0;i<3;i++){
+      const x=x0+i*(bw+gap), known=i<B.fx.seqShown, done=i<B.seqIdx;
+      ctx.fillStyle= done?'rgba(159,232,112,.28)':'rgba(8,12,22,.85)'; ctx.fillRect(x,y0,bw,24);
+      ctx.strokeStyle= done?'#9fe870':'rgba(140,165,210,.45)'; ctx.lineWidth=1; ctx.strokeRect(x+.5,y0+.5,bw-1,23);
+      ctx.fillStyle= known?'#e8eefb':'#54658c'; ctx.font=fnt('400',13,'"Zen Kaku Gothic New",sans-serif');
+      ctx.fillText(known?MJ[B.seq[i]]:'？', x+bw/2, y0+17);
+    }
+  }
+  // WORLD 20：体力の段
+  if(stage.id==='w20' && B.fx.segments){
+    ctx.strokeStyle='rgba(255,255,255,.75)'; ctx.lineWidth=2;
+    for(const r of [1/3,2/3]){ const x=W-358+2+(330-4)*(1-r); ctx.beginPath(); ctx.moveTo(x,24); ctx.lineTo(x,44); ctx.stroke(); }
+  }
   ctx.textAlign='left';
   // 最後の一撃
   if(B.finishReady){
@@ -2489,7 +3303,7 @@ const VS_STAGE={ id:'vs', num:'VERSUS', title:'通信対戦', skill:'', skillJp:
   trouble:'台とギミックのあるステージ。先に相手を削りきったほうが勝ち。',
   manual:null, lesson:'', call:null };
 const NSTATES=['idle','walk','jump','guard','dodge','attack','hurt','block','crush'];
-const NMOVES=['light','heavy','air','special','stopgrab','laser','ultimate','cast','upper','rush'];
+const NMOVES=['light','heavy','air','special','stopgrab','laser','ultimate','cast','upper','rush','dash','spin'];
 
 function loadPeerJS(){
   return new Promise((res,rej)=>{
@@ -2512,7 +3326,9 @@ function encF(f){
   return [Math.round(f.x), Math.round(f.y), f.face, Math.max(0,NSTATES.indexOf(f.state)), f.t|0,
           Math.round(f.hp*10), Math.round(f.meter), Math.round(f.guard),
           f.attack?NMOVES.indexOf(f.attack.name):-1, f.dead?1:0,
-          (eff(f,'stop')?1:0)|(eff(f,'invis')?2:0)|(f.clones>0?4:0)|(eff(f,'armor')?8:0)];
+          (eff(f,'stop')?1:0)|(eff(f,'invis')?2:0)|(f.clones>0?4:0)|(eff(f,'armor')?8:0)
+          |(eff(f,'giant')?16:0)|(eff(f,'slow')?32:0)|(eff(f,'reverse')?64:0)|(eff(f,'invatk')?128:0)
+          |(eff(f,'mirror')?256:0)|(eff(f,'haste')?512:0)|(eff(f,'counter')?1024:0)|(eff(f,'iron')?2048:0)];
 }
 function decF(f,a){
   f.x=a[0]; f.y=a[1]; f.face=a[2]; f.state=NSTATES[a[3]]||'idle'; f.t=a[4];
@@ -2521,6 +3337,9 @@ function decF(f,a){
   f.dead=!!a[9];
   const fl=a[10]|0; f.eff={};
   if(fl&1) addEff(f,'stop',3); if(fl&2) addEff(f,'invis',3); if(fl&8) addEff(f,'armor',3);
+  if(fl&16) addEff(f,'giant',3); if(fl&32) addEff(f,'slow',3); if(fl&64) addEff(f,'reverse',3);
+  if(fl&128) addEff(f,'invatk',3); if(fl&256) addEff(f,'mirror',3); if(fl&512) addEff(f,'haste',3);
+  if(fl&1024) addEff(f,'counter',3); if(fl&2048) addEff(f,'iron',3);
   f.clones=(fl&4)?3:0;
   const on=platsOf().find(pl=>pl.on!==false && Math.abs(f.y-pl.y)<1.5 && f.x>pl.x-8 && f.x<pl.x+pl.w+8);
   f.platform=!!on; if(on) f.platY=on.y+14;
@@ -2539,7 +3358,8 @@ function sendSnapshot(){
     B.bullets.map(q=>[q.x|0,q.y|0,Math.max(0,TALK.indexOf(q.txt)),q.sorted?1:0,q.wave?1:0]),
     B.walls.map(w=>[w.x|0,w.y|0,w.w|0,w.h|0]),
     B.fx.hazards.map(h=>[h.x|0,h.w|0,h.on?1:0]),
-    (B.ally&&B.fx.allyActive)?encF(B.ally):null ]});
+    (B.ally&&B.fx.allyActive)?encF(B.ally):null,
+    B.bolts.map(b=>[b.x|0,b.t|0]) ]});
 }
 function applySnapshot(s){
   if(!B||!B.vs||!B.fs) return;
@@ -2547,8 +3367,11 @@ function applySnapshot(s){
   const arr=s[1], before=B.fs.map(f=>f.hp);
   for(let i=0;i<B.fs.length && i<arr.length;i++) decF(B.fs[i],arr[i]);
   s[2].forEach((a,i)=>{ const pl=B.plats[i]; if(!pl) return; pl.x=a[0]; pl.on=!!a[1]; pl.fuse=a[2]; });
-  B.items=s[3].map(a=>{ const d=ITEMS.find(z=>z.k===a[2])||ITEMS[0];
+  B.items=s[3].map(a=>{
+    if(a[2]==='trap') return {x:a[0],y:a[1],vy:0,life:99,k:'trap',c:'#ff3d8b',ch:'罠',trap:true};
+    const d=ITEMS.find(z=>z.k===a[2])||ITEMS[0];
     return {x:a[0],y:a[1],vy:0,life:99,k:d.k,c:d.c,ch:d.ch}; });
+  B.bolts=(s[11]||[]).map(a=>({x:a[0],t:a[1],strike:3}));
   const ph=s[4]; B.phase = ph===0?'intro':(ph===2?'over':'fight');
   B.t=s[5]; B.result = s[6]<0?null:s[6];
   // 必殺技で出たもの（弾・壁・見えない床・なかま）も同期する
@@ -2622,7 +3445,10 @@ function netLobby(){
   const lb=$('#vs-lobby'); if(!lb) return;
   lb.textContent='';
   if(NET.role!=='host'){
-    if(NET.connected) lb.appendChild(el('p','muted','あなたは P'+(NET.mySlot+1)+' です。ホストが始めると自動で始まります。'));
+    if(NET.connected){
+      lb.appendChild(el('p','muted','あなたは P'+(NET.mySlot+1)+' です。ホストが始めると自動で始まります。'));
+      const r=el('div','row'); r.style.marginTop='10px'; r.appendChild(spButton('vs',true)); lb.appendChild(r);
+    }
     return;
   }
   const n=netPlayers();
@@ -2645,6 +3471,7 @@ function netLobby(){
   tg.onclick=()=>hostStart('tag');
   if(n!==4){ tg.disabled=true; tg.style.opacity='.45'; }
   act.appendChild(tg);
+  act.appendChild(spButton('vs',true));
   lb.appendChild(act);
   if(n<2) lb.appendChild(el('p','muted','あいことばを伝えて、参加してもらってください。2人からはじめられます。'));
   else if(n<4) lb.appendChild(el('p','muted','4人そろうとタッグ戦もえらべます。'));
@@ -2820,31 +3647,105 @@ $('#b-vs').onclick=()=>{ audio(); sfx('ui'); netStatus(''); netLobby(); showLaye
 $('#vs-host').onclick=()=>vsStart('host');
 $('#vs-join').onclick=()=>vsStart('guest');
 $('#vs-back').onclick=()=>{ sfx('ui'); netCleanup(); netStatus(''); showLayer('title'); };
-let lastSp='select';
-function worldNameOf(id){ const s=STAGES.find(x=>x.id===id); return s?s.num:''; }
-function buildSpecials(){
-  const forVs = lastSp==='vs';           // 通信対戦では全部の技を使える
-  const cur = forVs ? save.equipVs : save.equip;
-  const list=$('#sp-list'); list.textContent='';
-  const head0=$('#sp-lead');
-  if(head0) head0.textContent = forVs
-    ? '通信対戦では、まだクリアしていない技もぜんぶ使えます。'
-    : 'えらんだ技はストーリーで使えます。ステージをクリアすると、その相手の技や仕掛けを覚えます。';
-  Object.keys(SPECIALS).forEach(id=>{
-    const d=SPECIALS[id], un=forVs||spUnlocked(id);
-    const b=el('button','spcard'+(cur===id?' on':'')+(un?'':' locked'));
-    const h=el('div','sphead');
-    h.appendChild(el('div','spname', d.n));
-    h.appendChild(el('div','spmeta', un?(cur===id?'えらんでいる':'えらぶ'):(worldNameOf(d.from)+' クリアで習得')));
-    b.appendChild(h);
-    b.appendChild(el('p','muted', d.d));
-    if(un) b.onclick=()=>{ if(forVs) save.equipVs=id; else save.equip=id; persist(); sfx('ok'); buildSpecials(); };
-    list.appendChild(b);
+/* ---- 必殺技えらび：どこから開いたかを覚えておき、そこへ戻る ---- */
+const SPS={back:'select', vs:false, filter:'all', only:false};
+let lastSp='select';   // 互換のため残す
+function worldNameOf(id){ const s=stageById(id); return s?s.num:''; }
+function spSource(d){ return d.from ? worldNameOf(d.from) : '最初から'; }
+function curSp(forVs){ const id=forVs?save.equipVs:save.equip; return SPECIALS[id]?id:'tomoe'; }
+function openSp(back, forVs){ SPS.back=back; SPS.vs=!!forVs; lastSp=forVs?'vs':back; sfx('ui'); buildSpecials(); showLayer('sp'); }
+// どの画面にも置ける「必殺技を変える」ボタン
+function spButton(back, forVs){
+  const id=curSp(!!forVs);
+  const b=el('button','btn ghost sm spnow');
+  b.dataset.vs = forVs?'1':'0';
+  b.appendChild(document.createTextNode('必殺技を変える（いま：'));
+  b.appendChild(el('b',null,SPECIALS[id].n));
+  b.appendChild(document.createTextNode('）'));
+  b.onclick=()=>openSp(back, forVs);
+  return b;
+}
+function refreshSpButtons(){
+  document.querySelectorAll('.spnow').forEach(b=>{
+    const x=b.querySelector('b'); if(x) x.textContent=SPECIALS[curSp(b.dataset.vs==='1')].n;
   });
 }
-$('#b-sp1').onclick=()=>{ lastSp='select'; sfx('ui'); buildSpecials(); showLayer('sp'); };
-$('#vs-sp').onclick=()=>{ lastSp='vs'; sfx('ui'); buildSpecials(); showLayer('sp'); };
-$('#sp-back').onclick=()=>{ sfx('ui'); showLayer(lastSp); };
+function equipSp(id){
+  if(SPS.vs){
+    save.equipVs=id;
+    if(NET.role==='guest' && NET.conn && NET.conn.open){ try{ NET.conn.send({sp:id}); }catch(e){} }
+  } else save.equip=id;
+  persist(); sfx('ok'); buildSpecials();
+}
+function spCard(id){
+  const d=SPECIALS[id], un=SPS.vs||spUnlocked(id), cur=curSp(SPS.vs), T=SP_TYPES[d.ty]||SP_TYPES.melee;
+  const b=el('button','spc'+(cur===id?' on':'')+(un?'':' locked'));
+  b.style.setProperty('--tc', T.c);
+  b.appendChild(el('span','spc-ty', T.n));
+  b.appendChild(el('span','spc-n', d.n));
+  b.appendChild(el('span','spc-d', d.d));
+  b.appendChild(el('span','spc-src', un ? (d.from?spSource(d)+'でゲット':'最初から使える') : spSource(d)+'をクリアで習得'));
+  b.title=d.n+'：'+d.d;
+  if(un) b.onclick=()=>equipSp(id); else b.setAttribute('aria-disabled','true');
+  return b;
+}
+function buildSpecials(){
+  const ids=Object.keys(SPECIALS);
+  const got=ids.filter(id=>SPS.vs||spUnlocked(id)).length;
+  $('#sp-mode').textContent = SPS.vs ? 'Special Moves / Versus' : 'Special Moves / Story';
+  $('#sp-count').innerHTML='';
+  const cnt=$('#sp-count');
+  cnt.appendChild(document.createTextNode(SPS.vs?'使える技 ':'覚えた技 '));
+  cnt.appendChild(el('b',null,String(got)));
+  cnt.appendChild(document.createTextNode(' / '+ids.length));
+  $('#sp-lead').textContent = SPS.vs
+    ? '通信対戦では、まだクリアしていない技も含めて、ぜんぶ使えます。'
+    : 'ストーリーのWORLDや強敵をクリアすると、その相手の技や仕掛けを、自分の必殺技として覚えます。';
+  // いま装備中
+  const cid=curSp(SPS.vs), cd=SPECIALS[cid], ct=SP_TYPES[cd.ty]||SP_TYPES.melee;
+  const eq=$('#sp-equip'); eq.textContent=''; eq.style.setProperty('--tc', ct.c);
+  eq.appendChild(el('div','lbl','装備中'));
+  const nm=el('div','nm', cd.n); eq.appendChild(nm);
+  const ds=el('div','ds'); ds.textContent=ct.n+'　'+cd.d; eq.appendChild(ds);
+  // しぼりこみ
+  const tabs=$('#sp-tabs'); tabs.textContent='';
+  const mk=(key,label,color)=>{
+    const t=el('button','sp-tab',label); t.setAttribute('role','tab');
+    t.setAttribute('aria-selected', SPS.filter===key?'true':'false');
+    if(color) t.style.setProperty('--tc',color);
+    t.onclick=()=>{ SPS.filter=key; sfx('ui'); buildSpecials(); };
+    tabs.appendChild(t);
+  };
+  mk('all','すべて');
+  for(const k in SP_TYPES){ const n=ids.filter(id=>SPECIALS[id].ty===k).length; mk(k, SP_TYPES[k].n+' '+n, SP_TYPES[k].c); }
+  $('#sp-only-wrap').hidden = SPS.vs;
+  $('#sp-only').checked = SPS.only;
+  // 出どころごとに並べる
+  const list=$('#sp-list'); list.textContent='';
+  const groups=[
+    ['最初から使える', id=>!SPECIALS[id].from],
+    ['ストーリーでゲット', id=>/^w/.test(SPECIALS[id].from||'')],
+    ['強敵を倒してゲット', id=>/^k/.test(SPECIALS[id].from||'')]
+  ];
+  let shown=0;
+  for(const [title,test] of groups){
+    const g=ids.filter(test).filter(id=>SPS.filter==='all'||SPECIALS[id].ty===SPS.filter)
+               .filter(id=>!SPS.only||SPS.vs||spUnlocked(id));
+    if(!g.length) continue;
+    const sec=el('div','sp-sec');
+    const h=el('div','sp-sech'); h.appendChild(el('h3',null,title));
+    const have=g.filter(id=>SPS.vs||spUnlocked(id)).length;
+    h.appendChild(el('span',null,have+' / '+g.length)); sec.appendChild(h);
+    const grid=el('div','sp-grid'); g.forEach(id=>grid.appendChild(spCard(id))); sec.appendChild(grid);
+    list.appendChild(sec); shown+=g.length;
+  }
+  if(!shown) list.appendChild(el('p','sp-empty','この条件の技はまだありません。'));
+}
+$('#sp-only').onchange=e=>{ SPS.only=e.target.checked; buildSpecials(); };
+$('#b-sp1').onclick=()=>openSp('select',false);
+$('#vs-sp').onclick=()=>openSp('vs',true);
+$('#sp-back').onclick=()=>{ sfx('ui'); if(SPS.back==='vs') netLobby(); refreshSpButtons(); showLayer(SPS.back); };
+$('#b-sp0').onclick=()=>openSp('title',false);
 $('#b-manual0').onclick=()=>{ lastMenu='title'; buildManual(); showLayer('manual'); };
 $('#b-book0').onclick=()=>{ lastMenu='title'; buildBook(); showLayer('book'); };
 $('#b-manual1').onclick=()=>{ lastMenu='select'; buildManual(); showLayer('manual'); };
@@ -2876,19 +3777,39 @@ function buildHow(){
   vb.appendChild(el('p','muted','最大4人。大乱闘と、タッグ戦（2対2）がえらべます。ジャンプで乗れる台が3段。緑のバネ台は高く跳ね上がり、いちばん上の動く足場まで届きます。紫の床は乗り続けると割れて落ち、しばらくすると戻ります。ジャンプで相手の攻撃をかわして、後ろに回り込めます。'));
   vs.appendChild(vb); list.appendChild(vs);
 }
+function worldCard(s,label,unlocked,lockText){
+  const cleared=save.cleared.includes(s.id);
+  const b=el('button','world'+(unlocked?'':' locked')+(s.kyo?' kyo':''));
+  b.appendChild(el('div','n', label));
+  const mid=el('div');
+  mid.appendChild(el('div','t', s.title));
+  mid.appendChild(el('div','b', s.boss.name+'　／　'+s.trouble));
+  const sp=SPECIALS[s.id];
+  if(sp){ const r=el('div','wreward');
+    r.appendChild(el('span','wrk', cleared?'ゲット済み':'クリアで'));
+    r.appendChild(document.createTextNode(sp.n)); mid.appendChild(r); }
+  b.appendChild(mid);
+  b.appendChild(el('div','st', cleared?'CLEAR':(unlocked?'PLAY':(lockText||'LOCKED'))));
+  if(unlocked) b.onclick=()=>startStage(s);
+  return b;
+}
 function buildWorlds(){
   const list=$('#worldlist'); list.textContent='';
   STAGES.forEach((s,i)=>{
-    const unlocked = i===0 || save.cleared.includes(STAGES[i-1].id);
-    const b=el('button','world'+(unlocked?'':' locked'));
-    b.appendChild(el('div','n', String(i+1)));
-    const mid=el('div');
-    mid.appendChild(el('div','t', s.title));
-    mid.appendChild(el('div','b', s.boss.name+'　／　'+s.trouble));
-    b.appendChild(mid);
-    b.appendChild(el('div','st', save.cleared.includes(s.id)?'CLEAR':(unlocked?'PLAY':'LOCKED')));
-    if(unlocked) b.onclick=()=>startStage(s);
-    list.appendChild(b);
+    // 一度クリアしたステージは、あとから前のステージが増えても遊べる
+    const unlocked = i===0 || save.cleared.includes(STAGES[i-1].id) || save.cleared.includes(s.id);
+    list.appendChild(worldCard(s, s.id==='wf'?'F':String(i+1), unlocked));
+  });
+  // 強敵ステージ
+  const head=el('div','wsec');
+  head.appendChild(el('div','eyebrow','Strong Enemies'));
+  head.appendChild(el('h3',null,'強敵に挑む'));
+  head.appendChild(el('p','muted','これまでの頼み方を組み合わせて戦う、手ごわい相手です。倒すと、その技を覚えます。'));
+  list.appendChild(head);
+  KYO_STAGES.forEach((s,i)=>{
+    const ok = save.cleared.includes(s.need) || save.cleared.includes(s.id);
+    const needS = stageById(s.need);
+    list.appendChild(worldCard(s, 'K'+(i+1), ok, needS?needS.num+'をクリア':'LOCKED'));
   });
   const rl=$('#roadmaplist'); rl.textContent='';
   ROADMAP.forEach(r=>{ const li=el('li'); const bb=el('b',null,r[0]); li.appendChild(bb); li.appendChild(document.createTextNode(r[1])); rl.appendChild(li); });
@@ -3085,6 +4006,80 @@ function applyTier(tier){
     if(tier>=3){ f.fog=0; f.shapeless=0; f.timeRush=false; f.atk=1.1;
       B.tactic='ULTIMATE COMMAND。妨害はすべて解除。最後は自分で決める。'; }
   }
+  // ---- WORLD 18〜27 ----
+  if(id==='w18'){
+    if(tier===1){ B.roleT=Math.max(B.roleT,150); B.tactic='型の切り替えがゆっくりになった。'; }
+    if(tier===2){ f.roleShow=true; B.tactic='相手の型が頭の上に見える。型に合わせて動く。'; }
+    if(tier>=3){ f.roleShow=true; f.roleLock=true; f.telegraph=true; f.critBonus=1.4;
+      B.tactic='攻め→守り→逃げの順に回る。逃げの型のときに打ち込む。'; }
+  }
+  if(id==='w19'){
+    if(tier===1){ f.seqShown=1; B.tactic='順番の1つ目が分かった。'; }
+    if(tier===2){ f.seqShown=2; B.tactic='順番の2つ目まで分かった。'; }
+    if(tier>=3){ f.seqShown=3; B.tactic='画面の順番どおりに当てる。3つ目で3倍。'; }
+  }
+  if(id==='w20'){
+    if(tier===1){ f.giantBoss=1.45; B.tactic='少し小さくなった。まだ大きい。'; }
+    if(tier===2){ f.giantBoss=1.15; f.segments=true; B.tactic='体力が3段に分かれた。1段ずつ削る。'; }
+    if(tier>=3){ f.giantBoss=0; f.segments=true; B.tactic='1段削るたびに大きくひるむ。一段ずつ。'; }
+  }
+  if(id==='w21'){
+    if(tier===1){ f.revMode=1; B.revT=60; B.tactic='ときどき正しい向きに戻る。'; }
+    if(tier===2){ f.revMode=1; B.revT=150; B.tactic='逆になるのは、ときどきだけ。'; }
+    if(tier>=3){ f.revMode=0; f.revNow=false; B.tactic='操作が元どおり。いつもどおり戦える。'; }
+  }
+  if(id==='w22'){
+    if(tier===1){ f.slowWorld=0.65; B.tactic='少しだけ速くなった。時間に気をつける。'; }
+    if(tier===2){ f.slowWorld=0.85; B.tactic='かなり速くなった。'; }
+    if(tier>=3){ f.slowWorld=0; f.pSpd=1.15; B.tactic='速さが戻った。いつもより少し身軽。'; }
+  }
+  if(id==='w23'){
+    if(tier===1){ f.bossReflect=0.25; f.bossTake=0.6; B.tactic='はね返りが少し弱まった。'; }
+    if(tier===2){ f.bossReflect=0; f.bossTake=1; B.tactic='はね返りが止まった。背中側が薄い。'; }
+    if(tier>=3){ f.bossReflect=0; f.bossTake=1; f.critBonus=1.3; B.tactic='盾が割れた。ダメージ1.3倍。'; }
+  }
+  if(id==='w24'){
+    if(tier===1){ f.trapReveal=true; B.tactic='赤く光るアイテムはわな。拾わない。'; }
+    if(tier===2){ f.trapReveal=true; f.trapRate=0.5; B.tactic='わなは半分に減った。赤いものは避ける。'; }
+    if(tier>=3){ f.trapReveal=true; f.trapRate=0;
+      for(const it of B.items) it.privacy=false;
+      B.tactic='わなは全部、役に立つアイテムに変わった。'; }
+  }
+  if(id==='w25'){
+    if(tier===1){ f.repeatMul=0.15; B.tactic='ダメージの増え方がゆるやかになった。'; }
+    if(tier===2){ f.repeatMul=0; B.tactic='同じ技で増えるダメージが止まった。'; }
+    if(tier>=3){ f.repeatMul=0; f.learned=true; B.tactic='同じ技は2回目から半分。見切れる。'; }
+  }
+  if(id==='w26'){
+    if(tier===1){ f.timeRate=2; B.tactic='時間の減りが少しゆるやかになった。'; }
+    if(tier===2){ f.timeRate=1; B.tactic='時間の減りがふつうに戻った。'; }
+    if(tier>=3){ f.timeRate=1; f.checkpoints=true; B.ckT=0; B.ckHp=B.b.hp;
+      B.tactic='10秒ごとに、相手の体力を12%削れば回復。'; }
+  }
+  if(id==='w27'){
+    if(tier===1){ f.hideAtk=0.6; B.tactic='攻撃の瞬間だけ、うっすら見える。'; }
+    if(tier===2){ f.hideAtk=0; B.tactic='攻撃が見えるようになった。'; }
+    if(tier>=3){ f.hideAtk=0; f.telegraph=true; B.tactic='攻撃の直前に合図が出る。見えたら避ける。'; }
+  }
+  // ---- 強敵 ----
+  if(id==='k1'){
+    if(tier===1){ B.b.ai.spd=1.35; B.tactic='少しだけ遅くなった。'; }
+    if(tier===2){ f.dashTell=true; B.tactic='突進の前に予兆が出る。見えたらジャンプ。'; }
+    if(tier>=3){ B.b.ai.spd=1; f.dashTell=true; f.dashBonus=true;
+      B.tactic='予兆を見る→ジャンプ→背中に強攻撃。空振り直後は1.5倍。'; }
+  }
+  if(id==='k2'){
+    if(tier===1){ f.copyGap=460; B.tactic='真似の間隔が長くなった。'; }
+    if(tier===2){ f.copyWeak=0.7; B.tactic='真似した技の威力が下がった。ふつうの技で押す。'; }
+    if(tier>=3){ f.copyWeak=0.5; f.copyVuln=true;
+      B.tactic='真似した直後は必ず隙。そこにふつうの技で割り込む。'; }
+  }
+  if(id==='k3'){
+    if(tier===1){ f.stormGap=170; B.tactic='雷の回数が少し減った。'; }
+    if(tier===2){ f.stormTell=62; B.tactic='雷の予告が長くなった。光ったら離れる。'; }
+    if(tier>=3){ f.stormGap=240; f.quakeGap=900; f.stormLess=true; f.stormSafePlat=true; f.stormTell=58;
+      B.tactic='地震はジャンプ、雷は予告から離れる。足場の上なら雷は当たらない。'; }
+  }
 }
 function sanitize(html){
   // 許可タグは <b> のみ
@@ -3131,6 +4126,7 @@ function endBattle(){
     } else {
       row.appendChild(el('p','muted','ホストが「もう一度」を押すと、また始まります。'));
     }
+    row.appendChild(spButton('result', true));
     const quit=el('button','btn ghost sm','やめる');
     quit.onclick=()=>{ netCleanup(); netStatus(''); showLayer('title'); };
     row.appendChild(quit); sheet.appendChild(row);
@@ -3183,18 +4179,23 @@ function endBattle(){
     }
     const row=el('div','close-row');
     const idx=STAGES.indexOf(s);
-    if(idx<STAGES.length-1){
+    if(s.kyo){
+      const ki=KYO_STAGES.indexOf(s), nk=KYO_STAGES[ki+1];
+      if(nk){ const nx=el('button','btn','次の強敵へ'); nx.onclick=()=>startStage(nk); row.appendChild(nx); }
+      else { const nx=el('button','btn yui','CUEで使ってみる'); nx.onclick=()=>{ lastMenu='select'; buildBook(); showLayer('book'); }; row.appendChild(nx); }
+    } else if(idx<STAGES.length-1){
       const nx=el('button','btn','次のWORLDへ'); nx.onclick=()=>{ startStage(STAGES[idx+1]); }; row.appendChild(nx);
     } else {
       const nx=el('button','btn yui','CUEで使ってみる'); nx.onclick=()=>{ lastMenu='select'; buildBook(); showLayer('book'); }; row.appendChild(nx);
     }
     const r2=el('div','row');
     const again=el('button','btn ghost sm','もう一度戦う'); again.onclick=()=>startStage(s); r2.appendChild(again);
+    r2.appendChild(spButton('result'));
     const sel=el('button','btn ghost sm','WORLD選択'); sel.onclick=()=>{ buildWorlds(); showLayer('select'); }; r2.appendChild(sel);
     row.appendChild(r2); sheet.appendChild(row);
     if(idx===STAGES.length-1){
       const done=el('div','effect'); done.style.marginTop='16px';
-      done.innerHTML='<b>Version 0.1 はここまで。</b> 見つけた頼み方は、そのままCUEの仕事で使えます。';
+      done.innerHTML='<b>ストーリーはこれでクリアです。</b> 見つけた頼み方は、そのままCUEの仕事で使えます。まだの強敵にも挑戦できます。';
       sheet.appendChild(done);
     }
     sfx('ok');
@@ -3208,6 +4209,7 @@ function endBattle(){
       if(B.tier===0){ setTimeout(()=>{ if(scene==='battle'&&B.phase!=='paused'){ B.phase='fight'; B.yui=100; openCall(true); } }, 120); }
     };
     row.appendChild(again);
+    row.appendChild(spButton('result'));
     const sel=el('button','btn ghost sm','WORLD選択'); sel.onclick=()=>{ buildWorlds(); showLayer('select'); };
     row.appendChild(sel); sheet.appendChild(row);
   }
